@@ -14,35 +14,192 @@ export type Database = {
   }
   public: {
     Tables: {
-      profiles: {
+      agent_outputs: {
         Row: {
-          avatar_url: string | null
+          agent_id: string
           created_at: string
-          full_name: string | null
           id: string
-          subscription_status: string
-          updated_at: string
+          summary: string
           user_id: string
         }
         Insert: {
-          avatar_url?: string | null
+          agent_id: string
           created_at?: string
-          full_name?: string | null
           id?: string
-          subscription_status?: string
-          updated_at?: string
+          summary: string
           user_id: string
         }
         Update: {
-          avatar_url?: string | null
+          agent_id?: string
           created_at?: string
-          full_name?: string | null
           id?: string
-          subscription_status?: string
-          updated_at?: string
+          summary?: string
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "agent_outputs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_sessions: {
+        Row: {
+          agent_id: string
+          completed_at: string | null
+          id: string
+          started_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          completed_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          completed_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "agent_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          hotmart_purchase_id: string | null
+          id: string
+          name: string | null
+          subscription_status: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          hotmart_purchase_id?: string | null
+          id: string
+          name?: string | null
+          subscription_status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          hotmart_purchase_id?: string | null
+          id?: string
+          name?: string | null
+          subscription_status?: string
+        }
         Relationships: []
+      }
+      user_favorites: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          agent_id: string
+          completed: boolean
+          completed_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
