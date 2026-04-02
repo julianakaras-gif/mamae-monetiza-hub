@@ -19,8 +19,8 @@ const AppSidebar = () => {
   const { profile, signOut } = useAuth();
   const progressPercent = 12; // placeholder
 
-  const userInitial = profile?.full_name?.charAt(0)?.toUpperCase() || "A";
-  const userName = profile?.full_name || "Aluna";
+  const userInitial = profile?.name?.charAt(0)?.toUpperCase() || "A";
+  const userName = profile?.name || "Aluna";
 
   return (
     <aside className="w-[218px] min-h-screen flex flex-col bg-sidebar text-sidebar-foreground shrink-0">

@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Home = () => {
   const { profile } = useAuth();
-  const name = profile?.full_name?.split(" ")[0] || "Aluna";
+  const name = profile?.name?.split(" ")[0] || "Aluna";
 
   return (
     <div className="p-8 animate-fade-in">
