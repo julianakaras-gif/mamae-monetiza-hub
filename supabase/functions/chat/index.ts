@@ -166,6 +166,7 @@ Deno.serve(async (req) => {
       { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
     );
     const history = await historyRes.json();
+    const historyArray = Array.isArray(history) ? history : [];
 
     const messages = [
       ...history.map((m: any) => ({ role: m.role, content: m.content })),
