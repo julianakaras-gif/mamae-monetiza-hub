@@ -173,10 +173,10 @@ Deno.serve(async (req) => {
       { role: "user", content: message },
     ];
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }),
+        JSON.stringify({ error: "ANTHROPIC_API_KEY is not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -192,19 +192,19 @@ Deno.serve(async (req) => {
       body: JSON.stringify({ session_id, role: "user", content: message }),
     });
 
-    // Call Lovable AI Gateway
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Call Anthropic API with streaming
+    const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
+        model: "claude-sonnet-4-5-20250929",
+        max_tokens: 2048,
+        system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
+        messages,
         stream: true,
       }),
     });
@@ -216,21 +216,15 @@ Deno.serve(async (req) => {
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (aiResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Créditos esgotados. Entre em contato com o suporte." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       const errText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errText);
+      console.error("Anthropic error:", aiResponse.status, errText);
       return new Response(
         JSON.stringify({ error: "Erro ao conectar com a IA" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Transform the OpenAI-compatible SSE stream into our simpler format and collect full response
+    // Stream Anthropic SSE response
     const reader = aiResponse.body!.getReader();
     const decoder = new TextDecoder();
     const encoder = new TextEncoder();
@@ -242,23 +236,6 @@ Deno.serve(async (req) => {
         while (true) {
           const { done, value } = await reader.read();
           if (done) {
-            // Flush buffer
-            if (buffer.trim()) {
-              for (const raw of buffer.split("\n")) {
-                if (!raw || !raw.startsWith("data: ")) continue;
-                const jsonStr = raw.slice(6).trim();
-                if (jsonStr === "[DONE]") continue;
-                try {
-                  const parsed = JSON.parse(jsonStr);
-                  const content = parsed.choices?.[0]?.delta?.content;
-                  if (content) {
-                    fullResponse += content;
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: content })}\n\n`));
-                  }
-                } catch { /* ignore */ }
-              }
-            }
-
             // Save assistant response
             if (fullResponse) {
               await fetch(`${supabaseUrl}/rest/v1/messages`, {
@@ -271,7 +248,6 @@ Deno.serve(async (req) => {
                 body: JSON.stringify({ session_id, role: "assistant", content: fullResponse }),
               });
             }
-
             controller.enqueue(encoder.encode("data: [DONE]\n\n"));
             controller.close();
             return;
@@ -289,12 +265,14 @@ Deno.serve(async (req) => {
             if (!jsonStr) continue;
             try {
               const parsed = JSON.parse(jsonStr);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                fullResponse += content;
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: content })}\n\n`));
+              if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
+                const text = parsed.delta.text;
+                if (text) {
+                  fullResponse += text;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+                }
               }
-            } catch { /* partial JSON, wait for more */ }
+            } catch { /* partial JSON */ }
           }
         }
       },
