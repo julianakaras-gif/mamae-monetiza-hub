@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Star, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +36,6 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Resolve agent info
   const isSerena = agentId === "serena";
   const agentInfo = isSerena
     ? {
@@ -68,12 +67,10 @@ const Chat = () => {
   const totalMessages = messages.length;
   const canComplete = totalMessages >= 4 && !isSerena;
 
-  // Scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -81,7 +78,6 @@ const Chat = () => {
     }
   }, [input]);
 
-  // Initialize session
   useEffect(() => {
     if (!user || !agentId || !agent) return;
 
@@ -149,7 +145,6 @@ const Chat = () => {
     init();
   }, [user, agentId]);
 
-  // Send message with streaming
   const sendMessage = useCallback(async () => {
     if (!input.trim() || !sessionId || isStreaming || !agent) return;
 
@@ -158,7 +153,6 @@ const Chat = () => {
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsStreaming(true);
 
-    // Fetch context outputs
     let contextOutputs: any[] = [];
     if (agent.context.length > 0 && user) {
       const { data: outputs } = await supabase
@@ -249,7 +243,6 @@ const Chat = () => {
     }
   }, [input, sessionId, isStreaming, agentId, agent, user]);
 
-  // Complete agent
   const handleComplete = async () => {
     if (!sessionId || !user || !agent || !phase) return;
     setIsCompleting(true);
@@ -273,7 +266,7 @@ const Chat = () => {
 
       if (!resp.ok) throw new Error("Erro ao concluir etapa");
 
-      toast.success(`Etapa com ${agent.name} concluída!`);
+      toast.success("Etapa concluída! Continue sua trilha. 🎉");
       await refetch();
       navigate(`/trilha?phase=${phase.id}`);
     } catch (err: any) {
@@ -307,18 +300,19 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh)] bg-background">
+    <div className="flex flex-col h-[100dvh] md:h-[calc(100vh)] bg-background">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b bg-card shrink-0">
+      <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 border-b bg-card shrink-0">
         <button
           onClick={() => navigate(`/trilha?phase=${phase.id}`)}
           className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+          aria-label="Voltar para a trilha"
         >
           <ArrowLeft size={18} className="text-foreground" />
         </button>
 
         <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+          className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
           style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
         >
           {agent.name.charAt(0)}
@@ -330,7 +324,7 @@ const Chat = () => {
               {agent.name}
             </span>
             <Badge
-              className="text-[10px] px-2 py-0 border-0"
+              className="text-[10px] px-2 py-0 border-0 hidden sm:inline-flex"
               style={{ backgroundColor: `${phase.color}20`, color: phase.color }}
             >
               {phase.emoji} {phase.name}
@@ -339,8 +333,25 @@ const Chat = () => {
           <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
         </div>
 
+        {/* Mobile: complete button in header */}
+        {canComplete && (
+          <button
+            onClick={handleComplete}
+            disabled={isCompleting || isStreaming}
+            className="md:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-lg border-2 border-primary text-primary text-xs font-semibold bg-card disabled:opacity-50"
+            aria-label="Concluir esta etapa"
+          >
+            <CheckCircle2 size={14} />
+            <span className="hidden xs:inline">Concluir</span>
+          </button>
+        )}
+
         {!isSerena && (
-          <button onClick={() => agentId && toggleFavorite(agentId)} className="p-1.5">
+          <button
+            onClick={() => agentId && toggleFavorite(agentId)}
+            className="p-1.5"
+            aria-label={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          >
             <Star
               size={18}
               className={
@@ -354,7 +365,7 @@ const Chat = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-3 md:px-4 py-4 space-y-4">
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -362,14 +373,14 @@ const Chat = () => {
           >
             {msg.role === "assistant" && (
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
+                className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 mr-2 mt-1"
                 style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
               >
                 {agent.name.charAt(0)}
               </div>
             )}
             <div
-              className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+              className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-3.5 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed ${
                 msg.role === "user"
                   ? "rounded-br-md text-accent-foreground"
                   : "rounded-bl-md bg-card border-l-[3px]"
@@ -388,7 +399,7 @@ const Chat = () => {
         {isStreaming && messages[messages.length - 1]?.role !== "assistant" && (
           <div className="flex justify-start">
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
+              className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 mr-2 mt-1"
               style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
             >
               {agent.name.charAt(0)}
@@ -410,12 +421,17 @@ const Chat = () => {
       </div>
 
       {/* Footer */}
-      <div className="border-t bg-card px-4 py-3 shrink-0">
+      <div
+        className="border-t bg-card px-3 md:px-4 py-2.5 md:py-3 shrink-0"
+        style={{ paddingBottom: "max(0.625rem, env(safe-area-inset-bottom))" }}
+      >
+        {/* Desktop: complete button in footer */}
         {canComplete && (
           <button
             onClick={handleComplete}
             disabled={isCompleting || isStreaming}
-            className="w-full mb-3 flex items-center justify-center gap-2 py-2 rounded-xl border-2 border-primary text-primary text-sm font-semibold bg-card hover:bg-primary/5 transition-colors disabled:opacity-50"
+            className="hidden md:flex w-full mb-3 items-center justify-center gap-2 py-2 rounded-xl border-2 border-primary text-primary text-sm font-semibold bg-card hover:bg-primary/5 transition-colors disabled:opacity-50"
+            aria-label="Concluir esta etapa"
           >
             <CheckCircle2 size={16} />
             {isCompleting ? "Concluindo..." : "Concluir esta etapa"}
@@ -430,7 +446,7 @@ const Chat = () => {
             onKeyDown={handleKeyDown}
             placeholder="Digite sua mensagem..."
             rows={1}
-            className="flex-1 resize-none rounded-xl border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex-1 resize-none rounded-xl border bg-background px-3 md:px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             disabled={isStreaming}
           />
           <button
@@ -438,6 +454,7 @@ const Chat = () => {
             disabled={!input.trim() || isStreaming}
             className="p-2.5 rounded-xl text-accent-foreground transition-colors disabled:opacity-30"
             style={{ backgroundColor: phase.color }}
+            aria-label="Enviar mensagem"
           >
             <Send size={18} />
           </button>
