@@ -129,19 +129,6 @@ export const PHASES: Phase[] = [
       { id: 'luna', name: 'Luna', role: 'Arquiteta de Funis Automáticos', desc: 'Cria funis que vendem 24h por dia, adaptados ao nível técnico. Entrega checklist de implementação semana a semana.', context: ['talia', 'alana', 'nina'], welcome: 'Olá! Eu sou a Luna 🌙\n\nFunil automatizado não é coisa de empresa grande: é o jeito mais inteligente de uma pessoa só fazer o trabalho de uma equipe. Vou criar a estrutura que vende enquanto você dorme.\n\n**Você tem alguma ferramenta de email ou página de vendas já configurada?**' },
       { id: 'liora', name: 'Liora', role: 'Decodificadora de Dados', desc: 'Transforma métricas em decisões acionáveis. Dashboard completo de Instagram, vendas e funil com roadmap de 90 dias priorizado por ROI.', context: [], welcome: 'Olá! Eu sou a Liora 📊\n\nNúmeros sem interpretação são só números. Vou transformar suas métricas em decisões claras: o que está funcionando, o que precisa mudar e o que priorizar nos próximos 90 dias.\n\n**Por qual área você quer começar: Instagram, vendas ou funil?**' },
     ],
-  },
-  {
-    id: 6,
-    name: 'Execução',
-    sub: 'Rotinas, dados e escala sustentável',
-    emoji: '🚀',
-    color: '#c49a30',
-    alwaysOpen: true,
-    freeAgents: true,
-    agents: [
-      { id: 'maia', name: 'Maia', role: 'Arquiteta de Rotinas Estratégicas', desc: 'Constrói sistema de produtividade consciente de energia. Previne burnout com 4 opções de rotina adaptadas à sua realidade como mãe empreendedora.', context: [], welcome: 'Olá! Eu sou a Maia ⚡\n\nProdutividade para mãe empreendedora não é fazer mais: é fazer o que importa no tempo que você tem. Vou criar sua rotina respeitando sua energia, sua família e sua saúde.\n\n**Quantas horas por dia você tem disponível para o negócio?**' },
-    ],
-  },
 ];
 
 export const SERENA = {
