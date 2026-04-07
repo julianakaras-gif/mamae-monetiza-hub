@@ -1,8 +1,65 @@
-const Favoritos = () => (
-  <div className="p-8 animate-fade-in">
-    <h1 className="font-georgia text-2xl font-bold text-foreground mb-2">Favoritos</h1>
-    <p className="text-muted-foreground text-sm">Seus conteúdos favoritos aparecerão aqui.</p>
-  </div>
-);
+import { PHASES } from "@/data/agents";
+import { useAgentProgress } from "@/hooks/useAgentProgress";
+import AgentCard from "@/components/AgentCard";
+
+const Favoritos = () => {
+  const { favorites, getAgentStatus, toggleFavorite, loading } = useAgentProgress();
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Group favorites by phase
+  const grouped = PHASES.map((phase) => ({
+    phase,
+    agents: phase.agents.filter((a) => favorites.has(a.id)),
+  })).filter((g) => g.agents.length > 0);
+
+  return (
+    <div className="p-6 md:p-8 max-w-3xl animate-fade-in">
+      <h1 className="font-georgia text-2xl font-bold text-foreground mb-1">Favoritos</h1>
+      <p className="text-muted-foreground text-sm mb-6">
+        Seus agentes favoritos, agrupados por fase.
+      </p>
+
+      {grouped.length === 0 ? (
+        <div className="text-center py-16">
+          <p className="text-muted-foreground text-sm">
+            Nenhum agente favoritado ainda. Use a estrela na trilha para adicionar.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {grouped.map(({ phase, agents }) => (
+            <div key={phase.id}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-base">{phase.emoji}</span>
+                <span className="font-georgia font-bold text-sm text-foreground">
+                  {phase.name}
+                </span>
+              </div>
+              <div className="space-y-2">
+                {agents.map((agent) => (
+                  <AgentCard
+                    key={agent.id}
+                    agent={agent}
+                    phaseColor={phase.color}
+                    status={getAgentStatus(agent.id)}
+                    isFavorite={true}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default Favoritos;

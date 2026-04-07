@@ -2,6 +2,7 @@ import { Home, Map, Star, LogOut } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgentProgress } from "@/hooks/useAgentProgress";
 
 const menuItems = [
   { title: "Início", path: "/home", icon: Home },
@@ -17,7 +18,7 @@ const quickAgents = [
 const AppSidebar = () => {
   const location = useLocation();
   const { profile, signOut } = useAuth();
-  const progressPercent = 12; // placeholder
+  const { progressPercent } = useAgentProgress();
 
   const userInitial = profile?.name?.charAt(0)?.toUpperCase() || "A";
   const userName = profile?.name || "Aluna";
