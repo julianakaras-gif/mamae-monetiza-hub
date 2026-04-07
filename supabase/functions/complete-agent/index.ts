@@ -13,11 +13,11 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
+    if (!ANTHROPIC_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
+        JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -27,18 +27,21 @@ Deno.serve(async (req) => {
       `${supabaseUrl}/rest/v1/messages?session_id=eq.${session_id}&role=eq.assistant&order=created_at.desc&limit=8`,
       { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
     );
-    const messages = await msgRes.json();
-    const assistantContent = messages.reverse().map((m: any) => m.content).join("\n\n");
+    const rawMessages = await msgRes.json();
+    const messagesArr = Array.isArray(rawMessages) ? rawMessages : [];
+    const assistantContent = messagesArr.reverse().map((m: any) => m.content).join("\n\n");
 
-    // Generate structured summary via Lovable AI
-    const summaryRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Generate structured summary via Anthropic (Haiku for cost efficiency)
+    const summaryRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 1024,
         messages: [
           {
             role: "user",
@@ -58,7 +61,7 @@ Deno.serve(async (req) => {
     }
 
     const summaryData = await summaryRes.json();
-    const summaryText = summaryData.choices?.[0]?.message?.content || "";
+    const summaryText = summaryData.content?.[0]?.text || "";
 
     // Upsert agent_outputs
     await fetch(`${supabaseUrl}/rest/v1/agent_outputs`, {
