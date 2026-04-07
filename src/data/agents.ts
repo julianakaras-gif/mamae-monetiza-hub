@@ -78,6 +78,7 @@ export const PHASES: Phase[] = [
         context: ['clara', 'lucca'],
         welcome: 'Olá! Eu sou a Alice ✨\n\nJá tenho o perfil do seu negócio e o plano do Lucca. Vou construir a marca que representa quem você realmente é: não uma persona, mas a sua essência potencializada.\n\n**Se sua marca fosse uma pessoa, como ela seria?**',
       },
+      { id: 'maia', name: 'Maia', role: 'Arquiteta de Rotinas Estratégicas', desc: 'Constrói sistema de produtividade consciente de energia. Previne burnout com 4 opções de rotina adaptadas à sua realidade como mãe empreendedora.', context: [], welcome: 'Olá! Eu sou a Maia ⚡\n\nProdutividade para mãe empreendedora não é fazer mais: é fazer o que importa no tempo que você tem. Vou criar sua rotina respeitando sua energia, sua família e sua saúde.\n\n**Quantas horas por dia você tem disponível para o negócio?**' },
     ],
   },
   {
