@@ -44,6 +44,14 @@ export const PHASES: Phase[] = [
         context: ['clara'],
         welcome: 'Olá! Eu sou a Aya 📊\n\nRecebi os conceitos que você desenvolveu com a Clara. Já estou analisando cada um sob a ótica do mercado real.\n\nMinha função é ser honesta com você, porque começar no negócio certo economiza meses de esforço no negócio errado.\n\n**Qual dos conceitos você sente mais conexão? Isso vai me ajudar a priorizar minha análise.**',
       },
+      {
+        id: 'talia',
+        name: 'Talia',
+        role: 'Arquiteta de Ecossistemas',
+        desc: 'Desenha sistema completo de 6 produtos: isca, tripwire, core, upsell, high ticket e recorrência. Inclui projeções de receita para 3 cenários.',
+        context: ['clara', 'aya'],
+        welcome: 'Olá! Eu sou a Talia 💎\n\nTenho o perfil completo do negócio e a validação da Aya. Agora vou construir o ecossistema de produtos.\n\nUm único produto não é negócio: é um emprego. **Qual é a transformação principal que você entrega para suas clientes?**',
+      },
     ],
   },
   {
@@ -59,7 +67,7 @@ export const PHASES: Phase[] = [
         name: 'Lucca',
         role: 'Consultor Estratégico',
         desc: 'Cria plano de implementação detalhado com base nos seus recursos reais. Entrega 2 opções de plano estratégico e cronograma semanal de ação.',
-        context: ['clara', 'aya'],
+        context: ['clara', 'aya', 'talia'],
         welcome: 'Olá! Eu sou o Lucca 🎯\n\nRecebi os dados de validação da Aya e o perfil do seu negócio. Vou criar um plano de implementação realista com o tempo, orçamento e habilidades que você realmente tem.\n\n**Para calibrar o plano: qual é o seu orçamento mensal disponível para o negócio agora?**',
       },
       {
@@ -69,22 +77,6 @@ export const PHASES: Phase[] = [
         desc: 'Constrói identidade de marca completa de dentro para fora: 3 pilares, paleta visual, tipografia, manual de voz e 5 micro-histórias.',
         context: ['clara', 'lucca'],
         welcome: 'Olá! Eu sou a Alice ✨\n\nJá tenho o perfil do seu negócio e o plano do Lucca. Vou construir a marca que representa quem você realmente é: não uma persona, mas a sua essência potencializada.\n\n**Se sua marca fosse uma pessoa, como ela seria?**',
-      },
-      {
-        id: 'kaia',
-        name: 'Kaia',
-        role: 'Estrategista de Conteúdo Autêntico',
-        desc: 'Constrói posicionamento corajoso e específico. Entrega manifesto da marca, 3 a 5 pilares de conteúdo honestos e 10 posts autênticos.',
-        context: ['alice', 'clara'],
-        welcome: 'Olá! Eu sou a Kaia 📣\n\nRecebi a identidade de marca que a Alice construiu com você. Agora vou criar um posicionamento de conteúdo corajoso e específico.\n\nConteúdo genérico não constrói negócio. **Qual é a crença que você tem sobre o seu nicho que a maioria ainda não percebeu?**',
-      },
-      {
-        id: 'talia',
-        name: 'Talia',
-        role: 'Arquiteta de Ecossistemas',
-        desc: 'Desenha sistema completo de 6 produtos: isca, tripwire, core, upsell, high ticket e recorrência. Inclui projeções de receita para 3 cenários.',
-        context: ['clara', 'aya', 'lucca'],
-        welcome: 'Olá! Eu sou a Talia 💎\n\nTenho o perfil completo do negócio, a validação da Aya e a estratégia do Lucca. Agora vou construir o ecossistema de produtos.\n\nUm único produto não é negócio: é um emprego. **Qual é a transformação principal que você entrega para suas clientes?**',
       },
     ],
   },
@@ -111,6 +103,7 @@ export const PHASES: Phase[] = [
     color: '#c49a30',
     freeAgents: true,
     agents: [
+      { id: 'kaia', name: 'Kaia', role: 'Estrategista de Conteúdo Autêntico', desc: 'Constrói posicionamento corajoso e específico. Entrega manifesto da marca, 3 a 5 pilares de conteúdo honestos e 10 posts autênticos.', context: ['alice', 'clara'], welcome: 'Olá! Eu sou a Kaia 📣\n\nRecebi a identidade de marca que a Alice construiu com você. Agora vou criar um posicionamento de conteúdo corajoso e específico.\n\nConteúdo genérico não constrói negócio. **Qual é a crença que você tem sobre o seu nicho que a maioria ainda não percebeu?**' },
       { id: 'alma', name: 'Alma', role: 'Especialista em Copywriting Emocional', desc: 'Cria copy com framework de 3 camadas emocionais. Entrega 3 versões de texto: reconhecimento, transição e transformação.', context: ['alice', 'talia'], welcome: 'Olá! Eu sou a Alma 💬\n\nTenho a identidade de marca da Alice e o ecossistema da Talia. Vou criar os textos que fazem sua cliente sentir: ela está falando de mim.\n\n**Para qual produto você quer o copy primeiro?**' },
       { id: 'malu', name: 'Malu', role: 'Estrategista de Calendário Editorial', desc: 'Organiza 30 dias de conteúdo com distribuição 40/35/25 de funil, horários de publicação, hashtags por plataforma e guia de produção em lote.', context: ['kaia', 'alma'], welcome: 'Olá! Eu sou a Malu 📅\n\nNão precisa postar todo dia para ter resultado: precisa postar com estratégia. Tenho os pilares de conteúdo da Kaia para montar seu calendário de 30 dias.\n\n**Em quais plataformas você quer publicar conteúdo?**' },
       { id: 'kaena', name: 'Kaena', role: 'Roteirista Viral', desc: 'Cria roteiros para TikTok, Reels e Shorts usando 5 fórmulas psicológicas. Inclui legenda e métricas esperadas.', context: ['alma', 'kaia'], welcome: 'Olá! Eu sou a Kaena 🎬\n\nVídeos curtos que param o scroll seguem fórmulas psicológicas testadas. Vou criar roteiros que você grava em menos de 5 minutos.\n\n**Qual tema de conteúdo você quer gravar primeiro?**' },
@@ -133,6 +126,7 @@ export const PHASES: Phase[] = [
       { id: 'nina', name: 'Nina', role: 'Arquiteta de Relacionamentos', desc: 'Constrói sequências de nutrição multicanal (WhatsApp, email e DM) com estratégia completa de 21 dias.', context: ['talia', 'alma'], welcome: 'Olá! Eu sou a Nina 💌\n\nLeads não compram na primeira vez: precisam de relacionamento. Vou criar as sequências automáticas que mantêm sua marca presente na vida da sua cliente até ela estar pronta para comprar.\n\n**Por onde você prefere começar: email, WhatsApp ou DM do Instagram?**' },
       { id: 'elisa', name: 'Elisa', role: 'Especialista em Quiz Funnels', desc: 'Cria sistema de geração de leads via quiz com 5 mecanismos psicológicos e segmentação automática.', context: ['clara', 'talia'], welcome: 'Olá! Eu sou a Elisa 🎯\n\nQuiz é uma das formas mais poderosas de capturar leads e segmentá-los automaticamente. Vou criar o quiz completo: perguntas, resultados personalizados e sequência de email para cada perfil.\n\n**Qual é o tema do quiz?**' },
       { id: 'luna', name: 'Luna', role: 'Arquiteta de Funis Automáticos', desc: 'Cria funis que vendem 24h por dia, adaptados ao nível técnico. Entrega checklist de implementação semana a semana.', context: ['talia', 'alana', 'nina'], welcome: 'Olá! Eu sou a Luna 🌙\n\nFunil automatizado não é coisa de empresa grande: é o jeito mais inteligente de uma pessoa só fazer o trabalho de uma equipe. Vou criar a estrutura que vende enquanto você dorme.\n\n**Você tem alguma ferramenta de email ou página de vendas já configurada?**' },
+      { id: 'liora', name: 'Liora', role: 'Decodificadora de Dados', desc: 'Transforma métricas em decisões acionáveis. Dashboard completo de Instagram, vendas e funil com roadmap de 90 dias priorizado por ROI.', context: [], welcome: 'Olá! Eu sou a Liora 📊\n\nNúmeros sem interpretação são só números. Vou transformar suas métricas em decisões claras: o que está funcionando, o que precisa mudar e o que priorizar nos próximos 90 dias.\n\n**Por qual área você quer começar: Instagram, vendas ou funil?**' },
     ],
   },
   {
@@ -145,7 +139,6 @@ export const PHASES: Phase[] = [
     freeAgents: true,
     agents: [
       { id: 'maia', name: 'Maia', role: 'Arquiteta de Rotinas Estratégicas', desc: 'Constrói sistema de produtividade consciente de energia. Previne burnout com 4 opções de rotina adaptadas à sua realidade como mãe empreendedora.', context: [], welcome: 'Olá! Eu sou a Maia ⚡\n\nProdutividade para mãe empreendedora não é fazer mais: é fazer o que importa no tempo que você tem. Vou criar sua rotina respeitando sua energia, sua família e sua saúde.\n\n**Quantas horas por dia você tem disponível para o negócio?**' },
-      { id: 'liora', name: 'Liora', role: 'Decodificadora de Dados', desc: 'Transforma métricas em decisões acionáveis. Dashboard completo de Instagram, vendas e funil com roadmap de 90 dias priorizado por ROI.', context: [], welcome: 'Olá! Eu sou a Liora 📊\n\nNúmeros sem interpretação são só números. Vou transformar suas métricas em decisões claras: o que está funcionando, o que precisa mudar e o que priorizar nos próximos 90 dias.\n\n**Por qual área você quer começar: Instagram, vendas ou funil?**' },
     ],
   },
 ];
