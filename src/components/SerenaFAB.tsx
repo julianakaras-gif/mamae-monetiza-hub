@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 import { SERENA } from "@/data/agents";
 
 const SerenaFAB = () => {
   const [showTooltip, setShowTooltip] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Hide when already chatting with Serena
+  if (location.pathname === "/chat/serena") return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
