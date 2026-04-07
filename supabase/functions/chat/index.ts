@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
     const historyArray = Array.isArray(history) ? history : [];
 
     const messages = [
-      ...history.map((m: any) => ({ role: m.role, content: m.content })),
+      ...historyArray.map((m: any) => ({ role: m.role, content: m.content })),
       { role: "user", content: message },
     ];
 
