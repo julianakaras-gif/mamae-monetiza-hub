@@ -1,6 +1,7 @@
 import { PHASES } from "@/data/agents";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
 import AgentCard from "@/components/AgentCard";
+import { Star } from "lucide-react";
 
 const Favoritos = () => {
   const { favorites, getAgentStatus, toggleFavorite, loading } = useAgentProgress();
@@ -13,23 +14,28 @@ const Favoritos = () => {
     );
   }
 
-  // Group favorites by phase
   const grouped = PHASES.map((phase) => ({
     phase,
     agents: phase.agents.filter((a) => favorites.has(a.id)),
   })).filter((g) => g.agents.length > 0);
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl animate-fade-in">
-      <h1 className="font-georgia text-2xl font-bold text-foreground mb-1">Favoritos</h1>
+    <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
+      <h1 className="font-georgia text-xl md:text-2xl font-bold text-foreground mb-1">Favoritos</h1>
       <p className="text-muted-foreground text-sm mb-6">
         Seus agentes favoritos, agrupados por fase.
       </p>
 
       {grouped.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-muted-foreground text-sm">
-            Nenhum agente favoritado ainda. Use a estrela na trilha para adicionar.
+          <div className="w-16 h-16 rounded-full bg-secondary/15 flex items-center justify-center mx-auto mb-4">
+            <Star size={28} className="text-secondary" />
+          </div>
+          <p className="font-georgia font-bold text-sm text-foreground mb-2">
+            Você ainda não tem favoritos
+          </p>
+          <p className="text-muted-foreground text-xs max-w-xs mx-auto">
+            Explore a trilha e marque os agentes que mais usa com a estrela para acessá-los rapidamente aqui.
           </p>
         </div>
       ) : (
