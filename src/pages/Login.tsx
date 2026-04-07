@@ -154,7 +154,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-8">
             Não tem acesso?{" "}
-            <a href="#" className="text-rosa font-bold hover:underline">
+            <a href="/" className="text-rosa font-bold hover:underline">
               Conheça o método
             </a>
           </p>
