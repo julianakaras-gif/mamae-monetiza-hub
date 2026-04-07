@@ -44,7 +44,7 @@ export function useAgentProgress() {
     fetchData();
   }, [fetchData]);
 
-  const getAgentStatus = useCallback((agentId: string): AgentStatus => {
+  function getAgentStatus(agentId: string): AgentStatus {
     if (completedAgents.has(agentId)) return "completed";
 
     // Phase 1 (Descoberta): sequential - clara > aya > talia
@@ -79,7 +79,7 @@ export function useAgentProgress() {
     }
 
     return "locked";
-  }, [completedAgents]);
+  }
 
   function getPhaseStatus(phase: Phase): "locked" | "in_progress" | "completed" | "free" {
     const statuses = phase.agents.map((a) => getAgentStatus(a.id));
