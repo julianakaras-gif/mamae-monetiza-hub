@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
 import Login from "@/pages/Login";
+import Index from "@/pages/Index";
 import AcessoBloqueado from "@/pages/AcessoBloqueado";
 import Home from "@/pages/Home";
 import Trilha from "@/pages/Trilha";
