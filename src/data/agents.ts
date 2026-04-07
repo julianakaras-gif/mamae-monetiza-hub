@@ -129,6 +129,7 @@ export const PHASES: Phase[] = [
       { id: 'luna', name: 'Luna', role: 'Arquiteta de Funis Automáticos', desc: 'Cria funis que vendem 24h por dia, adaptados ao nível técnico. Entrega checklist de implementação semana a semana.', context: ['talia', 'alana', 'nina'], welcome: 'Olá! Eu sou a Luna 🌙\n\nFunil automatizado não é coisa de empresa grande: é o jeito mais inteligente de uma pessoa só fazer o trabalho de uma equipe. Vou criar a estrutura que vende enquanto você dorme.\n\n**Você tem alguma ferramenta de email ou página de vendas já configurada?**' },
       { id: 'liora', name: 'Liora', role: 'Decodificadora de Dados', desc: 'Transforma métricas em decisões acionáveis. Dashboard completo de Instagram, vendas e funil com roadmap de 90 dias priorizado por ROI.', context: [], welcome: 'Olá! Eu sou a Liora 📊\n\nNúmeros sem interpretação são só números. Vou transformar suas métricas em decisões claras: o que está funcionando, o que precisa mudar e o que priorizar nos próximos 90 dias.\n\n**Por qual área você quer começar: Instagram, vendas ou funil?**' },
     ],
+  },
 ];
 
 export const SERENA = {
