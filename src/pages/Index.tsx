@@ -306,18 +306,18 @@ function AgentesDestaque() {
 
 /* ─── Section 5: Depoimentos ─── */
 function Depoimentos() {
-  const depos = [
-    { name: "Dra. Rubia", text: "Tô aqui chorando pq o resultado foi incrível. Sério. Sei q é uma IA. Mas a sensibilidade com q ela sentiu minha insegurança e me conduziu até encontrarmos um negócio q chegou na minha essência, é de emocionar mesmo. Só queria dividir com vcs pq estou bem feliz." },
-    { name: "Lenita", text: "Eu fiquei surpreendida (positivamente, claro!) com as IA's do mamãe monetiza. Não havia visto nada semelhante no mercado. As aulas são rápidas e direto ao ponto e os robôs de uma sensibilidade que parecem gente (parece que é a Juliana falando com a gente). Um dos melhores cursos que já investi, me destravou demais!" },
-    { name: "Elaine", text: "Já conhecia as IA's que tem no mercado, as famosinhas, porém até conhecer o curso eu não conseguia ter um norte de por onde ir, como usar essa ferramenta. Com o mamãe monetiza eu consegui até ter um ânimo diferente para criar no digital, consegui reestruturar dois e-books que eu já tinha e agora formular e dar uma cara mais profissional as páginas de venda, as quais nem sabia como proceder. Obrigada Juliana por sua dedicação em criar esse material." },
-    { name: "Adriana", text: "Já tinha gastado uma pequena fortuna com cursos e mentoria sem resultado. Já tinha alguma experiência com chat gpt, mas o que são esses robôs da @Juliana Karas???? Muito bem refinados e dão tudo!!! Palmas em câmera lenta para a Vera, robô para criação de comunidades que é exatamente o que eu quero." },
-    { name: "Fabricia", text: "A ideia dos robôs da @Juliana Karas foi incrível. Vai nos tirar das muitas voltas que damos. Parabéns pelo trabalho, em breve vou ser um caso de sucesso a partir dos seus robôs." },
-    { name: "Jamile", text: "Eu hoje consegui finalizar a estrutura da minha mentoria. Nem tô acreditando. A direção definida me tira do lugar de perdida." },
-    { name: "Gisele", text: "Agora com os robôs tem sido mais prático! Meu planejamento tem melhorado naturalmente e me trouxe mais clareza de como me organizar no meu dia. Ainda recebe muitas dicas também de como comunicar o meu trabalho. Está sendo muito positivo!" },
-    { name: "Fabricia", text: "Comprei hoje o curso e fiz o processo com a Clara e já valeu o valor que paguei. Parabéns. Vou amar." },
-  ];
+  const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/depoimentos`;
 
-  const colors = ["#df437d", "#29a6ab", "#ebc780", "#4a5759", "#df437d", "#29a6ab", "#c49a30", "#4a5759"];
+  const depoimentos = [
+    { arquivo: '2.png', alt: 'Depoimento Dra. Rubia' },
+    { arquivo: '5.png', alt: 'Depoimento Lenita' },
+    { arquivo: '20.png', alt: 'Depoimento Adriana' },
+    { arquivo: '6.png', alt: 'Depoimento Elaine' },
+    { arquivo: '7.png', alt: 'Depoimento Fabricia' },
+    { arquivo: '26.png', alt: 'Depoimento Gisele' },
+    { arquivo: '25.png', alt: 'Depoimento Jamile' },
+    { arquivo: '29.png', alt: 'Depoimento Fabricia' },
+  ];
 
   return (
     <section className="py-20 px-6 bg-white">
@@ -327,29 +327,64 @@ function Depoimentos() {
             O que as alunas estão dizendo
           </h2>
           <p className="text-center text-muted-foreground text-sm mb-12">
-            Mensagens reais do grupo de alunas, sem edição
+            Prints reais do grupo de alunas. Sem edição.
           </p>
         </Reveal>
 
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-          {depos.map((d, i) => (
-            <Reveal key={i} className="break-inside-avoid">
-              <div className="bg-background rounded-2xl p-6 shadow-sm relative">
-                <Quote size={20} className="absolute top-4 right-4" style={{ color: "#29a6ab", opacity: 0.3 }} />
-                <div className="flex items-center gap-3 mb-4">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{ backgroundColor: colors[i] }}
-                  >
-                    {d.name[0]}
-                  </div>
-                  <span className="font-semibold text-sm text-foreground">{d.name}</span>
-                </div>
-                <p className="text-sm text-foreground leading-relaxed italic">"{d.text}"</p>
-              </div>
-            </Reveal>
+        <div style={{ columns: '3 280px', gap: '16px' }}>
+          {depoimentos.map((dep, i) => (
+            <div
+              key={dep.arquivo}
+              className="opacity-0"
+              ref={(el) => {
+                if (!el) return;
+                const obs = new IntersectionObserver(
+                  ([e]) => {
+                    if (e.isIntersecting) {
+                      setTimeout(() => {
+                        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                      }, i * 80);
+                      obs.unobserve(el);
+                    }
+                  },
+                  { threshold: 0.1 }
+                );
+                el.style.transform = 'translateY(20px)';
+                obs.observe(el);
+              }}
+              style={{
+                breakInside: 'avoid',
+                marginBottom: '16px',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                boxShadow: '0 4px 20px rgba(74,87,89,0.10)',
+                transition: 'transform 0.25s, box-shadow 0.25s',
+                cursor: 'default',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 8px 32px rgba(74,87,89,0.16)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 20px rgba(74,87,89,0.10)';
+              }}
+            >
+              <img
+                src={`${STORAGE_BASE}/${dep.arquivo}`}
+                alt={dep.alt}
+                style={{ width: '100%', display: 'block' }}
+                loading="lazy"
+              />
+            </div>
           ))}
         </div>
+
+        <p className="text-center text-muted-foreground text-xs italic mt-10">
+          Prints reais do grupo privado de alunas. Nomes preservados como apareceram originalmente.
+        </p>
       </div>
     </section>
   );
