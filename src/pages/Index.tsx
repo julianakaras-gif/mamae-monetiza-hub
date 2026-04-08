@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, LockOpen, Check, X, ChevronDown, Quote } from "lucide-react";
+import { Lock, LockOpen, Check, X, ChevronDown } from "lucide-react";
 import Logo from "@/components/Logo";
 import { PHASES } from "@/data/agents";
 import { toast } from "sonner";
