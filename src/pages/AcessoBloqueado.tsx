@@ -1,11 +1,19 @@
+import { useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { ShieldX, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-
-const SALES_URL = import.meta.env.VITE_SALES_PAGE_URL || "https://exemplo.com/metodo";
+import { supabase } from "@/integrations/supabase/client";
 
 const AcessoBloqueado = () => {
-  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleQueroSerAluna = () => {
+    window.open("/", "_blank", "noopener,noreferrer");
+  };
+
+  const handleJaSouAluna = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
 
   return (
     <div
@@ -29,17 +37,15 @@ const AcessoBloqueado = () => {
           Para acessar os 26 agentes e iniciar sua trilha de transformação, você precisa ser aluna ativa do Método Mamãe Monetiza.
         </p>
 
-        <a
-          href={SALES_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={handleQueroSerAluna}
           className="inline-block w-full py-3.5 rounded-pill bg-rosa text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity mb-3"
         >
           Quero me tornar aluna
-        </a>
+        </button>
 
         <button
-          onClick={signOut}
+          onClick={handleJaSouAluna}
           className="w-full py-3 rounded-pill border border-borda text-muted-foreground font-medium text-sm hover:bg-muted/50 transition-colors flex items-center justify-center gap-2"
         >
           <LogOut size={14} />
