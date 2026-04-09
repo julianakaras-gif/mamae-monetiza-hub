@@ -19,6 +19,84 @@ const HOTMART_LINKS = {
   fundadora: "https://pay.hotmart.com/G105292559C?off=rt0xc1u6&bid=1775674916866",
 };
 
+const roboImages = import.meta.glob("../assets/robos/*", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
+
+const getRoboImage = (fileName?: string | null) => {
+  if (!fileName) return null;
+  return roboImages[`../assets/robos/${fileName}`] ?? null;
+};
+
+const agentesDestaque = [
+  {
+    id: "clara",
+    nome: "Clara",
+    foto: "CLARA.png",
+    role: "Reveladora de Negócios Autênticos",
+    frase: "Vamos descobrir o negócio que combina seus dons reais com o que o mercado precisa.",
+  },
+  {
+    id: "talia",
+    nome: "Talia",
+    foto: "TALIA.png",
+    role: "Arquiteta de Ecossistemas",
+    frase: "Um único produto não é negócio: é um emprego. Vou criar seu ecossistema completo de 6 produtos.",
+  },
+  {
+    id: "alma",
+    nome: "Alma",
+    foto: "ALMA.png",
+    role: "Especialista em Copywriting Emocional",
+    frase: "Vou criar os textos que fazem sua cliente sentir: ela está falando de mim.",
+  },
+  {
+    id: "petra",
+    nome: "Petra",
+    foto: "PETRA.png",
+    role: "Especialista em Sales Pages",
+    frase: "Página que converte não é sobre design bonito: é sobre falar a coisa certa para a pessoa certa.",
+  },
+  {
+    id: "maia",
+    nome: "Maia",
+    foto: "MAIA.png",
+    role: "Arquiteta de Rotinas Estratégicas",
+    frase: "Produtividade para mãe empreendedora não é fazer mais: é fazer o que importa no tempo que você tem.",
+  },
+  {
+    id: "serena",
+    nome: "Serena",
+    foto: "SERENA.png",
+    role: "Desbloqueadora de Potencial",
+    frase: "Estou aqui para quando a jornada parecer pesada demais. Traga pra cá.",
+  },
+];
+
+const outrosAgentes = [
+  { id: "aya", nome: "Aya", foto: "AYA.png", role: "Validadora de Mercado" },
+  { id: "lucca", nome: "Lucca", foto: "LUCCA.png", role: "Consultor Estratégico" },
+  { id: "alice", nome: "Alice", foto: "ALICE.png", role: "Arquiteta de Marcas" },
+  { id: "kaia", nome: "Kaia", foto: "KAIA.png", role: "Estrategista de Conteúdo Autêntico" },
+  { id: "lira", nome: "Lira", foto: "LIRA1.png", role: "Especialista em Ebooks" },
+  { id: "noa", nome: "Noa", foto: "NOA.png", role: "Especialista em Cursos Online" },
+  { id: "eron", nome: "Eron", foto: "ERON.png", role: "Especialista em Mentorias de Alto Valor" },
+  { id: "vera", nome: "Vera", foto: "VERA.png", role: "Especialista em Comunidades Online" },
+  { id: "cora", nome: "Cora", foto: "CORA.png", role: "Especialista em Gamificação" },
+  { id: "malu", nome: "Malu", foto: "MALU.png", role: "Estrategista de Calendário Editorial" },
+  { id: "kaena", nome: "Kaena", foto: "KAENA.png", role: "Roteirista Viral" },
+  { id: "lumi", nome: "Lumi", foto: "LUMI.png", role: "Especialista em Carrosséis Virais" },
+  { id: "luli", nome: "Luli", foto: "LULI.jpg", role: "Especialista em Prompts de Imagem IA" },
+  { id: "nara", nome: "Nara", foto: "NARA.png", role: "Especialista em Stories que Convertem" },
+  { id: "alana", nome: "Alana", foto: "ALANA.png", role: "Especialista em Vendas Humanizadas" },
+  { id: "nina", nome: "Nina", foto: "NINA.png", role: "Arquiteta de Relacionamentos" },
+  { id: "elisa", nome: "Elisa", foto: "ELISA.png", role: "Especialista em Quiz Funnels" },
+  { id: "luna", nome: "Luna", foto: "LUNA.png", role: "Arquiteta de Funis Automáticos" },
+  { id: "liora", nome: "Liora", foto: "LIORA.png", role: "Decodificadora de Dados" },
+  { id: "bill", nome: "Bill", foto: "BILL.png", role: "Roteirista de YouTube" },
+];
+
 const openHotmart = (plan: keyof typeof HOTMART_LINKS) => {
   window.open(HOTMART_LINKS[plan], "_blank", "noopener,noreferrer");
 };
@@ -50,6 +128,39 @@ function Reveal({ children, className = "" }: { children: React.ReactNode; class
     <div ref={ref} className={`opacity-0 ${className}`}>
       {children}
     </div>
+  );
+}
+
+function AgentAvatar({
+  name,
+  foto,
+  size = 80,
+}: {
+  name: string;
+  foto?: string | null;
+  size?: number;
+}) {
+  const imageSrc = getRoboImage(foto);
+
+  if (!imageSrc) {
+    return (
+      <div
+        className="rounded-full flex items-center justify-center bg-sage-pale text-foreground font-semibold shrink-0"
+        style={{ width: size, height: size, fontSize: size * 0.32 }}
+      >
+        {name.charAt(0)}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={imageSrc}
+      alt={`Foto do agente ${name}`}
+      className="rounded-full object-cover shrink-0 bg-muted"
+      style={{ width: size, height: size }}
+      loading="lazy"
+    />
   );
 }
 
