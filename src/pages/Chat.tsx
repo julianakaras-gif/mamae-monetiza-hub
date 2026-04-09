@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback, memo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Send, Star, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,8 @@ import { useAgentProgress } from "@/hooks/useAgentProgress";
 import { findAgent, SERENA, PHASES } from "@/data/agents";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import ChatMessageContent from "@/components/ChatMessage";
+import ProjectSelector from "@/components/ProjectSelector";
 
 interface ChatMessage {
   id?: string;
@@ -14,24 +16,17 @@ interface ChatMessage {
   content: string;
 }
 
-function renderMarkdown(text: string) {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\n/g, "<br />");
-}
-
 const Chat = () => {
   const { agentId } = useParams<{ agentId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { favorites, toggleFavorite, refetch } = useAgentProgress();
 
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [isCompleting, setIsCompleting] = useState(false);
-  const [initializing, setInitializing] = useState(true);
+  const [showProjectSelector, setShowProjectSelector] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    searchParams.get("project")
+  );
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
