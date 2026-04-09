@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProject } from "@/hooks/useProject";
 import { PHASES, type Agent, type Phase } from "@/data/agents";
 
 export type AgentStatus = "locked" | "unlocked" | "completed";
@@ -13,6 +14,7 @@ export interface AgentState {
 
 export function useAgentProgress() {
   const { user } = useAuth();
+  const { activeProjectId } = useProject();
   const [completedAgents, setCompletedAgents] = useState<Set<string>>(new Set());
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -21,12 +23,18 @@ export function useAgentProgress() {
     if (!user) return;
     setLoading(true);
 
+    let progressQuery = supabase
+      .from("user_progress")
+      .select("agent_id, completed")
+      .eq("user_id", user.id)
+      .eq("completed", true);
+
+    if (activeProjectId) {
+      progressQuery = progressQuery.eq("project_id", activeProjectId);
+    }
+
     const [progressRes, favRes] = await Promise.all([
-      supabase
-        .from("user_progress")
-        .select("agent_id, completed")
-        .eq("user_id", user.id)
-        .eq("completed", true),
+      progressQuery,
       supabase
         .from("user_favorites")
         .select("agent_id")
@@ -38,11 +46,32 @@ export function useAgentProgress() {
     );
     setFavorites(new Set((favRes.data ?? []).map((r) => r.agent_id)));
     setLoading(false);
-  }, [user]);
+  }, [user, activeProjectId]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Realtime subscription for progress updates
+  useEffect(() => {
+    if (!user || !activeProjectId) return;
+
+    const channel = supabase
+      .channel(`progress-${activeProjectId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'user_progress',
+        filter: `project_id=eq.${activeProjectId}`,
+      }, (payload: any) => {
+        if (payload.new?.completed) {
+          setCompletedAgents(prev => new Set([...prev, payload.new.agent_id]));
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user, activeProjectId]);
 
   function getAgentStatus(agentId: string): AgentStatus {
     if (completedAgents.has(agentId)) return "completed";
