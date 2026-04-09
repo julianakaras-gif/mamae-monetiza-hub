@@ -4,7 +4,9 @@ import { ArrowLeft, Send, Star, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
+import { useProject } from "@/hooks/useProject";
 import { findAgent, SERENA } from "@/data/agents";
+import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import ChatMessageContent from "@/components/ChatMessage";
@@ -22,10 +24,11 @@ const Chat = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { favorites, toggleFavorite, refetch } = useAgentProgress();
+  const { activeProjectId } = useProject();
 
   const [showProjectSelector, setShowProjectSelector] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    searchParams.get("project")
+    searchParams.get("project") || activeProjectId
   );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -64,6 +67,7 @@ const Chat = () => {
 
   const agent = agentInfo?.agent;
   const phase = agentInfo?.phase;
+  const photoUrl = agentId ? getAgentPhotoUrl(agentId) : null;
 
   const isFav = agentId ? favorites.has(agentId) : false;
   const totalMessages = messages.length;
@@ -209,6 +213,7 @@ const Chat = () => {
         body: JSON.stringify({
           agent_id: agentId,
           session_id: sessionId,
+          project_id: selectedProjectId,
           message: userMessage,
           context_outputs: contextOutputs,
         }),
@@ -266,7 +271,7 @@ const Chat = () => {
     } finally {
       setIsStreaming(false);
     }
-  }, [input, sessionId, isStreaming, agentId, agent, user]);
+  }, [input, sessionId, isStreaming, agentId, agent, user, selectedProjectId]);
 
   const handleComplete = async () => {
     if (!sessionId || !user || !agent || !phase) return;
@@ -286,6 +291,7 @@ const Chat = () => {
           agent_role: agent.role,
           session_id: sessionId,
           user_id: user.id,
+          project_id: selectedProjectId,
         }),
       });
 
@@ -343,12 +349,20 @@ const Chat = () => {
             <ArrowLeft size={18} className="text-foreground" />
           </button>
 
-          <div
-            className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
-            style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
-          >
-            {agent.name.charAt(0)}
-          </div>
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt={agent.name}
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
+              style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+            >
+              {agent.name.charAt(0)}
+            </div>
+          )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -403,12 +417,20 @@ const Chat = () => {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
             >
               {msg.role === "assistant" && (
-                <div
-                  className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
-                  style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
-                >
-                  {agent.name.charAt(0)}
-                </div>
+                photoUrl ? (
+                  <img
+                    src={photoUrl}
+                    alt={agent.name}
+                    className="w-[36px] h-[36px] rounded-full object-cover shrink-0 mr-2 mt-1"
+                  />
+                ) : (
+                  <div
+                    className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
+                    style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+                  >
+                    {agent.name.charAt(0)}
+                  </div>
+                )
               )}
               <div
                 className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-3.5 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed ${
@@ -429,12 +451,20 @@ const Chat = () => {
 
           {isStreaming && messages[messages.length - 1]?.role !== "assistant" && (
             <div className="flex justify-start">
-              <div
-                className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
-                style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
-              >
-                {agent.name.charAt(0)}
-              </div>
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt={agent.name}
+                  className="w-[36px] h-[36px] rounded-full object-cover shrink-0 mr-2 mt-1"
+                />
+              ) : (
+                <div
+                  className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
+                  style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+                >
+                  {agent.name.charAt(0)}
+                </div>
+              )}
               <div
                 className="bg-card border-l-[3px] rounded-2xl rounded-bl-md px-4 py-3"
                 style={{ borderLeftColor: phase.color }}

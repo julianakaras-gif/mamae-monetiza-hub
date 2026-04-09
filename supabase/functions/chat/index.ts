@@ -129,13 +129,15 @@ Ao finalizar: "Seu ecossistema de produtos está completo. Você pode clicar em 
   serena: `Você é a Serena, Desbloqueadora de Potencial do Método Mamãe Monetiza. Sua missão: apoiar emocionalmente a aluna quando a jornada parecer pesada demais. Temas: síndrome do impostor, medo de falhar, bloqueio criativo, sobrecarga emocional, procrastinação. Abordagem: escuta ativa, acolhimento, perguntas poderosas de coaching, reframing de crenças limitantes. Não dê soluções prontas. Regras: nunca use travessão longo (--), fale em português brasileiro, nunca tente resolver problemas técnicos do negócio (redirecione para os agentes específicos).`,
 };
 
+const CONTENT_AGENTS = ['alma', 'malu', 'kaena', 'bill', 'lumi', 'luli', 'nara', 'kaia'];
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { agent_id, session_id, message, context_outputs } = await req.json();
+    const { agent_id, session_id, message, context_outputs, project_id } = await req.json();
 
     const systemPromptBase = SYSTEM_PROMPTS[agent_id];
     if (!systemPromptBase) {
@@ -144,6 +146,9 @@ Deno.serve(async (req) => {
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     // Build context from previous agents
     let contextSection = "";
@@ -155,12 +160,42 @@ Deno.serve(async (req) => {
       contextSection += "---\n";
     }
 
-    const systemPrompt = systemPromptBase + contextSection;
+    // Content agents get automatic project/brand context
+    let contentContext = '';
+    if (CONTENT_AGENTS.includes(agent_id) && project_id) {
+      const projRes = await fetch(
+        `${supabaseUrl}/rest/v1/projects?id=eq.${project_id}&select=name,niche,target_audience`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      );
+      const projData = await projRes.json();
+      if (projData?.[0]) {
+        const p = projData[0];
+        contentContext += `\n\n---\nCONTEXTO DO PROJETO:\nNome: ${p.name}${p.niche ? `\nNicho: ${p.niche}` : ''}${p.target_audience ? `\nPúblico-alvo: ${p.target_audience}` : ''}\n---\n`;
+      }
+
+      const outputRes = await fetch(
+        `${supabaseUrl}/rest/v1/agent_outputs?project_id=eq.${project_id}&agent_id=in.(alice,kaia,talia,alma)&select=agent_id,summary`,
+        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      );
+      const outputs = await outputRes.json();
+      if (outputs?.length > 0) {
+        const labels: Record<string, string> = {
+          alice: 'IDENTIDADE DE MARCA',
+          kaia: 'POSICIONAMENTO DE CONTEÚDO',
+          talia: 'ECOSSISTEMA DE PRODUTOS',
+          alma: 'COPYWRITING JÁ CRIADO',
+        };
+        contentContext += '\n\n---\nCONTEXTO DE MARCA E PRODUTO (use para personalizar todo o conteúdo):\n\n';
+        for (const out of outputs) {
+          contentContext += `[${labels[out.agent_id] || out.agent_id.toUpperCase()}]\n${out.summary}\n\n`;
+        }
+        contentContext += '---\n';
+      }
+    }
+
+    const systemPrompt = systemPromptBase + contentContext + contextSection;
 
     // Fetch message history from Supabase
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
     const historyRes = await fetch(
       `${supabaseUrl}/rest/v1/messages?session_id=eq.${session_id}&order=created_at.asc`,
       { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }

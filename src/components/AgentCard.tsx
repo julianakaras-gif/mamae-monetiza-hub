@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import type { Agent } from "@/data/agents";
 import type { AgentStatus } from "@/hooks/useAgentProgress";
 import { toast } from "sonner";
+import { getAgentPhotoUrl } from "@/data/agentPhotos";
 
 interface AgentCardProps {
   agent: Agent;
@@ -21,6 +22,7 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
   const borderColor = isLocked ? "#E2D9C8" : phaseColor;
   const avatarBg = isLocked ? "rgba(226, 217, 200, 0.15)" : `${phaseColor}15`;
   const avatarColor = isLocked ? "#b0a89f" : phaseColor;
+  const photoUrl = getAgentPhotoUrl(agent.id);
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -45,8 +47,17 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
       aria-label={`${isLocked ? "Bloqueado: " : ""}${agent.name} - ${agent.role}`}
       aria-disabled={isLocked}
     >
+      {photoUrl ? (
+        <img
+          src={photoUrl}
+          alt={agent.name}
+          className="w-[50px] h-[50px] rounded-full object-cover shrink-0"
+          style={{ opacity: isLocked ? 0.5 : 1 }}
+          onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }}
+        />
+      ) : null}
       <div
-        className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
+        className={`w-[50px] h-[50px] rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${photoUrl ? 'hidden' : ''}`}
         style={{ backgroundColor: avatarBg, color: avatarColor }}
       >
         {agent.name.charAt(0)}
