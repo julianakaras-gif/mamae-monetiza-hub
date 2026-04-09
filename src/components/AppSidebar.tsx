@@ -11,11 +11,6 @@ const menuItems = [
   { title: "Favoritos", path: "/favoritos", icon: Star },
 ];
 
-const quickAgents = [
-  { name: "Maia", initial: "M", color: "bg-gold" },
-  { name: "Liora", initial: "L", color: "bg-sage-light" },
-];
-
 const AppSidebar = () => {
   const location = useLocation();
   const { profile, signOut } = useAuth();
