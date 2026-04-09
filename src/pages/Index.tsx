@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, LockOpen, Check, X, ChevronDown } from "lucide-react";
 import Logo from "@/components/Logo";
-import { PHASES } from "@/data/agents";
-import { toast } from "sonner";
 import {
   Accordion,
   AccordionContent,
@@ -16,15 +14,14 @@ const scrollTo = (id: string) => {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 };
 
-const salesUrl = () => import.meta.env.VITE_SALES_PAGE_URL as string | undefined;
+const HOTMART_LINKS = {
+  mensal: "https://pay.hotmart.com/G105292559C?off=3v5pivbp",
+  anual: "https://pay.hotmart.com/G105292559C?off=f5iww1vi&bid=1775674844703",
+  fundadora: "https://pay.hotmart.com/G105292559C?off=rt0xc1u6&bid=1775674916866",
+};
 
-const handleBuy = () => {
-  const url = salesUrl();
-  if (url) {
-    window.open(url, "_blank");
-  } else {
-    toast("Link de compra em breve");
-  }
+const openHotmart = (plan: keyof typeof HOTMART_LINKS) => {
+  window.open(HOTMART_LINKS[plan], "_blank", "noopener,noreferrer");
 };
 
 /* ─── intersection observer animation hook ─── */
@@ -431,7 +428,7 @@ function Precos() {
                   </li>
                 ))}
               </ul>
-              <button onClick={handleBuy} className="w-full py-3 rounded-full text-white font-semibold text-sm" style={{ backgroundColor: "#4a5759" }} aria-label="Começar plano mensal">
+              <button onClick={() => openHotmart("mensal")} className="w-full py-3 rounded-full text-white font-semibold text-sm" style={{ backgroundColor: "#4a5759" }} aria-label="Começar plano mensal">
                 Começar agora
               </button>
             </div>
@@ -445,7 +442,7 @@ function Precos() {
               </span>
               <h3 className="font-bold text-lg text-foreground mb-1 mt-2">Anual</h3>
               <p className="text-3xl font-bold text-foreground">R$ 797<span className="text-sm font-normal text-muted-foreground"> / ano</span></p>
-              <p className="text-xs text-muted-foreground mt-1">equivale a R$ 66/mês</p>
+              <p className="text-xs text-muted-foreground mt-1">ou 12x de R$ 82,43</p>
               <span className="inline-block mt-2 mb-6 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "rgba(41,166,171,0.15)", color: "#29a6ab" }}>
                 Você economiza R$ 367
               </span>
@@ -458,7 +455,7 @@ function Precos() {
                 ))}
               </ul>
               <button
-                onClick={handleBuy}
+                onClick={() => openHotmart("anual")}
                 className="w-full py-3 rounded-full text-white font-semibold text-sm transition-shadow hover:shadow-lg"
                 style={{ backgroundColor: "#29a6ab", boxShadow: "0 0 20px rgba(41,166,171,0.3)" }}
                 aria-label="Escolher plano anual"
@@ -476,7 +473,7 @@ function Precos() {
               </span>
               <h3 className="font-bold text-lg text-foreground mb-1 mt-2">Fundadora</h3>
               <p className="text-3xl font-bold text-foreground">R$ 497<span className="text-sm font-normal text-muted-foreground"> / ano</span></p>
-              <p className="text-xs text-muted-foreground mt-1"><span className="line-through">R$ 797</span></p>
+              <p className="text-xs text-muted-foreground mt-1"><span className="line-through">R$ 797</span> ou 12x de R$ 51</p>
               <span className="inline-block mt-2 mb-6 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "rgba(223,67,125,0.15)", color: "#df437d" }}>
                 37% de desconto no lançamento
               </span>
@@ -488,7 +485,7 @@ function Precos() {
                   </li>
                 ))}
               </ul>
-              <button onClick={handleBuy} className="w-full py-3 rounded-full text-white font-semibold text-sm" style={{ backgroundColor: "#df437d" }} aria-label="Quero ser fundadora">
+              <button onClick={() => openHotmart("fundadora")} className="w-full py-3 rounded-full text-white font-semibold text-sm" style={{ backgroundColor: "#df437d" }} aria-label="Quero ser fundadora">
                 Quero ser fundadora
               </button>
             </div>
@@ -608,7 +605,7 @@ function CtaFinal() {
             26 especialistas. Uma trilha. O negócio que você merecia ter construído antes.
           </p>
           <button
-            onClick={handleBuy}
+            onClick={() => openHotmart("fundadora")}
             className="px-12 py-4.5 rounded-[40px] text-white font-bold text-base hover:opacity-90 transition-opacity mb-6"
             style={{ backgroundColor: "#df437d" }}
             aria-label="Quero começar agora"
