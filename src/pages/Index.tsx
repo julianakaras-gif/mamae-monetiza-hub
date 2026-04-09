@@ -626,7 +626,7 @@ function Faq() {
     { q: "Preciso saber usar inteligência artificial?", a: "Não. Os agentes foram criados para ser tão simples quanto mandar uma mensagem no WhatsApp. Você conversa, eles trabalham." },
     { q: "Quanto tempo preciso dedicar por dia?", a: "De 30 minutos a 1 hora já é suficiente para avançar na trilha. A Maia (agente de rotinas) vai te ajudar a encaixar o método na sua realidade." },
     { q: "O acesso é imediato após a compra?", a: "Sim. Assim que o pagamento for confirmado pelo Hotmart, você recebe o acesso por email e já pode entrar na plataforma." },
-    { q: "Posso cancelar quando quiser?", a: "No plano mensal, sim: cancele quando quiser sem multa. Nos planos anuais, o acesso fica ativo por 12 meses completos." },
+    { q: "Posso cancelar quando quiser?", a: "No plano mensal, sim: cancele quando quiser sem multa. No plano Fundadora, o acesso fica ativo por 12 meses completos." },
     { q: "Os agentes realmente conversam entre si?", a: "Sim. Quando você conclui uma etapa com um agente, o sistema salva automaticamente o que foi produzido e injeta esse contexto no próximo agente. Você nunca precisa repetir informações." },
     { q: "Tem suporte se eu tiver dúvidas?", a: "Sim. Além dos agentes, você tem acesso ao grupo de alunas e ao suporte via email. No plano anual, o suporte é prioritário." },
   ];
