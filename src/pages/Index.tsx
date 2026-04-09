@@ -517,7 +517,7 @@ function Precos() {
           </div>
         </Reveal>
 
-        <div className="grid md:grid-cols-3 gap-6 items-start">
+        <div className="grid md:grid-cols-2 gap-6 items-start max-w-2xl mx-auto">
           <Reveal>
             <div className="bg-white rounded-2xl p-6 shadow-sm border" style={{ borderColor: "#B6D0BE" }}>
               <h3 className="font-bold text-lg text-foreground mb-1">Mensal</h3>
@@ -538,36 +538,7 @@ function Precos() {
           </Reveal>
 
           <Reveal>
-            <div className="bg-white rounded-2xl p-6 shadow-md relative border-2" style={{ borderColor: "#3A5C46" }}>
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-white text-xs font-bold bg-sage-mid">
-                Mais popular
-              </span>
-              <h3 className="font-bold text-lg text-foreground mb-1 mt-2">Anual</h3>
-              <p className="text-3xl font-bold text-foreground">R$ 797<span className="text-sm font-normal text-muted-foreground"> / ano</span></p>
-              <p className="text-xs text-muted-foreground mt-1">ou 12x de R$ 82,43</p>
-              <span className="inline-block mt-2 mb-6 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "rgba(182,208,190,0.3)", color: "#3A5C46" }}>
-                Você economiza R$ 367
-              </span>
-              <ul className="space-y-3 mb-6">
-                {[...beneficios, "Suporte prioritário"].map((b, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                    <Check size={16} className="mt-0.5 shrink-0 text-sage-mid" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={() => openHotmart("anual")}
-                className="w-full py-3 rounded-full text-white font-semibold text-sm transition-shadow hover:shadow-lg bg-sage-mid"
-                style={{ boxShadow: "0 0 20px rgba(58,92,70,0.3)" }}
-              >
-                Quero o anual
-              </button>
-            </div>
-          </Reveal>
-
-          <Reveal>
-            <div className="bg-white rounded-2xl p-6 shadow-sm relative border-2" style={{ borderColor: "#C6A86C" }}>
+            <div className="bg-white rounded-2xl p-6 shadow-md relative border-2" style={{ borderColor: "#C6A86C" }}>
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: "#C6A86C", color: "#1C3C2C" }}>
                 Oferta de lançamento
               </span>
