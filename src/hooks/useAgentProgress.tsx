@@ -15,6 +15,7 @@ export interface AgentState {
 export function useAgentProgress() {
   const { user } = useAuth();
   const { activeProjectId } = useProject();
+
   const [completedAgents, setCompletedAgents] = useState<Set<string>>(new Set());
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
