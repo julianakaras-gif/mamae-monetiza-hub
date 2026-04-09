@@ -101,7 +101,7 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+              <label className="block text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
                 E-mail
               </label>
               <input
@@ -116,7 +116,7 @@ const Login = () => {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+                <label className="block text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                   Senha
                 </label>
                 <button type="button" className="text-xs text-sage-mid hover:underline font-medium">
