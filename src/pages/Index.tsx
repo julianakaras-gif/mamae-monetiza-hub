@@ -19,6 +19,84 @@ const HOTMART_LINKS = {
   fundadora: "https://pay.hotmart.com/G105292559C?off=rt0xc1u6&bid=1775674916866",
 };
 
+const roboImages = import.meta.glob("../assets/robos/*", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
+
+const getRoboImage = (fileName?: string | null) => {
+  if (!fileName) return null;
+  return roboImages[`../assets/robos/${fileName}`] ?? null;
+};
+
+const agentesDestaque = [
+  {
+    id: "clara",
+    nome: "Clara",
+    foto: "CLARA.png",
+    role: "Reveladora de Negócios Autênticos",
+    frase: "Vamos descobrir o negócio que combina seus dons reais com o que o mercado precisa.",
+  },
+  {
+    id: "talia",
+    nome: "Talia",
+    foto: "TALIA.png",
+    role: "Arquiteta de Ecossistemas",
+    frase: "Um único produto não é negócio: é um emprego. Vou criar seu ecossistema completo de 6 produtos.",
+  },
+  {
+    id: "alma",
+    nome: "Alma",
+    foto: "ALMA.png",
+    role: "Especialista em Copywriting Emocional",
+    frase: "Vou criar os textos que fazem sua cliente sentir: ela está falando de mim.",
+  },
+  {
+    id: "petra",
+    nome: "Petra",
+    foto: "PETRA.png",
+    role: "Especialista em Sales Pages",
+    frase: "Página que converte não é sobre design bonito: é sobre falar a coisa certa para a pessoa certa.",
+  },
+  {
+    id: "maia",
+    nome: "Maia",
+    foto: "MAIA.png",
+    role: "Arquiteta de Rotinas Estratégicas",
+    frase: "Produtividade para mãe empreendedora não é fazer mais: é fazer o que importa no tempo que você tem.",
+  },
+  {
+    id: "serena",
+    nome: "Serena",
+    foto: "SERENA.png",
+    role: "Desbloqueadora de Potencial",
+    frase: "Estou aqui para quando a jornada parecer pesada demais. Traga pra cá.",
+  },
+];
+
+const outrosAgentes = [
+  { id: "aya", nome: "Aya", foto: "AYA.png", role: "Validadora de Mercado" },
+  { id: "lucca", nome: "Lucca", foto: "LUCCA.png", role: "Consultor Estratégico" },
+  { id: "alice", nome: "Alice", foto: "ALICE.png", role: "Arquiteta de Marcas" },
+  { id: "kaia", nome: "Kaia", foto: "KAIA.png", role: "Estrategista de Conteúdo Autêntico" },
+  { id: "lira", nome: "Lira", foto: "LIRA1.png", role: "Especialista em Ebooks" },
+  { id: "noa", nome: "Noa", foto: "NOA.png", role: "Especialista em Cursos Online" },
+  { id: "eron", nome: "Eron", foto: "ERON.png", role: "Especialista em Mentorias de Alto Valor" },
+  { id: "vera", nome: "Vera", foto: "VERA.png", role: "Especialista em Comunidades Online" },
+  { id: "cora", nome: "Cora", foto: "CORA.png", role: "Especialista em Gamificação" },
+  { id: "malu", nome: "Malu", foto: "MALU.png", role: "Estrategista de Calendário Editorial" },
+  { id: "kaena", nome: "Kaena", foto: "KAENA.png", role: "Roteirista Viral" },
+  { id: "lumi", nome: "Lumi", foto: "LUMI.png", role: "Especialista em Carrosséis Virais" },
+  { id: "luli", nome: "Luli", foto: "LULI.jpg", role: "Especialista em Prompts de Imagem IA" },
+  { id: "nara", nome: "Nara", foto: "NARA.png", role: "Especialista em Stories que Convertem" },
+  { id: "alana", nome: "Alana", foto: "ALANA.png", role: "Especialista em Vendas Humanizadas" },
+  { id: "nina", nome: "Nina", foto: "NINA.png", role: "Arquiteta de Relacionamentos" },
+  { id: "elisa", nome: "Elisa", foto: "ELISA.png", role: "Especialista em Quiz Funnels" },
+  { id: "luna", nome: "Luna", foto: "LUNA.png", role: "Arquiteta de Funis Automáticos" },
+  { id: "liora", nome: "Liora", foto: "LIORA.png", role: "Decodificadora de Dados" },
+  { id: "bill", nome: "Bill", foto: "BILL.png", role: "Roteirista de YouTube" },
+];
+
 const openHotmart = (plan: keyof typeof HOTMART_LINKS) => {
   window.open(HOTMART_LINKS[plan], "_blank", "noopener,noreferrer");
 };
@@ -50,6 +128,39 @@ function Reveal({ children, className = "" }: { children: React.ReactNode; class
     <div ref={ref} className={`opacity-0 ${className}`}>
       {children}
     </div>
+  );
+}
+
+function AgentAvatar({
+  name,
+  foto,
+  size = 80,
+}: {
+  name: string;
+  foto?: string | null;
+  size?: number;
+}) {
+  const imageSrc = getRoboImage(foto);
+
+  if (!imageSrc) {
+    return (
+      <div
+        className="rounded-full flex items-center justify-center bg-sage-pale text-foreground font-semibold shrink-0"
+        style={{ width: size, height: size, fontSize: size * 0.32 }}
+      >
+        {name.charAt(0)}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={imageSrc}
+      alt={`Foto do agente ${name}`}
+      className="rounded-full object-cover shrink-0 bg-muted"
+      style={{ width: size, height: size }}
+      loading="lazy"
+    />
   );
 }
 
@@ -180,11 +291,12 @@ function ParaQuem() {
 
 function OQueE() {
   const phaseDisplay = [
-    { emoji: "🌱", name: "Descoberta", count: 3 },
-    { emoji: "🎯", name: "Estratégia", count: 3 },
+    { emoji: "🌱", name: "Descoberta", count: 2 },
+    { emoji: "🎯", name: "Estratégia", count: 4 },
     { emoji: "📦", name: "Produto", count: 5 },
-    { emoji: "✨", name: "Conteúdo", count: 8 },
-    { emoji: "💰", name: "Vendas", count: 6 },
+    { emoji: "✨", name: "Conteúdo", count: 7 },
+    { emoji: "💰", name: "Vendas", count: 5 },
+    { emoji: "🚀", name: "Execução", count: 2 },
   ];
 
   return (
@@ -203,7 +315,7 @@ function OQueE() {
                 Cada agente do Método é um especialista dedicado a uma parte do seu negócio. Eles não são chatbots genéricos: são especializados, treinados para o contexto de mães empreendedoras e, o mais importante, eles conversam entre si.
               </p>
               <p>
-                Quando você termina com a Clara (que descobre seu negócio ideal), a Aya já sabe o que a Clara entregou. Quando a Talia monta seu ecossistema de produtos, a Alma usa isso para criar seu copywriting. Você não precisa repetir nada. É uma equipe trabalhando para você.
+                Quando você termina com a Clara, a Aya já sabe o que a Clara entregou. Quando a Talia monta seu ecossistema de produtos, a Alma usa isso para criar seu copywriting. Você não precisa repetir nada. É uma equipe trabalhando para você.
               </p>
             </div>
             <div className="mt-6 px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(182,208,190,0.3)", color: "#1C3C2C" }}>
@@ -213,11 +325,11 @@ function OQueE() {
         </Reveal>
 
         <Reveal>
-          <div className="rounded-2xl p-6" style={{ background: "linear-gradient(160deg, #1C3C2C 0%, #F5F1E9 100%)" }}>
-            <p className="text-white text-xs uppercase tracking-[2px] font-semibold mb-5">As fases da trilha</p>
+          <div className="rounded-2xl p-6" style={{ background: "linear-gradient(160deg, #EDE5D2 0%, #F5F1E9 100%)" }}>
+            <p className="text-foreground text-xs uppercase tracking-[2px] font-semibold mb-5">As fases da trilha</p>
             <div className="space-y-3">
               {phaseDisplay.map((p, i) => (
-                <div key={i} className="flex items-center gap-3 bg-white/90 rounded-xl px-4 py-3">
+                <div key={p.name} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-border shadow-sm">
                   <span className="text-xl">{p.emoji}</span>
                   <div className="flex-1">
                     <span className="text-sm font-bold text-foreground">Fase {i + 1}: {p.name}</span>
@@ -225,13 +337,6 @@ function OQueE() {
                   <span className="text-xs text-muted-foreground">{p.count} agentes</span>
                 </div>
               ))}
-              <div className="flex items-center gap-3 bg-white/90 rounded-xl px-4 py-3">
-                <span className="text-xl">💛</span>
-                <div className="flex-1">
-                  <span className="text-sm font-bold text-foreground">Serena</span>
-                </div>
-                <span className="text-xs text-muted-foreground">sempre disponível</span>
-              </div>
             </div>
           </div>
         </Reveal>
@@ -241,49 +346,62 @@ function OQueE() {
 }
 
 function AgentesDestaque() {
-  const agents = [
-    { name: "Clara", role: "Reveladora de Negócios Autênticos", phrase: "Vamos descobrir o negócio que combina seus dons reais com o que o mercado precisa.", color: "#7A5535", initial: "C" },
-    { name: "Talia", role: "Arquiteta de Ecossistemas", phrase: "Um único produto não é negócio: é um emprego. Vou criar seu ecossistema completo de 6 produtos.", color: "#3A5C46", initial: "T" },
-    { name: "Alma", role: "Especialista em Copywriting Emocional", phrase: "Vou criar os textos que fazem sua cliente sentir: ela está falando de mim.", color: "#C6A86C", initial: "A" },
-    { name: "Petra", role: "Especialista em Sales Pages", phrase: "Página que converte não é sobre design bonito: é sobre falar a coisa certa para a pessoa certa.", color: "#7A5535", initial: "P" },
-    { name: "Maia", role: "Arquiteta de Rotinas Estratégicas", phrase: "Produtividade para mãe empreendedora não é fazer mais: é fazer o que importa no tempo que você tem.", color: "#C6A86C", initial: "M" },
-    { name: "Serena", role: "Desbloqueadora de Potencial", phrase: "Estou aqui para quando a jornada parecer pesada demais. Síndrome do impostor, medo de falhar: traga pra cá.", color: "#6E9876", initial: "S" },
-  ];
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <section className="py-20 px-6" style={{ backgroundColor: "#F5F1E9" }}>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <Reveal>
-          <h2 className="font-display text-[32px] text-foreground text-center mb-12">
-            Conheça alguns dos seus novos especialistas
-          </h2>
+          <div className="text-center mb-12">
+            <h2 className="font-display text-[36px] md:text-[40px] text-foreground mb-3">
+              Conheça seus 26 especialistas
+            </h2>
+            <p className="text-muted-foreground text-base max-w-2xl mx-auto">
+              Cada agente é especializado em uma parte do seu negócio. Juntos, eles formam sua equipe completa.
+            </p>
+          </div>
         </Reveal>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8 overflow-x-auto">
-          {agents.map((a, i) => (
-            <Reveal key={i}>
-              <div className="bg-white rounded-2xl p-6 shadow-sm h-full flex flex-col">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg mb-4"
-                  style={{ backgroundColor: a.color }}
-                >
-                  {a.initial}
-                </div>
-                <h3 className="font-bold text-foreground text-base mb-1">{a.name}</h3>
-                <p className="text-xs text-muted-foreground mb-3">{a.role}</p>
-                <p className="text-sm text-foreground leading-relaxed italic flex-1">"{a.phrase}"</p>
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {agentesDestaque.map((agent) => (
+            <Reveal key={agent.id}>
+              <div className="bg-white rounded-2xl p-6 border border-border shadow-subtle h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
+                <AgentAvatar name={agent.nome} foto={agent.foto} size={80} />
+                <h3 className="font-display text-[24px] text-foreground mt-5 mb-2">{agent.nome}</h3>
+                <p className="text-[11px] uppercase tracking-[2px] text-sage-light mb-3">{agent.role}</p>
+                <p className="text-sm text-sage-mid leading-relaxed italic">{agent.frase}</p>
               </div>
             </Reveal>
           ))}
         </div>
 
         <Reveal>
-          <p className="text-center">
-            <button onClick={() => scrollTo("precos")} className="text-sm font-medium hover:underline text-sage-mid">
-              Ver todos os 26 agentes da trilha →
+          <div className="text-center mt-10">
+            <button
+              onClick={() => setExpanded((value) => !value)}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-pill border border-gold text-foreground text-sm font-medium hover:bg-gold/10 transition-colors"
+            >
+              {expanded ? "Fechar ↑" : "Ver todos os 26 agentes ↓"}
             </button>
-          </p>
+          </div>
         </Reveal>
+
+        <div
+          className="overflow-hidden transition-all duration-500 ease-in-out"
+          style={{ maxHeight: expanded ? "2200px" : "0px" }}
+        >
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-8">
+            {outrosAgentes.map((agent) => (
+              <div key={agent.id} className="bg-white rounded-2xl p-4 border border-border shadow-subtle flex items-center gap-4">
+                <AgentAvatar name={agent.nome} foto={agent.foto} size={60} />
+                <div className="min-w-0">
+                  <h3 className="font-display text-[22px] text-foreground leading-none mb-1">{agent.nome}</h3>
+                  <p className="text-xs text-sage-light leading-snug">{agent.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
