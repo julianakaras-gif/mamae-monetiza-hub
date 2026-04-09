@@ -63,6 +63,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ProjectProvider>
+          <AgentProgressProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route
@@ -92,6 +93,7 @@ const App = () => (
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </AgentProgressProvider>
           </ProjectProvider>
         </AuthProvider>
       </BrowserRouter>
