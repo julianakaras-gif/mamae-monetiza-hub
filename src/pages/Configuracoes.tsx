@@ -148,7 +148,7 @@ const Configuracoes = () => {
     setShowCancel(false);
   }
 
-  const planLabel = profile?.subscription_plan || "Mensal";
+  const planLabel = (profile as any)?.subscription_plan || "Mensal";
   const isActive = profile?.subscription_status === "active";
 
   const cardStyle = "bg-white rounded-2xl p-7 mb-5";
