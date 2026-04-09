@@ -45,7 +45,6 @@ const ProjectSelector = ({ open, onSelect, onClose }: ProjectSelectorProps) => {
       .order("updated_at", { ascending: false });
 
     if (data) {
-      // Get session counts
       const projectIds = data.map((p) => p.id);
       const counts: Record<string, number> = {};
       if (projectIds.length > 0) {
@@ -82,7 +81,7 @@ const ProjectSelector = ({ open, onSelect, onClose }: ProjectSelectorProps) => {
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-georgia">Para qual projeto é essa conversa?</DialogTitle>
+          <DialogTitle className="font-display">Para qual projeto é essa conversa?</DialogTitle>
           <DialogDescription>
             Assim suas conversas ficam organizadas e salvas por negócio.
           </DialogDescription>
@@ -120,7 +119,7 @@ const ProjectSelector = ({ open, onSelect, onClose }: ProjectSelectorProps) => {
           <button
             onClick={handleCreate}
             disabled={!newName.trim() || creating}
-            className="px-3 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50"
+            className="px-3 py-2 rounded-xl bg-sage-dark text-white text-sm font-medium disabled:opacity-50"
           >
             <Plus size={16} />
           </button>

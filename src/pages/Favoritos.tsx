@@ -21,17 +21,17 @@ const Favoritos = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
-      <h1 className="font-georgia text-xl md:text-2xl font-bold text-foreground mb-1">Favoritos</h1>
+      <h1 className="font-display text-xl md:text-2xl text-foreground mb-1">Favoritos</h1>
       <p className="text-muted-foreground text-sm mb-6">
         Seus agentes favoritos, agrupados por fase.
       </p>
 
       {grouped.length === 0 ? (
         <div className="text-center py-16">
-          <div className="w-16 h-16 rounded-full bg-secondary/15 flex items-center justify-center mx-auto mb-4">
-            <Star size={28} className="text-secondary" />
+          <div className="w-16 h-16 rounded-full bg-gold/15 flex items-center justify-center mx-auto mb-4">
+            <Star size={28} className="text-gold" />
           </div>
-          <p className="font-georgia font-bold text-sm text-foreground mb-2">
+          <p className="font-display text-sm text-foreground mb-2">
             Você ainda não tem favoritos
           </p>
           <p className="text-muted-foreground text-xs max-w-xs mx-auto">
@@ -44,7 +44,7 @@ const Favoritos = () => {
             <div key={phase.id}>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-base">{phase.emoji}</span>
-                <span className="font-georgia font-bold text-sm text-foreground">
+                <span className="font-display text-sm text-foreground">
                   {phase.name}
                 </span>
               </div>

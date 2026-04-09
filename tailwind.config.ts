@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        raleway: ["Raleway", "sans-serif"],
-        georgia: ["Georgia", "'Times New Roman'", "serif"],
+        display: ["Italiana", "serif"],
+        sans: ["Instrument Sans", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,18 +61,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        cinza: {
-          DEFAULT: "hsl(var(--cinza))",
-          light: "hsl(var(--cinza-light))",
+        "sage-dark": "#1C3C2C",
+        "sage-mid": "#3A5C46",
+        "sage-light": "#6E9876",
+        "sage-pale": "#B6D0BE",
+        gold: {
+          DEFAULT: "#C6A86C",
+          light: "#DEC888",
         },
-        ciano: "hsl(var(--ciano))",
-        rosa: "hsl(var(--rosa))",
-        amarelo: {
-          DEFAULT: "hsl(var(--amarelo))",
-          dark: "hsl(var(--amarelo-dark))",
+        ivory: {
+          DEFAULT: "#F5F1E9",
+          dark: "#EDE5D2",
         },
-        bege: "hsl(var(--bege))",
-        borda: "hsl(var(--borda))",
+        "warm-brown": "#7A5535",
       },
       borderRadius: {
         lg: "var(--radius)",

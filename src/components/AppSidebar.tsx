@@ -12,8 +12,8 @@ const menuItems = [
 ];
 
 const quickAgents = [
-  { name: "Maia", initial: "M", color: "bg-ciano" },
-  { name: "Liora", initial: "L", color: "bg-rosa" },
+  { name: "Maia", initial: "M", color: "bg-gold" },
+  { name: "Liora", initial: "L", color: "bg-sage-light" },
 ];
 
 const AppSidebar = () => {
@@ -25,15 +25,15 @@ const AppSidebar = () => {
   const userName = profile?.name || "Aluna";
 
   return (
-    <aside className="w-[218px] min-h-screen flex flex-col bg-sidebar text-sidebar-foreground shrink-0">
+    <aside className="w-[218px] min-h-screen flex flex-col shrink-0" style={{ backgroundColor: "#1C3C2C", color: "#fff" }}>
       {/* Logo */}
       <div className="pt-6 pb-6 flex justify-center">
-        <Logo size={52} light />
+        <Logo size={32} light />
       </div>
 
       {/* Menu section */}
       <div className="px-4 mb-2">
-        <p className="text-[10px] uppercase tracking-widest opacity-40 mb-3 pl-2 font-raleway">
+        <p className="text-[10px] uppercase tracking-widest opacity-40 mb-3 pl-2">
           Menu
         </p>
         <nav className="space-y-1">
@@ -52,7 +52,7 @@ const AppSidebar = () => {
                 <item.icon size={18} />
                 <span>{item.title}</span>
                 {isActive && (
-                  <span className="absolute right-3 w-2 h-2 rounded-full bg-ciano" />
+                  <span className="absolute right-3 w-2 h-2 rounded-full bg-gold" />
                 )}
               </NavLink>
             );
@@ -65,7 +65,7 @@ const AppSidebar = () => {
 
       {/* Quick agents */}
       <div className="px-4 mb-4">
-        <p className="text-[10px] uppercase tracking-widest opacity-40 mb-3 pl-2 font-raleway">
+        <p className="text-[10px] uppercase tracking-widest opacity-40 mb-3 pl-2">
           Sempre disponíveis
         </p>
         <div className="space-y-2">
@@ -76,7 +76,7 @@ const AppSidebar = () => {
               className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm hover:bg-[rgba(255,255,255,0.07)] transition-colors"
             >
               <div
-                className={`w-7 h-7 rounded-full ${agent.color} flex items-center justify-center text-xs font-bold text-primary-foreground`}
+                className={`w-7 h-7 rounded-full ${agent.color} flex items-center justify-center text-xs font-bold text-white`}
               >
                 {agent.initial}
               </div>
@@ -92,7 +92,7 @@ const AppSidebar = () => {
       {/* Progress */}
       <div className="px-4 mb-4">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] uppercase tracking-widest opacity-40 font-raleway">
+          <p className="text-[10px] uppercase tracking-widest opacity-40">
             Progresso geral
           </p>
           <span className="text-xs font-bold">{progressPercent}%</span>
@@ -102,7 +102,7 @@ const AppSidebar = () => {
             className="h-full rounded-full transition-all"
             style={{
               width: `${progressPercent}%`,
-              background: "linear-gradient(90deg, #29a6ab, #df437d)",
+              background: "linear-gradient(90deg, #6E9876, #C6A86C)",
             }}
           />
         </div>
@@ -111,7 +111,7 @@ const AppSidebar = () => {
       {/* User card */}
       <div className="px-4 pb-4">
         <div className="flex items-center gap-3 p-3 rounded-xl bg-[rgba(255,255,255,0.07)]">
-          <div className="w-9 h-9 rounded-full bg-rosa flex items-center justify-center text-sm font-bold text-primary-foreground shrink-0">
+          <div className="w-9 h-9 rounded-full bg-gold flex items-center justify-center text-sm font-bold text-sage-dark shrink-0">
             {userInitial}
           </div>
           <div className="min-w-0 flex-1">

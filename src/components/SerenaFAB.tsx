@@ -8,7 +8,6 @@ const SerenaFAB = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Hide when already chatting with Serena
   if (location.pathname === "/chat/serena") return null;
 
   return (
@@ -16,7 +15,7 @@ const SerenaFAB = () => {
       {showTooltip && (
         <div className="bg-card border shadow-lg rounded-xl p-3 max-w-[220px] animate-fade-in">
           <div className="flex items-center justify-between mb-1">
-            <span className="font-georgia font-bold text-sm text-foreground">Serena</span>
+            <span className="font-display text-sm text-foreground">Serena</span>
             <button onClick={() => setShowTooltip(false)} className="text-muted-foreground hover:text-foreground">
               <X size={14} />
             </button>
@@ -24,8 +23,7 @@ const SerenaFAB = () => {
           <p className="text-xs text-muted-foreground mb-2">{SERENA.role}</p>
           <button
             onClick={() => { navigate(`/chat/${SERENA.id}`); setShowTooltip(false); }}
-            className="w-full text-xs font-semibold py-1.5 rounded-lg text-accent-foreground"
-            style={{ background: "hsl(var(--rosa))" }}
+            className="w-full text-xs font-semibold py-1.5 rounded-lg text-white bg-sage-mid"
           >
             Conversar com Serena
           </button>
@@ -36,10 +34,10 @@ const SerenaFAB = () => {
         onClick={() => setShowTooltip((v) => !v)}
         className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl transition-transform hover:scale-105 active:scale-95"
         style={{
-          background: "linear-gradient(135deg, #df437d, #c4366a)",
-          boxShadow: "0 4px 20px rgba(223, 67, 125, 0.4)",
+          background: "linear-gradient(135deg, #3A5C46, #1C3C2C)",
+          boxShadow: "0 4px 20px rgba(28, 60, 44, 0.4)",
         }}
-        title="Serena — Suporte emocional"
+        title="Serena"
       >
         💛
       </button>

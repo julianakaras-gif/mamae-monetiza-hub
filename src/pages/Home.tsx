@@ -32,7 +32,7 @@ const Home = () => {
   return (
     <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
       {/* Welcome */}
-      <h1 className="font-georgia text-xl md:text-2xl font-bold text-foreground mb-1">
+      <h1 className="font-display text-xl md:text-2xl text-foreground mb-1">
         {getGreeting()}, {name}! 👋
       </h1>
       <p className="text-muted-foreground text-sm mb-6 md:mb-8">
@@ -41,14 +41,14 @@ const Home = () => {
 
       {/* First visit card */}
       {isFirstVisit && (
-        <Card className="mb-6 border-0 shadow-md overflow-hidden bg-gradient-to-r from-[hsl(var(--ciano))]/10 to-[hsl(var(--rosa))]/10">
+        <Card className="mb-6 border-0 shadow-md overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(182,208,190,0.15), rgba(198,168,108,0.15))" }}>
           <CardContent className="p-5 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-rosa/15 flex items-center justify-center shrink-0">
-              <Sparkles size={22} className="text-rosa" />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(198,168,108,0.15)" }}>
+              <Sparkles size={22} className="text-gold" />
             </div>
             <div>
-              <p className="font-georgia font-bold text-sm text-foreground mb-1">
-                Bem-vinda ao Método Mamãe Monetiza! 🎉
+              <p className="font-display text-sm text-foreground mb-1">
+                Bem-vinda ao Prospera! 🎉
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Sua jornada começa com a Clara, que vai te ajudar a descobrir o negócio perfeito para você. Cada agente desbloqueará o próximo passo da sua trilha.
@@ -73,17 +73,16 @@ const Home = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground mb-0.5">Próximo passo</p>
-              <p className="font-georgia font-bold text-sm text-foreground">
-                {next.agent.name} — {next.agent.role}
+              <p className="font-display text-sm text-foreground">
+                {next.agent.name}: {next.agent.role}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 hidden sm:block">{next.agent.desc}</p>
             </div>
             <button
               onClick={() => navigate(`/chat/${next.agent.id}`)}
-              className="px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-semibold text-accent-foreground shrink-0 transition-all"
+              className="px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-semibold text-white shrink-0 transition-all bg-sage-mid"
               style={{
-                background: "hsl(var(--rosa))",
-                boxShadow: "0 0 20px hsl(var(--rosa) / 0.4)",
+                boxShadow: "0 0 20px rgba(58,92,70,0.4)",
               }}
               aria-label={`Começar conversa com ${next.agent.name}`}
             >
@@ -111,7 +110,7 @@ const Home = () => {
                 {phase.emoji}
               </div>
               <div className="min-w-0">
-                <p className="font-georgia font-bold text-xs text-foreground">{phase.name}</p>
+                <p className="font-display text-xs text-foreground">{phase.name}</p>
                 <p className="text-[11px] text-muted-foreground">
                   {done}/{total} agentes
                 </p>

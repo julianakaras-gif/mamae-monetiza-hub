@@ -25,7 +25,7 @@ export const PHASES: Phase[] = [
     name: 'Descoberta',
     sub: 'Encontre seu negócio autêntico',
     emoji: '🌱',
-    color: '#df437d',
+    color: '#7A5535',
     sequential: true,
     agents: [
       {
@@ -59,7 +59,7 @@ export const PHASES: Phase[] = [
     name: 'Estratégia',
     sub: 'Plano, marca e ecossistema de produtos',
     emoji: '🎯',
-    color: '#29a6ab',
+    color: '#3A5C46',
     sequential: true,
     agents: [
       {
@@ -86,7 +86,7 @@ export const PHASES: Phase[] = [
     name: 'Produto',
     sub: 'Crie seus produtos digitais e sua comunidade',
     emoji: '📦',
-    color: '#4a5759',
+    color: '#1C3C2C',
     freeAgents: true,
     agents: [
       { id: 'lira', name: 'Lira', role: 'Especialista em Ebooks', desc: 'Cria ebooks e iscas digitais para cada posição do funil com estrutura pedagógica real. Entrega arquitetura completa, roteiro, workbook e checklists.', context: ['talia'], welcome: 'Olá! Eu sou a Lira 📚\n\nA Talia já definiu o ecossistema de produtos. Vou pegar o ebook ou isca digital do seu ecossistema e transformar em estrutura pedagógica real.\n\n**Qual produto do ecossistema você quer criar primeiro como ebook?**' },
@@ -101,7 +101,7 @@ export const PHASES: Phase[] = [
     name: 'Conteúdo',
     sub: 'Crie conteúdo que atrai, engaja e converte',
     emoji: '✨',
-    color: '#c49a30',
+    color: '#C6A86C',
     freeAgents: true,
     agents: [
       { id: 'kaia', name: 'Kaia', role: 'Estrategista de Conteúdo Autêntico', desc: 'Constrói posicionamento corajoso e específico. Entrega manifesto da marca, 3 a 5 pilares de conteúdo honestos e 10 posts autênticos.', context: ['alice', 'clara'], welcome: 'Olá! Eu sou a Kaia 📣\n\nRecebi a identidade de marca que a Alice construiu com você. Agora vou criar um posicionamento de conteúdo corajoso e específico.\n\nConteúdo genérico não constrói negócio. **Qual é a crença que você tem sobre o seu nicho que a maioria ainda não percebeu?**' },
@@ -119,7 +119,7 @@ export const PHASES: Phase[] = [
     name: 'Vendas',
     sub: 'Monte sua máquina de vendas',
     emoji: '💰',
-    color: '#df437d',
+    color: '#6E9876',
     freeAgents: true,
     agents: [
       { id: 'petra', name: 'Petra', role: 'Especialista em Sales Pages', desc: 'Cria páginas de vendas usando o framework de níveis de consciência de Eugene Schwartz.', context: ['talia', 'alma', 'alice'], welcome: 'Olá! Eu sou a Petra 📝\n\nTenho o ecossistema de produtos, o copy da Alma e a identidade da Alice. Página que converte não é sobre design bonito: é sobre falar a coisa certa para a pessoa certa no momento certo.\n\n**Para qual produto você quer criar a página de vendas primeiro?**' },
@@ -136,11 +136,10 @@ export const SERENA = {
   id: 'serena',
   name: 'Serena',
   role: 'Desbloqueadora de Potencial',
-  color: '#df437d',
+  color: '#6E9876',
   welcome: 'Olá! Eu sou a Serena 💛\n\nEstou aqui para quando a jornada parecer pesada demais. Síndrome do impostor, medo de falhar, bloqueio criativo, sobrecarga emocional: traga pra cá. Juntas a gente desbloqueia o que está te impedindo de avançar.\n\n**O que você está sentindo agora?**',
 };
 
-// Helper to find an agent by ID across all phases
 export function findAgent(agentId: string): { agent: Agent; phase: Phase } | null {
   for (const phase of PHASES) {
     const agent = phase.agents.find((a) => a.id === agentId);
@@ -149,7 +148,6 @@ export function findAgent(agentId: string): { agent: Agent; phase: Phase } | nul
   return null;
 }
 
-// Get all agent IDs
 export function getAllAgentIds(): string[] {
   return PHASES.flatMap((p) => p.agents.map((a) => a.id));
 }

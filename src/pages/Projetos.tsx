@@ -83,10 +83,9 @@ const Projetos = () => {
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto animate-fade-in">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-georgia text-2xl font-bold text-foreground">Meus Projetos</h1>
+        <h1 className="font-display text-2xl text-foreground">Meus Projetos</h1>
       </div>
 
-      {/* Create new */}
       <div className="flex gap-2 mb-8">
         <input
           value={newName}
@@ -98,7 +97,7 @@ const Projetos = () => {
         <button
           onClick={handleCreate}
           disabled={!newName.trim() || creating}
-          className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+          className="px-4 py-2.5 rounded-xl bg-sage-dark text-white text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
         >
           <Plus size={16} />
           Novo Projeto
@@ -132,7 +131,7 @@ const Projetos = () => {
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${pct}%`,
-                      background: "linear-gradient(90deg, #29a6ab, #df437d)",
+                      background: "linear-gradient(90deg, #6E9876, #C6A86C)",
                     }}
                   />
                 </div>

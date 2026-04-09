@@ -12,14 +12,13 @@ const navItems = [
 const BottomNav = () => {
   const location = useLocation();
 
-  // Hide in chat views
   if (location.pathname.startsWith("/chat/")) return null;
 
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden flex items-center justify-around border-t"
       style={{
-        backgroundColor: "hsl(186 11% 31%)",
+        backgroundColor: "#1C3C2C",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
@@ -32,7 +31,7 @@ const BottomNav = () => {
             className={`flex flex-col items-center gap-1 py-2.5 px-4 rounded-xl text-[11px] font-medium transition-colors ${
               isActive ? "bg-[rgba(255,255,255,0.15)]" : ""
             }`}
-            style={{ color: isActive ? "hsl(181 56% 41%)" : "rgba(255,255,255,0.7)" }}
+            style={{ color: isActive ? "#C6A86C" : "rgba(255,255,255,0.7)" }}
           >
             <item.icon size={20} />
             <span>{item.title}</span>
@@ -45,7 +44,7 @@ const BottomNav = () => {
           location.pathname === `/chat/${SERENA.id}` ? "bg-[rgba(255,255,255,0.15)]" : ""
         }`}
         style={{
-          color: location.pathname === `/chat/${SERENA.id}` ? "hsl(340 68% 57%)" : "rgba(255,255,255,0.7)",
+          color: location.pathname === `/chat/${SERENA.id}` ? "#C6A86C" : "rgba(255,255,255,0.7)",
         }}
       >
         <span className="text-lg leading-none">💛</span>
