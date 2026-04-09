@@ -135,28 +135,49 @@ export type Database = {
       }
       profiles: {
         Row: {
+          company_name: string | null
           created_at: string
           email: string | null
           hotmart_purchase_id: string | null
           id: string
+          instagram_handle: string | null
           name: string | null
+          niche: string | null
+          phone: string | null
+          subscription_plan: string | null
           subscription_status: string
+          target_audience: string | null
+          updated_at: string | null
         }
         Insert: {
+          company_name?: string | null
           created_at?: string
           email?: string | null
           hotmart_purchase_id?: string | null
           id: string
+          instagram_handle?: string | null
           name?: string | null
+          niche?: string | null
+          phone?: string | null
+          subscription_plan?: string | null
           subscription_status?: string
+          target_audience?: string | null
+          updated_at?: string | null
         }
         Update: {
+          company_name?: string | null
           created_at?: string
           email?: string | null
           hotmart_purchase_id?: string | null
           id?: string
+          instagram_handle?: string | null
           name?: string | null
+          niche?: string | null
+          phone?: string | null
+          subscription_plan?: string | null
           subscription_status?: string
+          target_audience?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -165,7 +186,10 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          is_active: boolean | null
           name: string
+          niche: string | null
+          target_audience: string | null
           updated_at: string | null
           user_id: string
         }
@@ -173,7 +197,10 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_active?: boolean | null
           name: string
+          niche?: string | null
+          target_audience?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -181,7 +208,10 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_active?: boolean | null
           name?: string
+          niche?: string | null
+          target_audience?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -222,6 +252,7 @@ export type Database = {
           completed: boolean
           completed_at: string | null
           id: string
+          project_id: string | null
           user_id: string
         }
         Insert: {
@@ -229,6 +260,7 @@ export type Database = {
           completed?: boolean
           completed_at?: string | null
           id?: string
+          project_id?: string | null
           user_id: string
         }
         Update: {
@@ -236,9 +268,17 @@ export type Database = {
           completed?: boolean
           completed_at?: string | null
           id?: string
+          project_id?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_progress_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_progress_user_id_fkey"
             columns: ["user_id"]
