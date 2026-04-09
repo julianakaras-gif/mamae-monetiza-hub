@@ -4,7 +4,7 @@ import { ArrowLeft, Send, Star, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
-import { findAgent, SERENA, PHASES } from "@/data/agents";
+import { findAgent, SERENA } from "@/data/agents";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import ChatMessageContent from "@/components/ChatMessage";
@@ -27,6 +27,13 @@ const Chat = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     searchParams.get("project")
   );
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+  const [projectResolved, setProjectResolved] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -62,6 +69,21 @@ const Chat = () => {
   const totalMessages = messages.length;
   const canComplete = totalMessages >= 4 && !isSerena;
 
+  // Show project selector if no project selected and not Serena
+  useEffect(() => {
+    if (!isSerena && !selectedProjectId && !projectResolved) {
+      setShowProjectSelector(true);
+    } else {
+      setProjectResolved(true);
+    }
+  }, [isSerena, selectedProjectId, projectResolved]);
+
+  const handleProjectSelect = (projectId: string | null) => {
+    setSelectedProjectId(projectId);
+    setShowProjectSelector(false);
+    setProjectResolved(true);
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -74,12 +96,13 @@ const Chat = () => {
   }, [input]);
 
   useEffect(() => {
-    if (!user || !agentId || !agent) return;
+    if (!user || !agentId || !agent || !projectResolved) return;
 
     const init = async () => {
       setInitializing(true);
 
-      const { data: existingSessions } = await supabase
+      // Build query for existing sessions
+      let query = supabase
         .from("agent_sessions")
         .select("id")
         .eq("user_id", user.id)
@@ -87,6 +110,12 @@ const Chat = () => {
         .eq("status", "active")
         .order("started_at", { ascending: false })
         .limit(1);
+
+      if (selectedProjectId) {
+        query = query.eq("project_id", selectedProjectId);
+      }
+
+      const { data: existingSessions } = await query;
 
       let sid: string;
 
@@ -110,9 +139,12 @@ const Chat = () => {
           setMessages([{ role: "assistant", content: agent.welcome }]);
         }
       } else {
+        const insertData: any = { user_id: user.id, agent_id: agentId };
+        if (selectedProjectId) insertData.project_id = selectedProjectId;
+
         const { data: newSession, error } = await supabase
           .from("agent_sessions")
-          .insert({ user_id: user.id, agent_id: agentId })
+          .insert(insertData)
           .select("id")
           .single();
 
@@ -138,7 +170,7 @@ const Chat = () => {
     };
 
     init();
-  }, [user, agentId]);
+  }, [user, agentId, projectResolved, selectedProjectId]);
 
   const sendMessage = useCallback(async () => {
     if (!input.trim() || !sessionId || isStreaming || !agent) return;
@@ -286,7 +318,7 @@ const Chat = () => {
     );
   }
 
-  if (initializing) {
+  if (initializing && projectResolved) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -295,167 +327,173 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] md:h-[calc(100vh)] bg-background">
-      {/* Header */}
-      <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 border-b bg-card shrink-0">
-        <button
-          onClick={() => navigate(`/trilha?phase=${phase.id}`)}
-          className="p-1.5 rounded-lg hover:bg-muted transition-colors"
-          aria-label="Voltar para a trilha"
-        >
-          <ArrowLeft size={18} className="text-foreground" />
-        </button>
+    <>
+      <ProjectSelector
+        open={showProjectSelector}
+        onSelect={handleProjectSelect}
+        onClose={() => handleProjectSelect(null)}
+      />
 
-        <div
-          className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
-          style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
-        >
-          {agent.name.charAt(0)}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-georgia font-bold text-sm text-foreground">
-              {agent.name}
-            </span>
-            <Badge
-              className="text-[10px] px-2 py-0 border-0 hidden sm:inline-flex"
-              style={{ backgroundColor: `${phase.color}20`, color: phase.color }}
-            >
-              {phase.emoji} {phase.name}
-            </Badge>
-          </div>
-          <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
-        </div>
-
-        {/* Mobile: complete button in header */}
-        {canComplete && (
+      <div className="flex flex-col h-[100dvh] md:h-[calc(100vh)] bg-background">
+        {/* Header */}
+        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 border-b bg-card shrink-0">
           <button
-            onClick={handleComplete}
-            disabled={isCompleting || isStreaming}
-            className="md:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-lg border-2 border-primary text-primary text-xs font-semibold bg-card disabled:opacity-50"
-            aria-label="Concluir esta etapa"
+            onClick={() => navigate(`/trilha?phase=${phase.id}`)}
+            className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+            aria-label="Voltar para a trilha"
           >
-            <CheckCircle2 size={14} />
-            <span className="hidden xs:inline">Concluir</span>
+            <ArrowLeft size={18} className="text-foreground" />
           </button>
-        )}
 
-        {!isSerena && (
-          <button
-            onClick={() => agentId && toggleFavorite(agentId)}
-            className="p-1.5"
-            aria-label={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-          >
-            <Star
-              size={18}
-              className={
-                isFav
-                  ? "fill-secondary text-secondary"
-                  : "text-muted-foreground/40 hover:text-secondary"
-              }
-            />
-          </button>
-        )}
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-3 md:px-4 py-4 space-y-4">
-        {messages.map((msg, i) => (
           <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
+            className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
+            style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
           >
-            {msg.role === "assistant" && (
+            {agent.name.charAt(0)}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-georgia font-bold text-sm text-foreground">
+                {agent.name}
+              </span>
+              <Badge
+                className="text-[10px] px-2 py-0 border-0 hidden sm:inline-flex"
+                style={{ backgroundColor: `${phase.color}20`, color: phase.color }}
+              >
+                {phase.emoji} {phase.name}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
+          </div>
+
+          {canComplete && (
+            <button
+              onClick={handleComplete}
+              disabled={isCompleting || isStreaming}
+              className="md:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-lg border-2 border-primary text-primary text-xs font-semibold bg-card disabled:opacity-50"
+              aria-label="Concluir esta etapa"
+            >
+              <CheckCircle2 size={14} />
+              <span className="hidden xs:inline">Concluir</span>
+            </button>
+          )}
+
+          {!isSerena && (
+            <button
+              onClick={() => agentId && toggleFavorite(agentId)}
+              className="p-1.5"
+              aria-label={isFav ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            >
+              <Star
+                size={18}
+                className={
+                  isFav
+                    ? "fill-secondary text-secondary"
+                    : "text-muted-foreground/40 hover:text-secondary"
+                }
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-4 space-y-4">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
+            >
+              {msg.role === "assistant" && (
+                <div
+                  className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 mr-2 mt-1"
+                  style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+                >
+                  {agent.name.charAt(0)}
+                </div>
+              )}
+              <div
+                className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-3.5 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed ${
+                  msg.role === "user"
+                    ? "rounded-br-md text-accent-foreground"
+                    : "rounded-bl-md bg-card border-l-[3px]"
+                }`}
+                style={
+                  msg.role === "user"
+                    ? { backgroundColor: phase.color }
+                    : { borderLeftColor: phase.color }
+                }
+              >
+                <ChatMessageContent content={msg.content} role={msg.role} />
+              </div>
+            </div>
+          ))}
+
+          {isStreaming && messages[messages.length - 1]?.role !== "assistant" && (
+            <div className="flex justify-start">
               <div
                 className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 mr-2 mt-1"
                 style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
               >
                 {agent.name.charAt(0)}
               </div>
-            )}
-            <div
-              className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-3.5 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed ${
-                msg.role === "user"
-                  ? "rounded-br-md text-accent-foreground"
-                  : "rounded-bl-md bg-card border-l-[3px]"
-              }`}
-              style={
-                msg.role === "user"
-                  ? { backgroundColor: phase.color }
-                  : { borderLeftColor: phase.color }
-              }
-            >
-              <div dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
-            </div>
-          </div>
-        ))}
-
-        {isStreaming && messages[messages.length - 1]?.role !== "assistant" && (
-          <div className="flex justify-start">
-            <div
-              className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 mr-2 mt-1"
-              style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
-            >
-              {agent.name.charAt(0)}
-            </div>
-            <div
-              className="bg-card border-l-[3px] rounded-2xl rounded-bl-md px-4 py-3"
-              style={{ borderLeftColor: phase.color }}
-            >
-              <div className="flex gap-1">
-                <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+              <div
+                className="bg-card border-l-[3px] rounded-2xl rounded-bl-md px-4 py-3"
+                style={{ borderLeftColor: phase.color }}
+              >
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
               </div>
             </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Footer */}
+        <div
+          className="border-t bg-card px-3 md:px-4 py-2.5 md:py-3 shrink-0"
+          style={{ paddingBottom: "max(0.625rem, env(safe-area-inset-bottom))" }}
+        >
+          {canComplete && (
+            <button
+              onClick={handleComplete}
+              disabled={isCompleting || isStreaming}
+              className="hidden md:flex w-full mb-3 items-center justify-center gap-2 py-2 rounded-xl border-2 border-primary text-primary text-sm font-semibold bg-card hover:bg-primary/5 transition-colors disabled:opacity-50"
+              aria-label="Concluir esta etapa"
+            >
+              <CheckCircle2 size={16} />
+              {isCompleting ? "Concluindo..." : "Concluir esta etapa"}
+            </button>
+          )}
+
+          <div className="flex items-end gap-2">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Digite sua mensagem..."
+              rows={1}
+              className="flex-1 resize-none rounded-xl border bg-background px-3 md:px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              disabled={isStreaming}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || isStreaming}
+              className="p-2.5 rounded-xl text-accent-foreground transition-colors disabled:opacity-30"
+              style={{ backgroundColor: phase.color }}
+              aria-label="Enviar mensagem"
+            >
+              <Send size={18} />
+            </button>
           </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Footer */}
-      <div
-        className="border-t bg-card px-3 md:px-4 py-2.5 md:py-3 shrink-0"
-        style={{ paddingBottom: "max(0.625rem, env(safe-area-inset-bottom))" }}
-      >
-        {/* Desktop: complete button in footer */}
-        {canComplete && (
-          <button
-            onClick={handleComplete}
-            disabled={isCompleting || isStreaming}
-            className="hidden md:flex w-full mb-3 items-center justify-center gap-2 py-2 rounded-xl border-2 border-primary text-primary text-sm font-semibold bg-card hover:bg-primary/5 transition-colors disabled:opacity-50"
-            aria-label="Concluir esta etapa"
-          >
-            <CheckCircle2 size={16} />
-            {isCompleting ? "Concluindo..." : "Concluir esta etapa"}
-          </button>
-        )}
-
-        <div className="flex items-end gap-2">
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Digite sua mensagem..."
-            rows={1}
-            className="flex-1 resize-none rounded-xl border bg-background px-3 md:px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            disabled={isStreaming}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || isStreaming}
-            className="p-2.5 rounded-xl text-accent-foreground transition-colors disabled:opacity-30"
-            style={{ backgroundColor: phase.color }}
-            aria-label="Enviar mensagem"
-          >
-            <Send size={18} />
-          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
