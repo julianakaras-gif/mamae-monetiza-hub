@@ -18,8 +18,8 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
   const isLocked = status === "locked";
   const isCompleted = status === "completed";
 
-  const borderColor = isLocked ? "#e4ddd5" : phaseColor;
-  const avatarBg = isLocked ? "rgba(228, 221, 213, 0.15)" : `${phaseColor}15`;
+  const borderColor = isLocked ? "#E2D9C8" : phaseColor;
+  const avatarBg = isLocked ? "rgba(226, 217, 200, 0.15)" : `${phaseColor}15`;
   const avatarColor = isLocked ? "#b0a89f" : phaseColor;
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
@@ -45,7 +45,6 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
       aria-label={`${isLocked ? "Bloqueado: " : ""}${agent.name} - ${agent.role}`}
       aria-disabled={isLocked}
     >
-      {/* Avatar */}
       <div
         className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
         style={{ backgroundColor: avatarBg, color: avatarColor }}
@@ -53,14 +52,12 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
         {agent.name.charAt(0)}
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="font-georgia text-sm font-bold text-foreground">{agent.name}</p>
+        <p className="font-display text-sm text-foreground">{agent.name}</p>
         <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 hidden sm:block">{agent.desc}</p>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-2 shrink-0">
         {!isLocked && (
           <button
@@ -70,13 +67,13 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
           >
             <Star
               size={16}
-              className={isFavorite ? "fill-secondary text-secondary" : "text-muted-foreground/40 hover:text-secondary"}
+              className={isFavorite ? "fill-gold text-gold" : "text-muted-foreground/40 hover:text-gold"}
             />
           </button>
         )}
 
         {isLocked && <Lock size={16} className="text-muted-foreground/50" />}
-        {isCompleted && <CheckCircle2 size={16} className="text-primary fill-primary/20" />}
+        {isCompleted && <CheckCircle2 size={16} className="text-sage-mid fill-sage-pale" />}
         {status === "unlocked" && <ChevronRight size={16} className="text-muted-foreground" />}
       </div>
     </div>

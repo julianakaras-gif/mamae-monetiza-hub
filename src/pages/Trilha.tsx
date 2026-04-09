@@ -31,7 +31,7 @@ const Trilha = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
-      <h1 className="font-georgia text-xl md:text-2xl font-bold text-foreground mb-1">Trilha</h1>
+      <h1 className="font-display text-xl md:text-2xl text-foreground mb-1">Trilha</h1>
       <p className="text-muted-foreground text-sm mb-6">
         Sua jornada com os agentes de IA, fase por fase.
       </p>
@@ -46,7 +46,7 @@ const Trilha = () => {
 
           const badgeColor =
             status === "completed"
-              ? "hsl(var(--ciano))"
+              ? "#3A5C46"
               : status === "locked"
               ? "hsl(var(--muted-foreground))"
               : phase.color;
@@ -68,7 +68,7 @@ const Trilha = () => {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-georgia font-bold text-sm text-foreground">
+                    <span className="font-display text-sm text-foreground">
                       {phase.name}
                     </span>
                     <Badge

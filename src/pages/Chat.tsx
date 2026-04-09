@@ -69,7 +69,6 @@ const Chat = () => {
   const totalMessages = messages.length;
   const canComplete = totalMessages >= 4 && !isSerena;
 
-  // Show project selector if no project selected and not Serena
   useEffect(() => {
     if (!isSerena && !selectedProjectId && !projectResolved) {
       setShowProjectSelector(true);
@@ -101,7 +100,6 @@ const Chat = () => {
     const init = async () => {
       setInitializing(true);
 
-      // Build query for existing sessions
       let query = supabase
         .from("agent_sessions")
         .select("id")
@@ -354,7 +352,7 @@ const Chat = () => {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-georgia font-bold text-sm text-foreground">
+              <span className="font-display text-sm text-foreground">
                 {agent.name}
               </span>
               <Badge
@@ -371,7 +369,7 @@ const Chat = () => {
             <button
               onClick={handleComplete}
               disabled={isCompleting || isStreaming}
-              className="md:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-lg border-2 border-primary text-primary text-xs font-semibold bg-card disabled:opacity-50"
+              className="md:hidden flex items-center gap-1 px-2.5 py-1.5 rounded-lg border-2 border-sage-mid text-sage-mid text-xs font-semibold bg-card disabled:opacity-50"
               aria-label="Concluir esta etapa"
             >
               <CheckCircle2 size={14} />
@@ -389,8 +387,8 @@ const Chat = () => {
                 size={18}
                 className={
                   isFav
-                    ? "fill-secondary text-secondary"
-                    : "text-muted-foreground/40 hover:text-secondary"
+                    ? "fill-gold text-gold"
+                    : "text-muted-foreground/40 hover:text-gold"
                 }
               />
             </button>
@@ -415,7 +413,7 @@ const Chat = () => {
               <div
                 className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-3.5 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed ${
                   msg.role === "user"
-                    ? "rounded-br-md text-accent-foreground"
+                    ? "rounded-br-md text-white"
                     : "rounded-bl-md bg-card border-l-[3px]"
                 }`}
                 style={
@@ -462,7 +460,7 @@ const Chat = () => {
             <button
               onClick={handleComplete}
               disabled={isCompleting || isStreaming}
-              className="hidden md:flex w-full mb-3 items-center justify-center gap-2 py-2 rounded-xl border-2 border-primary text-primary text-sm font-semibold bg-card hover:bg-primary/5 transition-colors disabled:opacity-50"
+              className="hidden md:flex w-full mb-3 items-center justify-center gap-2 py-2 rounded-xl border-2 border-sage-mid text-sage-mid text-sm font-semibold bg-card hover:bg-sage-pale/20 transition-colors disabled:opacity-50"
               aria-label="Concluir esta etapa"
             >
               <CheckCircle2 size={16} />
@@ -484,7 +482,7 @@ const Chat = () => {
             <button
               onClick={sendMessage}
               disabled={!input.trim() || isStreaming}
-              className="p-2.5 rounded-xl text-accent-foreground transition-colors disabled:opacity-30"
+              className="p-2.5 rounded-xl text-white transition-colors disabled:opacity-30"
               style={{ backgroundColor: phase.color }}
               aria-label="Enviar mensagem"
             >

@@ -61,7 +61,7 @@ const ProjetoDetalhe = () => {
         Voltar para projetos
       </button>
 
-      <h1 className="font-georgia text-2xl font-bold text-foreground mb-6">{projectName}</h1>
+      <h1 className="font-display text-2xl text-foreground mb-6">{projectName}</h1>
 
       {sessions.length === 0 ? (
         <p className="text-muted-foreground text-sm text-center py-12">Nenhuma conversa neste projeto ainda.</p>
@@ -71,7 +71,7 @@ const ProjetoDetalhe = () => {
             const info = findAgent(s.agent_id);
             const agentName = info?.agent.name || s.agent_id;
             const agentRole = info?.agent.role || "";
-            const color = info?.phase.color || "#4a5759";
+            const color = info?.phase.color || "#1C3C2C";
 
             return (
               <button
@@ -90,7 +90,7 @@ const ProjetoDetalhe = () => {
                   <p className="text-xs text-muted-foreground truncate">{agentRole}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === "completed" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === "completed" ? "bg-sage-pale/30 text-sage-mid" : "bg-muted text-muted-foreground"}`}>
                     {s.status === "completed" ? "Concluído" : "Em andamento"}
                   </span>
                   <p className="text-[10px] text-muted-foreground mt-1">
