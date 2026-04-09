@@ -634,7 +634,7 @@ function Footer() {
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <Logo size={40} light />
         <p className="text-white/50 text-xs text-center">
-          Método Mamãe Monetiza © 2025. Todos os direitos reservados.
+          Método Mamãe Monetiza © 2026. Todos os direitos reservados.
         </p>
         <div className="flex gap-4 text-xs text-white/40">
           <a href="#" className="hover:text-white/60">Política de Privacidade</a>
