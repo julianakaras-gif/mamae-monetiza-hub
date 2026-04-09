@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
+import { useRealtimeProgress } from "@/contexts/AgentProgressContext";
 import { PHASES, type Agent, type Phase } from "@/data/agents";
 
 export type AgentStatus = "locked" | "unlocked" | "completed";
@@ -15,6 +16,7 @@ export interface AgentState {
 export function useAgentProgress() {
   const { user } = useAuth();
   const { activeProjectId } = useProject();
+  const { realtimeCompleted } = useRealtimeProgress();
 
   const [completedAgents, setCompletedAgents] = useState<Set<string>>(new Set());
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -53,55 +55,36 @@ export function useAgentProgress() {
     fetchData();
   }, [fetchData]);
 
-  // Realtime subscription for progress updates
-  useEffect(() => {
-    if (!user || !activeProjectId) return;
-
-    const channelName = `progress-${activeProjectId}-${Date.now()}`;
-    const channel = supabase
-      .channel(channelName)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'user_progress',
-        filter: `project_id=eq.${activeProjectId}`,
-      }, (payload: any) => {
-        if (payload.new?.completed) {
-          setCompletedAgents(prev => new Set([...prev, payload.new.agent_id]));
-        }
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [user, activeProjectId]);
+  // Merge fetched + realtime completed agents
+  const allCompleted = useMemo(() => {
+    if (realtimeCompleted.size === 0) return completedAgents;
+    return new Set([...completedAgents, ...realtimeCompleted]);
+  }, [completedAgents, realtimeCompleted]);
 
   function getAgentStatus(agentId: string): AgentStatus {
-    if (completedAgents.has(agentId)) return "completed";
+    if (allCompleted.has(agentId)) return "completed";
 
-    // Phase 1 (Descoberta): sequential - clara > aya > talia
     const phase1 = PHASES[0];
     if (phase1.agents.some((a) => a.id === agentId)) {
       if (agentId === "clara") return "unlocked";
       const idx = phase1.agents.findIndex((a) => a.id === agentId);
       if (idx > 0) {
         const prev = phase1.agents[idx - 1];
-        return completedAgents.has(prev.id) ? "unlocked" : "locked";
+        return allCompleted.has(prev.id) ? "unlocked" : "locked";
       }
     }
 
-    // Phase 2 (Estratégia): sequential, unlocks when talia (last of phase 1) is completed
     const phase2 = PHASES[1];
-    const taliaCompleted = completedAgents.has("talia");
+    const taliaCompleted = allCompleted.has("talia");
     if (phase2.agents.some((a) => a.id === agentId)) {
       if (!taliaCompleted) return "locked";
       const idx = phase2.agents.findIndex((a) => a.id === agentId);
       if (idx === 0) return "unlocked";
       const prev = phase2.agents[idx - 1];
-      return completedAgents.has(prev.id) ? "unlocked" : "locked";
+      return allCompleted.has(prev.id) ? "unlocked" : "locked";
     }
 
-    // Phases 3, 4, 5 (freeAgents): unlock when alice (last of phase 2) is completed
-    const aliceCompleted = completedAgents.has("alice");
+    const aliceCompleted = allCompleted.has("alice");
     const freePhases = PHASES.filter((p) => p.freeAgents);
     for (const phase of freePhases) {
       if (phase.agents.some((a) => a.id === agentId)) {
@@ -114,18 +97,18 @@ export function useAgentProgress() {
 
   function getPhaseStatus(phase: Phase): "locked" | "in_progress" | "completed" | "free" {
     const statuses = phase.agents.map((a) => getAgentStatus(a.id));
-    const allCompleted = statuses.every((s) => s === "completed");
+    const allDone = statuses.every((s) => s === "completed");
     const allLocked = statuses.every((s) => s === "locked");
     const hasUnlocked = statuses.some((s) => s === "unlocked");
 
-    if (allCompleted) return "completed";
+    if (allDone) return "completed";
     if (allLocked) return "locked";
     if (phase.freeAgents && hasUnlocked) return "free";
     return "in_progress";
   }
 
   function getPhaseProgress(phase: Phase): { done: number; total: number } {
-    const done = phase.agents.filter((a) => completedAgents.has(a.id)).length;
+    const done = phase.agents.filter((a) => allCompleted.has(a.id)).length;
     return { done, total: phase.agents.length };
   }
 
@@ -141,7 +124,7 @@ export function useAgentProgress() {
   }
 
   const totalAgents = useMemo(() => PHASES.reduce((sum, p) => sum + p.agents.length, 0), []);
-  const progressPercent = totalAgents > 0 ? Math.round((completedAgents.size / totalAgents) * 100) : 0;
+  const progressPercent = totalAgents > 0 ? Math.round((allCompleted.size / totalAgents) * 100) : 0;
 
   async function toggleFavorite(agentId: string) {
     if (!user) return;
@@ -167,7 +150,7 @@ export function useAgentProgress() {
 
   return {
     loading,
-    completedAgents,
+    completedAgents: allCompleted,
     favorites,
     getAgentStatus,
     getPhaseStatus,
