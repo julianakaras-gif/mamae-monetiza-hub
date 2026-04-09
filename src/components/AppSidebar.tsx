@@ -23,12 +23,12 @@ const AppSidebar = () => {
     <aside className="w-[218px] min-h-screen flex flex-col shrink-0" style={{ backgroundColor: "#1C3C2C", color: "#fff" }}>
       {/* Logo */}
       <div className="pt-6 pb-6 flex justify-center">
-        <Logo size={32} light />
+        <Logo size={42} light />
       </div>
 
       {/* Menu section */}
       <div className="px-4 mb-2">
-        <p className="text-[10px] uppercase tracking-widest opacity-40 mb-3 pl-2">
+        <p className="text-xs uppercase tracking-widest opacity-40 mb-3 pl-2">
           Menu
         </p>
         <nav className="space-y-1">
@@ -58,28 +58,6 @@ const AppSidebar = () => {
       {/* Divider */}
       <div className="mx-4 my-3 border-t border-[rgba(255,255,255,0.1)]" />
 
-      {/* Quick agents */}
-      <div className="px-4 mb-4">
-        <p className="text-[10px] uppercase tracking-widest opacity-40 mb-3 pl-2">
-          Sempre disponíveis
-        </p>
-        <div className="space-y-2">
-          {quickAgents.map((agent) => (
-            <NavLink
-              key={agent.name}
-              to={`/chat/${agent.name.toLowerCase()}`}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm hover:bg-[rgba(255,255,255,0.07)] transition-colors"
-            >
-              <div
-                className={`w-7 h-7 rounded-full ${agent.color} flex items-center justify-center text-xs font-bold text-white`}
-              >
-                {agent.initial}
-              </div>
-              <span>{agent.name}</span>
-            </NavLink>
-          ))}
-        </div>
-      </div>
 
       {/* Spacer */}
       <div className="flex-1" />
@@ -87,7 +65,7 @@ const AppSidebar = () => {
       {/* Progress */}
       <div className="px-4 mb-4">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] uppercase tracking-widest opacity-40">
+          <p className="text-xs uppercase tracking-widest opacity-40">
             Progresso geral
           </p>
           <span className="text-xs font-bold">{progressPercent}%</span>
@@ -111,7 +89,7 @@ const AppSidebar = () => {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold truncate">{userName}</p>
-            <p className="text-[11px] opacity-50">Aluna ativa</p>
+            <p className="text-xs opacity-50">Aluna ativa</p>
           </div>
           <button
             onClick={signOut}
