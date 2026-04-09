@@ -1,4 +1,4 @@
-import { Home, Map, Star, FolderOpen, LogOut } from "lucide-react";
+import { Home, Map, Star, FolderOpen, LogOut, Settings } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,7 @@ const menuItems = [
   { title: "Trilha", path: "/trilha", icon: Map },
   { title: "Projetos", path: "/projetos", icon: FolderOpen },
   { title: "Favoritos", path: "/favoritos", icon: Star },
+  { title: "Configurações", path: "/configuracoes", icon: Settings },
 ];
 
 const AppSidebar = () => {
