@@ -51,7 +51,7 @@ const Logo = ({ size = 40, light = false }: LogoProps) => {
       </svg>
       <span
         className="font-display"
-        style={{ fontSize: 14 * scale, color: textColor, lineHeight: 1.2 }}
+        style={{ fontSize: size * 0.88, color: textColor, lineHeight: 1.2 }}
       >
         Prospera
       </span>

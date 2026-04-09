@@ -93,7 +93,7 @@ const ProjetoDetalhe = () => {
                   <span className={`text-xs px-2 py-0.5 rounded-full ${s.status === "completed" ? "bg-sage-pale/30 text-sage-mid" : "bg-muted text-muted-foreground"}`}>
                     {s.status === "completed" ? "Concluído" : "Em andamento"}
                   </span>
-                  <p className="text-[10px] text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {new Date(s.started_at).toLocaleDateString("pt-BR")}
                   </p>
                 </div>

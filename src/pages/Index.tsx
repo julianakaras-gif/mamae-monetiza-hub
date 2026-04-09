@@ -368,7 +368,7 @@ function AgentesDestaque() {
               <div className="bg-white rounded-2xl p-6 border border-border shadow-subtle h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
                 <AgentAvatar name={agent.nome} foto={agent.foto} size={80} />
                 <h3 className="font-display text-[24px] text-foreground mt-5 mb-2">{agent.nome}</h3>
-                <p className="text-[11px] uppercase tracking-[2px] text-sage-light mb-3">{agent.role}</p>
+                <p className="text-xs uppercase tracking-[2px] text-sage-light mb-3">{agent.role}</p>
                 <p className="text-sm text-sage-mid leading-relaxed italic">{agent.frase}</p>
               </div>
             </Reveal>

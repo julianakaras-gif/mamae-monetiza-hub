@@ -356,7 +356,7 @@ const Chat = () => {
                 {agent.name}
               </span>
               <Badge
-                className="text-[10px] px-2 py-0 border-0 hidden sm:inline-flex"
+                className="text-xs px-2 py-0 border-0 hidden sm:inline-flex"
                 style={{ backgroundColor: `${phase.color}20`, color: phase.color }}
               >
                 {phase.emoji} {phase.name}
@@ -404,7 +404,7 @@ const Chat = () => {
             >
               {msg.role === "assistant" && (
                 <div
-                  className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 mr-2 mt-1"
+                  className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
                   style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
                 >
                   {agent.name.charAt(0)}
@@ -430,7 +430,7 @@ const Chat = () => {
           {isStreaming && messages[messages.length - 1]?.role !== "assistant" && (
             <div className="flex justify-start">
               <div
-                className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shrink-0 mr-2 mt-1"
+                className="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
                 style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
               >
                 {agent.name.charAt(0)}

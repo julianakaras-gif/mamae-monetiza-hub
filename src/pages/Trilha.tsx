@@ -97,7 +97,7 @@ const Trilha = () => {
                       {phase.name}
                     </span>
                     <Badge
-                      className="text-[10px] px-2 py-0 border-0"
+                      className="text-xs px-2 py-0 border-0"
                       style={{ backgroundColor: `${badgeColor}20`, color: badgeColor }}
                     >
                       {statusInfo.label}

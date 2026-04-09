@@ -28,7 +28,7 @@ const BottomNav = () => {
           <NavLink
             key={item.path}
             to={item.path}
-            className={`flex flex-col items-center gap-1 py-2.5 px-4 rounded-xl text-[11px] font-medium transition-colors ${
+            className={`flex flex-col items-center gap-1 py-2.5 px-4 rounded-xl text-xs font-medium transition-colors ${
               isActive ? "bg-[rgba(255,255,255,0.15)]" : ""
             }`}
             style={{ color: isActive ? "#C6A86C" : "rgba(255,255,255,0.7)" }}
@@ -40,7 +40,7 @@ const BottomNav = () => {
       })}
       <NavLink
         to={`/chat/${SERENA.id}`}
-        className={`flex flex-col items-center gap-1 py-2.5 px-4 rounded-xl text-[11px] font-medium transition-colors ${
+        className={`flex flex-col items-center gap-1 py-2.5 px-4 rounded-xl text-xs font-medium transition-colors ${
           location.pathname === `/chat/${SERENA.id}` ? "bg-[rgba(255,255,255,0.15)]" : ""
         }`}
         style={{
