@@ -59,7 +59,7 @@ const Login = () => {
           </div>
 
           <h1 className="font-display text-[42px] leading-tight mb-4 text-white">
-            Seu <span style={{ color: "#C6A86C" }}>crescimento</span> começa aqui.
+            Seu <span className="text-4xl text-secondary">crescimento</span> começa aqui.
           </h1>
 
           <p className="text-[15px] mb-10 max-w-[380px] mx-auto" style={{ color: "rgba(255,255,255,0.65)" }}>
