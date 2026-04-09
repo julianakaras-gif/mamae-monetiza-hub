@@ -1,126 +1,359 @@
-import { useMemo } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useAgentProgress } from "@/hooks/useAgentProgress";
-import { PHASES } from "@/data/agents";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Plus, FolderOpen } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProject } from "@/hooks/useProject";
+import { PHASES } from "@/data/agents";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-function getGreeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Bom dia";
-  if (h < 18) return "Boa tarde";
-  return "Boa noite";
+interface ProjectWithProgress {
+  id: string;
+  name: string;
+  description: string | null;
+  created_at: string | null;
+  completedCount: number;
 }
 
-const Home = () => {
-  const { profile } = useAuth();
-  const { getNextAgent, getPhaseProgress, getPhaseStatus, progressPercent, loading, completedAgents } = useAgentProgress();
-  const navigate = useNavigate();
-  const name = profile?.name?.split(" ")[0] || "Aluna";
-  const next = getNextAgent();
-  const isFirstVisit = completedAgents.size === 0;
+const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0);
 
-  if (loading) {
+const LogoIcon = ({ size = 72 }: { size?: number }) => {
+  const scale = size / 40;
+  return (
+    <svg
+      width={40 * scale}
+      height={40 * scale}
+      viewBox="0 0 40 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+        <ellipse
+          key={`outer-${i}`}
+          cx="20" cy="20" rx="3" ry="12"
+          fill={i % 2 === 0 ? "#1C3C2C" : "#3A5C46"}
+          opacity={0.7}
+          transform={`rotate(${angle} 20 20)`}
+        />
+      ))}
+      {[30, 90, 150, 210, 270, 330].map((angle, i) => (
+        <ellipse
+          key={`mid-${i}`}
+          cx="20" cy="20" rx="2" ry="8"
+          fill="#6E9876"
+          opacity={0.5}
+          transform={`rotate(${angle} 20 20)`}
+        />
+      ))}
+      <circle cx="20" cy="20" r="4" fill="#C6A86C" />
+    </svg>
+  );
+};
+
+const Home = () => {
+  const { user } = useAuth();
+  const { projects, activeProjectId, setProject, createProject, loading: projectsLoading } = useProject();
+  const navigate = useNavigate();
+
+  const [projectProgress, setProjectProgress] = useState<Record<string, number>>({});
+  const [showModal, setShowModal] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    if (!user || projects.length === 0) return;
+    loadProgress();
+  }, [user, projects]);
+
+  async function loadProgress() {
+    if (!user) return;
+    const { data } = await supabase
+      .from("user_progress")
+      .select("agent_id, project_id")
+      .eq("user_id", user.id)
+      .eq("completed", true);
+
+    const counts: Record<string, number> = {};
+    data?.forEach((r) => {
+      const pid = r.project_id || "__none__";
+      counts[pid] = (counts[pid] || 0) + 1;
+    });
+    setProjectProgress(counts);
+  }
+
+  async function handleCreate() {
+    if (!newName.trim()) return;
+    setCreating(true);
+    const result = await createProject(newName.trim(), newDesc.trim() || undefined);
+    if (result) {
+      setShowModal(false);
+      setNewName("");
+      setNewDesc("");
+      navigate("/trilha");
+    }
+    setCreating(false);
+  }
+
+  function handleOpenProject(projectId: string) {
+    setProject(projectId);
+    navigate("/trilha");
+  }
+
+  if (projectsLoading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  // Empty state
+  if (projects.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] p-6 animate-fade-in">
+        <LogoIcon size={72} />
+        <h1
+          className="font-display mt-6 text-center"
+          style={{ fontSize: 34, color: "#1C3C2C" }}
+        >
+          Bem-vinda ao Prospera!
+        </h1>
+        <p
+          className="text-center mt-3 leading-relaxed"
+          style={{ fontSize: 16, color: "#6E9876", maxWidth: 420 }}
+        >
+          Vamos criar o seu primeiro projeto. Cada projeto é uma jornada completa com os {TOTAL_AGENTS} agentes.
+        </p>
+        <button
+          onClick={() => setShowModal(true)}
+          className="mt-8 font-semibold text-white transition-all hover:opacity-90"
+          style={{
+            backgroundColor: "#1C3C2C",
+            borderRadius: 40,
+            fontSize: 16,
+            padding: "14px 32px",
+          }}
+        >
+          Criar meu primeiro projeto
+        </button>
+
+        <NewProjectModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          name={newName}
+          setName={setNewName}
+          desc={newDesc}
+          setDesc={setNewDesc}
+          creating={creating}
+          onCreate={handleCreate}
+        />
+      </div>
+    );
+  }
+
+  // Projects list
   return (
     <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
-      {/* Welcome */}
-      <h1 className="font-display text-xl md:text-2xl text-foreground mb-1">
-        {getGreeting()}, {name}! 👋
-      </h1>
-      <p className="text-muted-foreground text-sm mb-6 md:mb-8">
-        Bem-vinda à sua plataforma de transformação digital.
-      </p>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display" style={{ fontSize: 34, color: "#1C3C2C" }}>
+          Meus projetos
+        </h1>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-1.5 font-semibold transition-all hover:opacity-90"
+          style={{
+            backgroundColor: "#C6A86C",
+            color: "#1C3C2C",
+            borderRadius: 40,
+            fontSize: 15,
+            padding: "10px 20px",
+          }}
+        >
+          <Plus size={16} />
+          Novo projeto
+        </button>
+      </div>
 
-      {/* First visit card */}
-      {isFirstVisit && (
-        <Card className="mb-6 border-0 shadow-md overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(182,208,190,0.15), rgba(198,168,108,0.15))" }}>
-          <CardContent className="p-5 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(198,168,108,0.15)" }}>
-              <Sparkles size={22} className="text-gold" />
-            </div>
-            <div>
-              <p className="font-display text-sm text-foreground mb-1">
-                Bem-vinda ao Prospera! 🎉
-              </p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Sua jornada começa com a Clara, que vai te ajudar a descobrir o negócio perfeito para você. Cada agente desbloqueará o próximo passo da sua trilha.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {projects.map((p) => {
+          const done = projectProgress[p.id] || 0;
+          const pct = TOTAL_AGENTS > 0 ? (done / TOTAL_AGENTS) * 100 : 0;
+          const isActive = p.id === activeProjectId;
 
-      {/* Next step */}
-      {next && (
-        <Card className="mb-6 border-0 shadow-md overflow-hidden">
-          <CardContent className="p-4 md:p-5 flex items-center gap-3 md:gap-4">
-            <div
-              className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-base md:text-lg font-bold shrink-0"
-              style={{
-                backgroundColor: `${next.phase.color}15`,
-                color: next.phase.color,
-              }}
-            >
-              {next.agent.name.charAt(0)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground mb-0.5">Próximo passo</p>
-              <p className="font-display text-sm text-foreground">
-                {next.agent.name}: {next.agent.role}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 hidden sm:block">{next.agent.desc}</p>
-            </div>
-            <button
-              onClick={() => navigate(`/chat/${next.agent.id}`)}
-              className="px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-semibold text-white shrink-0 transition-all bg-sage-mid"
-              style={{
-                boxShadow: "0 0 20px rgba(58,92,70,0.4)",
-              }}
-              aria-label={`Começar conversa com ${next.agent.name}`}
-            >
-              Começar
-            </button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Phase progress grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-        {PHASES.map((phase) => {
-          const { done, total } = getPhaseProgress(phase);
           return (
-            <button
-              key={phase.id}
-              onClick={() => navigate(`/trilha?phase=${phase.id}`)}
-              className="flex items-center gap-2 md:gap-3 p-2.5 md:p-3 rounded-xl border bg-card hover:shadow-sm transition-all text-left"
-              aria-label={`Fase ${phase.name}: ${done} de ${total} agentes completos`}
+            <div
+              key={p.id}
+              className="relative bg-white p-6 transition-all duration-200 hover:-translate-y-[3px]"
+              style={{
+                borderRadius: 20,
+                border: "1px solid #E2D9C8",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)")}
+              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
             >
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
-                style={{ backgroundColor: `${phase.color}15` }}
-              >
-                {phase.emoji}
-              </div>
-              <div className="min-w-0">
-                <p className="font-display text-xs text-foreground">{phase.name}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {done}/{total} agentes
+              {isActive && (
+                <span
+                  className="absolute top-4 right-4 font-medium"
+                  style={{
+                    backgroundColor: "#B6D0BE",
+                    color: "#1C3C2C",
+                    borderRadius: 20,
+                    fontSize: 12,
+                    padding: "2px 10px",
+                  }}
+                >
+                  Ativo
+                </span>
+              )}
+
+              <h2 className="font-display pr-16" style={{ fontSize: 22, color: "#1C3C2C" }}>
+                {p.name}
+              </h2>
+
+              {p.description && (
+                <p
+                  className="mt-1 line-clamp-2"
+                  style={{ fontSize: 14, color: "#6E9876" }}
+                >
+                  {p.description}
+                </p>
+              )}
+
+              {/* Progress bar */}
+              <div className="mt-4">
+                <div
+                  className="h-2 rounded-full overflow-hidden"
+                  style={{ backgroundColor: "#E2D9C8" }}
+                >
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${pct}%`,
+                      background: "linear-gradient(90deg, #6E9876, #C6A86C)",
+                    }}
+                  />
+                </div>
+                <p className="mt-1.5" style={{ fontSize: 13, color: "#6E9876" }}>
+                  {done} de {TOTAL_AGENTS} agentes concluídos
                 </p>
               </div>
-            </button>
+
+              <p className="mt-2" style={{ fontSize: 12, color: "#B6D0BE" }}>
+                Criado em{" "}
+                {p.created_at
+                  ? new Date(p.created_at).toLocaleDateString("pt-BR")
+                  : "-"}
+              </p>
+
+              <button
+                onClick={() => handleOpenProject(p.id)}
+                className="mt-4 w-full font-medium text-white transition-all hover:opacity-90"
+                style={{
+                  backgroundColor: "#1C3C2C",
+                  borderRadius: 12,
+                  fontSize: 14,
+                  padding: "10px 0",
+                }}
+              >
+                Abrir projeto
+              </button>
+            </div>
           );
         })}
       </div>
+
+      <NewProjectModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        name={newName}
+        setName={setNewName}
+        desc={newDesc}
+        setDesc={setNewDesc}
+        creating={creating}
+        onCreate={handleCreate}
+      />
     </div>
   );
 };
+
+interface NewProjectModalProps {
+  open: boolean;
+  onClose: () => void;
+  name: string;
+  setName: (v: string) => void;
+  desc: string;
+  setDesc: (v: string) => void;
+  creating: boolean;
+  onCreate: () => void;
+}
+
+function NewProjectModal({ open, onClose, name, setName, desc, setDesc, creating, onCreate }: NewProjectModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent
+        className="bg-white p-8"
+        style={{ borderRadius: 20, maxWidth: 460 }}
+      >
+        <DialogHeader>
+          <DialogTitle className="font-display" style={{ fontSize: 24, color: "#1C3C2C" }}>
+            Novo projeto
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 mt-2">
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
+              Nome do projeto *
+            </label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Meu curso de meditação"
+              className="w-full rounded-xl border px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-ring"
+              style={{ fontSize: 15, borderColor: "#E2D9C8" }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
+              Descrição (opcional)
+            </label>
+            <textarea
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+              placeholder="Curso para mães que querem meditar em 5 minutos"
+              rows={3}
+              className="w-full rounded-xl border px-3 py-2.5 bg-white resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+              style={{ fontSize: 15, borderColor: "#E2D9C8" }}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-4">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 font-medium transition-all hover:opacity-80"
+            style={{ color: "#6E9876", fontSize: 15 }}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onCreate}
+            disabled={!name.trim() || creating}
+            className="flex-1 py-2.5 font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
+            style={{ backgroundColor: "#1C3C2C", borderRadius: 12, fontSize: 15 }}
+          >
+            {creating ? "Criando..." : "Criar projeto"}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default Home;

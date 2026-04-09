@@ -1,8 +1,9 @@
 import { useState, memo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { ChevronDown, Info } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { ChevronDown, Info, FolderOpen } from "lucide-react";
 import { PHASES } from "@/data/agents";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
+import { useProject } from "@/hooks/useProject";
 import AgentCard from "@/components/AgentCard";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,11 +16,13 @@ const phaseStatusLabel: Record<string, { label: string }> = {
 
 const Trilha = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const returnPhase = searchParams.get("phase");
   const [openPhaseId, setOpenPhaseId] = useState<number | null>(
     returnPhase ? Number(returnPhase) : null
   );
   const { getAgentStatus, getPhaseStatus, getPhaseProgress, favorites, toggleFavorite, loading } = useAgentProgress();
+  const { activeProject } = useProject();
 
   if (loading) {
     return (
@@ -30,7 +33,29 @@ const Trilha = () => {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
+    <div className="animate-fade-in">
+      {activeProject && (
+        <div
+          className="flex items-center justify-between px-4 md:px-8 py-3"
+          style={{ backgroundColor: "#1C3C2C" }}
+        >
+          <div className="flex items-center gap-2 text-white" style={{ fontSize: 14 }}>
+            <FolderOpen size={16} />
+            <span>
+              Projeto ativo: <strong>{activeProject.name}</strong>
+            </span>
+          </div>
+          <button
+            onClick={() => navigate("/home")}
+            className="transition-opacity hover:opacity-80"
+            style={{ color: "#B6D0BE", fontSize: 13 }}
+          >
+            Trocar projeto
+          </button>
+        </div>
+      )}
+
+      <div className="p-4 md:p-8 max-w-3xl">
       <h1 className="font-display text-xl md:text-2xl text-foreground mb-1">Trilha</h1>
       <p className="text-muted-foreground text-sm mb-6">
         Sua jornada com os agentes de IA, fase por fase.
@@ -125,6 +150,7 @@ const Trilha = () => {
             </div>
           );
         })}
+      </div>
       </div>
     </div>
   );
