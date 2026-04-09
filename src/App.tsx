@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ProjectProvider } from "@/hooks/useProject";
+import { AgentProgressProvider } from "@/contexts/AgentProgressContext";
 import AppLayout from "@/components/AppLayout";
 import Login from "@/pages/Login";
 import Index from "@/pages/Index";
@@ -62,6 +63,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ProjectProvider>
+          <AgentProgressProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route
@@ -91,6 +93,7 @@ const App = () => (
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </AgentProgressProvider>
           </ProjectProvider>
         </AuthProvider>
       </BrowserRouter>
