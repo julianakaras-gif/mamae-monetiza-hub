@@ -57,8 +57,9 @@ export function useAgentProgress() {
   useEffect(() => {
     if (!user || !activeProjectId) return;
 
+    const channelName = `progress-${activeProjectId}-${Date.now()}`;
     const channel = supabase
-      .channel(`progress-${activeProjectId}`)
+      .channel(channelName)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
