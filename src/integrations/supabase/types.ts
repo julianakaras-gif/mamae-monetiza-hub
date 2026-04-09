@@ -19,6 +19,7 @@ export type Database = {
           agent_id: string
           created_at: string
           id: string
+          project_id: string | null
           summary: string
           user_id: string
         }
@@ -26,6 +27,7 @@ export type Database = {
           agent_id: string
           created_at?: string
           id?: string
+          project_id?: string | null
           summary: string
           user_id: string
         }
@@ -33,10 +35,18 @@ export type Database = {
           agent_id?: string
           created_at?: string
           id?: string
+          project_id?: string | null
           summary?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "agent_outputs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "agent_outputs_user_id_fkey"
             columns: ["user_id"]
@@ -51,6 +61,7 @@ export type Database = {
           agent_id: string
           completed_at: string | null
           id: string
+          project_id: string | null
           started_at: string
           status: string
           user_id: string
@@ -59,6 +70,7 @@ export type Database = {
           agent_id: string
           completed_at?: string | null
           id?: string
+          project_id?: string | null
           started_at?: string
           status?: string
           user_id: string
@@ -67,11 +79,19 @@ export type Database = {
           agent_id?: string
           completed_at?: string | null
           id?: string
+          project_id?: string | null
           started_at?: string
           status?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "agent_sessions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "agent_sessions_user_id_fkey"
             columns: ["user_id"]
@@ -137,6 +157,33 @@ export type Database = {
           id?: string
           name?: string | null
           subscription_status?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
