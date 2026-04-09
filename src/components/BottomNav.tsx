@@ -1,10 +1,11 @@
-import { Home, Map, Star } from "lucide-react";
+import { Home, Map, Star, FolderOpen } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { SERENA } from "@/data/agents";
 
 const navItems = [
   { title: "Início", path: "/home", icon: Home },
   { title: "Trilha", path: "/trilha", icon: Map },
+  { title: "Projetos", path: "/projetos", icon: FolderOpen },
   { title: "Favoritos", path: "/favoritos", icon: Star },
 ];
 

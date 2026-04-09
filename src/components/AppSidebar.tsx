@@ -1,4 +1,4 @@
-import { Home, Map, Star, LogOut } from "lucide-react";
+import { Home, Map, Star, FolderOpen, LogOut } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,7 @@ import { useAgentProgress } from "@/hooks/useAgentProgress";
 const menuItems = [
   { title: "Início", path: "/home", icon: Home },
   { title: "Trilha", path: "/trilha", icon: Map },
+  { title: "Projetos", path: "/projetos", icon: FolderOpen },
   { title: "Favoritos", path: "/favoritos", icon: Star },
 ];
 

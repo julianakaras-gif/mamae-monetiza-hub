@@ -11,6 +11,8 @@ import AcessoBloqueado from "@/pages/AcessoBloqueado";
 import Home from "@/pages/Home";
 import Trilha from "@/pages/Trilha";
 import Favoritos from "@/pages/Favoritos";
+import Projetos from "@/pages/Projetos";
+import ProjetoDetalhe from "@/pages/ProjetoDetalhe";
 import Chat from "@/pages/Chat";
 import NotFound from "@/pages/NotFound";
 
@@ -80,6 +82,8 @@ const App = () => (
               <Route path="/home" element={<Home />} />
               <Route path="/trilha" element={<Trilha />} />
               <Route path="/favoritos" element={<Favoritos />} />
+              <Route path="/projetos" element={<Projetos />} />
+              <Route path="/projetos/:projectId" element={<ProjetoDetalhe />} />
               <Route path="/chat/:agentId" element={<Chat />} />
             </Route>
 
