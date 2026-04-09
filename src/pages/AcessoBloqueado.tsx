@@ -18,19 +18,19 @@ const AcessoBloqueado = () => {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-6 animate-fade-in"
-      style={{ background: "linear-gradient(160deg, #4a5759 0%, #1e2829 100%)" }}
+      style={{ background: "linear-gradient(160deg, #1C3C2C 0%, #0F2419 100%)" }}
     >
       <div className="max-w-md w-full text-center bg-card rounded-3xl shadow-card p-10">
         <div className="flex justify-center mb-6">
-          <Logo size={56} />
+          <Logo size={48} />
         </div>
 
-        <div className="w-16 h-16 rounded-full bg-rosa/10 flex items-center justify-center mx-auto mb-6">
-          <ShieldX className="text-rosa" size={28} />
+        <div className="w-16 h-16 rounded-full bg-warm-brown/10 flex items-center justify-center mx-auto mb-6">
+          <ShieldX className="text-warm-brown" size={28} />
         </div>
 
-        <h1 className="font-georgia text-xl font-bold text-foreground mb-3">
-          Você ainda não tem acesso ao Método
+        <h1 className="font-display text-xl text-foreground mb-3">
+          Você ainda não tem acesso ao Prospera
         </h1>
 
         <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
@@ -39,14 +39,14 @@ const AcessoBloqueado = () => {
 
         <button
           onClick={handleQueroSerAluna}
-          className="inline-block w-full py-3.5 rounded-pill bg-rosa text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity mb-3"
+          className="inline-block w-full py-3.5 rounded-pill bg-sage-dark text-white font-semibold text-sm hover:opacity-90 transition-opacity mb-3"
         >
           Quero me tornar aluna
         </button>
 
         <button
           onClick={handleJaSouAluna}
-          className="w-full py-3 rounded-pill border border-borda text-muted-foreground font-medium text-sm hover:bg-muted/50 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-pill border border-border text-muted-foreground font-medium text-sm hover:bg-muted/50 transition-colors flex items-center justify-center gap-2"
         >
           <LogOut size={14} />
           Já sou aluna, entrar novamente
