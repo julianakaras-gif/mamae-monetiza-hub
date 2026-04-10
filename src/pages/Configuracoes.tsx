@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
+import { useAdmin } from "@/hooks/useAdmin";
 import { PHASES } from "@/data/agents";
 import { toast } from "sonner";
 import {
