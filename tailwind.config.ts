@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Italiana", "serif"],
+        display: ["Playfair Display", "serif"],
         sans: ["Instrument Sans", "sans-serif"],
       },
       colors: {
