@@ -141,6 +141,7 @@ export type Database = {
           hotmart_purchase_id: string | null
           id: string
           instagram_handle: string | null
+          is_admin: boolean
           name: string | null
           niche: string | null
           phone: string | null
@@ -156,6 +157,7 @@ export type Database = {
           hotmart_purchase_id?: string | null
           id: string
           instagram_handle?: string | null
+          is_admin?: boolean
           name?: string | null
           niche?: string | null
           phone?: string | null
@@ -171,6 +173,7 @@ export type Database = {
           hotmart_purchase_id?: string | null
           id?: string
           instagram_handle?: string | null
+          is_admin?: boolean
           name?: string | null
           niche?: string | null
           phone?: string | null
@@ -293,7 +296,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

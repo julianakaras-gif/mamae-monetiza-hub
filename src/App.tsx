@@ -17,6 +17,7 @@ import Projetos from "@/pages/Projetos";
 import ProjetoDetalhe from "@/pages/ProjetoDetalhe";
 import Chat from "@/pages/Chat";
 import Configuracoes from "@/pages/Configuracoes";
+import AdminPage from "@/pages/AdminPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -91,6 +92,7 @@ const App = () => (
               <Route path="/projetos/:projectId" element={<ProjetoDetalhe />} />
               <Route path="/chat/:agentId" element={<Chat />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
+              <Route path="/admin" element={<AdminPage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
