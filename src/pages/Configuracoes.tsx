@@ -19,6 +19,7 @@ const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0);
 const Configuracoes = () => {
   const { user, profile, signOut } = useAuth();
   const { projects, activeProjectId, createProject } = useProject();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
 
   // Section 1
