@@ -351,6 +351,19 @@ const Configuracoes = () => {
         </div>
       </div>
 
+      {/* Admin link */}
+      {isAdmin && (
+        <div className="mb-4">
+          <button
+            onClick={() => navigate("/admin")}
+            className="flex items-center gap-2 font-medium transition-all hover:opacity-80"
+            style={{ border: "1px solid #C6A86C", borderRadius: 12, fontSize: 15, padding: "10px 24px", color: "#1C3C2C", backgroundColor: "rgba(198,168,108,0.1)" }}
+          >
+            <Shield size={16} style={{ color: "#C6A86C" }} /> Painel Admin
+          </button>
+        </div>
+      )}
+
       {/* RODAPÉ */}
       <div className="mt-4 mb-10">
         <button
