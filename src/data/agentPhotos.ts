@@ -33,6 +33,7 @@ const AGENT_PHOTOS: Record<string, string> = {
   nara: NARA, petra: PETRA, alana: ALANA, nina: NINA,
   elisa: ELISA, luna: LUNA, maia: MAIA, liora: LIORA,
   serena: SERENA,
+  bill: BILL,
 };
 
 export function getAgentPhotoUrl(agentId: string): string | null {
