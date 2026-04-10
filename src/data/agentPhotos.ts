@@ -1,5 +1,6 @@
 import ALANA from '@/assets/robos/ALANA.png';
 import ALICE from '@/assets/robos/ALICE.png';
+import BILL from '@/assets/robos/BILL.png';
 import ALMA from '@/assets/robos/ALMA.png';
 import AYA from '@/assets/robos/AYA.png';
 import CLARA from '@/assets/robos/CLARA.png';
@@ -32,6 +33,7 @@ const AGENT_PHOTOS: Record<string, string> = {
   nara: NARA, petra: PETRA, alana: ALANA, nina: NINA,
   elisa: ELISA, luna: LUNA, maia: MAIA, liora: LIORA,
   serena: SERENA,
+  bill: BILL,
 };
 
 export function getAgentPhotoUrl(agentId: string): string | null {
