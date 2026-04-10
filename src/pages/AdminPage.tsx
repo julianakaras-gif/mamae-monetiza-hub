@@ -44,10 +44,10 @@ const AdminPage = () => {
   async function loadData() {
     setLoading(true);
 
-    const { data: profiles } = await supabase
+    const { data: profiles } = await (supabase
       .from("profiles")
-      .select("id, name, email, phone, instagram_handle, niche, target_audience, subscription_plan, subscription_status, created_at")
-      .eq("is_admin" as string, false as any)
+      .select("id, name, email, phone, instagram_handle, niche, target_audience, subscription_plan, subscription_status, created_at") as any)
+      .eq("is_admin", false)
       .order("created_at", { ascending: false });
 
     const { data: projects } = await supabase
