@@ -22,38 +22,9 @@ interface ProjectWithProgress {
 
 const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0);
 
-const LogoIcon = ({ size = 72 }: { size?: number }) => {
-  const scale = size / 40;
-  return (
-    <svg
-      width={40 * scale}
-      height={40 * scale}
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
-        <ellipse
-          key={`outer-${i}`}
-          cx="20" cy="20" rx="3" ry="12"
-          fill={i % 2 === 0 ? "#1C3C2C" : "#3A5C46"}
-          opacity={0.7}
-          transform={`rotate(${angle} 20 20)`}
-        />
-      ))}
-      {[30, 90, 150, 210, 270, 330].map((angle, i) => (
-        <ellipse
-          key={`mid-${i}`}
-          cx="20" cy="20" rx="2" ry="8"
-          fill="#6E9876"
-          opacity={0.5}
-          transform={`rotate(${angle} 20 20)`}
-        />
-      ))}
-      <circle cx="20" cy="20" r="4" fill="#C6A86C" />
-    </svg>
-  );
-};
+const LogoIcon = ({ size = 72 }: { size?: number }) => (
+  <img src="/prospera-logo-claro.png" alt="Prospera" style={{ height: size, width: "auto" }} className="object-contain" />
+);
 
 const Home = () => {
   const { user } = useAuth();
