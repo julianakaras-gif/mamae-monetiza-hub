@@ -47,7 +47,7 @@ const AdminPage = () => {
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, name, email, phone, instagram_handle, niche, target_audience, subscription_plan, subscription_status, created_at")
-      .eq("is_admin" as any, false)
+      .eq("is_admin" as string, false as any)
       .order("created_at", { ascending: false });
 
     const { data: projects } = await supabase
