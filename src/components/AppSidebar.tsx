@@ -23,8 +23,8 @@ const AppSidebar = () => {
   return (
     <aside className="w-[218px] min-h-screen flex flex-col shrink-0" style={{ backgroundColor: "#1C3C2C", color: "#fff" }}>
       {/* Logo */}
-      <div className="pt-6 pb-6 flex justify-center">
-        <Logo size={42} light />
+      <div className="pt-7 pb-7 flex justify-center">
+        <Logo size={56} light />
       </div>
 
       {/* Menu section */}
