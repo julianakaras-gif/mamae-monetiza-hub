@@ -85,14 +85,14 @@
   h4 { font-size: 20px; line-height: 1.30; }
 
   h1, h2, h3, .font-display {
-    font-family: 'Italiana', serif;
+    font-family: 'Playfair Display', serif;
     font-weight: 400;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: 'Italiana', serif;
+    font-family: 'Playfair Display', serif;
   }
 
   .font-sans {
