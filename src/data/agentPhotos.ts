@@ -1,5 +1,6 @@
 import ALANA from '@/assets/robos/ALANA.png';
 import ALICE from '@/assets/robos/ALICE.png';
+import BILL from '@/assets/robos/BILL.png';
 import ALMA from '@/assets/robos/ALMA.png';
 import AYA from '@/assets/robos/AYA.png';
 import CLARA from '@/assets/robos/CLARA.png';
