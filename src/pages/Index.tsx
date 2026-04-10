@@ -183,7 +183,7 @@ function Navbar() {
       }}
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <Logo size={48} light />
+        <Logo size={64} light />
         <button
           onClick={() => navigate("/login")}
           className="px-5 py-2 rounded-full border border-white/60 text-white text-sm font-medium hover:bg-white/10 transition-colors"
@@ -695,7 +695,7 @@ function Footer() {
   return (
     <footer className="py-10 px-6" style={{ backgroundColor: "#1C3C2C" }}>
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <Logo size={40} light />
+        <Logo size={52} light />
         <p className="text-white/50 text-xs text-center">
           Prospera · Método Mamãe Monetiza © 2026. Todos os direitos reservados.
         </p>
