@@ -1,15 +1,39 @@
-export const AGENT_PHOTOS: Record<string, string> = {
-  clara: 'CLARA.png', aya: 'AYA.png', lucca: 'LUCCA.png', alice: 'ALICE.png',
-  kaia: 'KAIA.png', talia: 'TALIA.png', lira: 'LIRA1.png', noa: 'NOA.png',
-  eron: 'ERON.png', vera: 'VERA.png', cora: 'CORA.png', alma: 'ALMA.png',
-  malu: 'MALU.png', kaena: 'KAENA.png', lumi: 'LUMI.png', luli: 'LULI.jpg',
-  nara: 'NARA.png', petra: 'PETRA.png', alana: 'ALANA.png', nina: 'NINA.png',
-  elisa: 'ELISA.png', luna: 'LUNA.png', maia: 'MAIA.png', liora: 'LIORA.png',
-  serena: 'SERENA.png',
+import ALANA from '@/assets/robos/ALANA.png';
+import ALICE from '@/assets/robos/ALICE.png';
+import ALMA from '@/assets/robos/ALMA.png';
+import AYA from '@/assets/robos/AYA.png';
+import CLARA from '@/assets/robos/CLARA.png';
+import CORA from '@/assets/robos/CORA.png';
+import ELISA from '@/assets/robos/ELISA.png';
+import ERON from '@/assets/robos/ERON.png';
+import KAENA from '@/assets/robos/KAENA.png';
+import KAIA from '@/assets/robos/KAIA.png';
+import LIORA from '@/assets/robos/LIORA.png';
+import LIRA1 from '@/assets/robos/LIRA1.png';
+import LUCCA from '@/assets/robos/LUCCA.png';
+import LULI from '@/assets/robos/LULI.jpg';
+import LUMI from '@/assets/robos/LUMI.png';
+import LUNA from '@/assets/robos/LUNA.png';
+import MAIA from '@/assets/robos/MAIA.png';
+import MALU from '@/assets/robos/MALU.png';
+import NARA from '@/assets/robos/NARA.png';
+import NINA from '@/assets/robos/NINA.png';
+import NOA from '@/assets/robos/NOA.png';
+import PETRA from '@/assets/robos/PETRA.png';
+import SERENA from '@/assets/robos/SERENA.png';
+import TALIA from '@/assets/robos/TALIA.png';
+import VERA from '@/assets/robos/VERA.png';
+
+const AGENT_PHOTOS: Record<string, string> = {
+  clara: CLARA, aya: AYA, lucca: LUCCA, alice: ALICE,
+  kaia: KAIA, talia: TALIA, lira: LIRA1, noa: NOA,
+  eron: ERON, vera: VERA, cora: CORA, alma: ALMA,
+  malu: MALU, kaena: KAENA, lumi: LUMI, luli: LULI,
+  nara: NARA, petra: PETRA, alana: ALANA, nina: NINA,
+  elisa: ELISA, luna: LUNA, maia: MAIA, liora: LIORA,
+  serena: SERENA,
 };
 
 export function getAgentPhotoUrl(agentId: string): string | null {
-  const file = AGENT_PHOTOS[agentId];
-  if (!file) return null;
-  return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/robos/${file}`;
+  return AGENT_PHOTOS[agentId] || null;
 }
