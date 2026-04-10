@@ -55,7 +55,7 @@ const Login = () => {
 
         <div className="relative z-10 max-w-md text-center">
           <div className="mb-10">
-            <Logo size={48} light />
+            <Logo size={60} light />
           </div>
 
           <h1 className="font-display text-[42px] leading-tight mb-4 text-white">
@@ -83,7 +83,7 @@ const Login = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-background">
         <div className="w-full max-w-md bg-card rounded-3xl shadow-card p-8 lg:p-10 animate-fade-in">
           <div className="lg:hidden flex justify-center mb-8">
-            <Logo size={48} />
+            <Logo size={56} />
           </div>
 
           <h2 className="font-display text-[26px] text-foreground mb-1">
