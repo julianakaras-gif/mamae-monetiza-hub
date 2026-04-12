@@ -47,7 +47,7 @@ const BottomNav = () => {
           color: location.pathname === `/chat/${SERENA.id}` ? "#C6A86C" : "rgba(255,255,255,0.7)",
         }}
       >
-        <span className="text-lg leading-none">💛</span>
+        <span className="text-lg leading-none">🧘‍♀️</span>
         <span>Serena</span>
       </NavLink>
     </nav>
