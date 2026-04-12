@@ -409,6 +409,8 @@ const AdminPage = () => {
           </div>
         </div>
       )}
+
+      <CreateAlunaModal open={modalOpen} onClose={() => setModalOpen(false)} onSuccess={loadData} />
     </div>
   );
 };
