@@ -55,7 +55,7 @@ const Chat = () => {
         phase: {
           id: 0,
           name: "Apoio",
-          emoji: "💛",
+          emoji: "🧘‍♀️",
           color: SERENA.color,
           sub: "",
           agents: [],

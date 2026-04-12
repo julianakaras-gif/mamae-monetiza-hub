@@ -39,7 +39,7 @@ const SerenaFAB = () => {
         }}
         title="Serena"
       >
-        💛
+        🧘‍♀️
       </button>
     </div>
   );
