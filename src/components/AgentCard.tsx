@@ -65,6 +65,11 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
 
       <div className="flex-1 min-w-0">
         <p className="font-display text-sm text-foreground">{agent.name}</p>
+        {agent.id === "serena" && (
+          <p style={{ fontFamily: "'Instrument Sans', sans-serif", fontSize: 12, color: "#6E9876" }}>
+            Apoio emocional &amp; Mindset
+          </p>
+        )}
         <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 hidden sm:block">{agent.desc}</p>
       </div>
