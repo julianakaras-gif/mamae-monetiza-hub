@@ -37,6 +37,7 @@ const AdminPage = () => {
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [selectedAluna, setSelectedAluna] = useState<Aluna | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     if (isAdmin) loadData();
@@ -142,13 +143,22 @@ const AdminPage = () => {
               {alunas.length} aluna{alunas.length !== 1 ? "s" : ""} cadastrada{alunas.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <button
-            onClick={() => navigate("/trilha")}
-            className="flex items-center gap-2 text-white font-medium transition-opacity hover:opacity-80"
-            style={{ fontSize: 14 }}
-          >
-            <ArrowLeft size={16} /> Voltar ao app
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium text-sm transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#6E9876" }}
+            >
+              <UserPlus size={16} /> Nova aluna
+            </button>
+            <button
+              onClick={() => navigate("/trilha")}
+              className="flex items-center gap-2 text-white font-medium transition-opacity hover:opacity-80"
+              style={{ fontSize: 14 }}
+            >
+              <ArrowLeft size={16} /> Voltar ao app
+            </button>
+          </div>
         </div>
       </div>
 
