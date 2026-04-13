@@ -28,7 +28,7 @@ export function useOnboarding() {
           popover: {
             title: "👋 Bem-vinda ao Prospera!",
             description:
-              "Aqui estão suas 26 especialistas. Cada uma cuida de uma parte do seu negócio — marca, conteúdo, vendas, finanças e muito mais.",
+              "Aqui estão suas 26 especialistas. Cada uma cuida de uma parte do seu negócio: marca, conteúdo, vendas, finanças e muito mais.",
             side: "right" as const,
             align: "start" as const,
           },
@@ -48,7 +48,7 @@ export function useOnboarding() {
           popover: {
             title: "📁 Seus projetos",
             description:
-              "Tudo que você construir fica salvo aqui. Pode ter um projeto para cada negócio ou ideia — as especialistas lembram de tudo.",
+              "Tudo que você construir fica salvo aqui. Pode ter um projeto para cada negócio ou ideia, e as especialistas lembram de tudo.",
             side: "right" as const,
             align: "start" as const,
           },
@@ -58,7 +58,7 @@ export function useOnboarding() {
           popover: {
             title: "✨ Pronta para começar?",
             description:
-              "Clique em 'Conversar' e inicie sua jornada. A Clara já sabe como te ajudar — mesmo que você ainda não saiba o que quer vender.",
+              "Clique em 'Conversar' e inicie sua jornada. A Clara já sabe como te ajudar, mesmo que você ainda não saiba o que quer vender.",
             side: "top" as const,
             align: "center" as const,
           },
