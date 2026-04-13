@@ -20,7 +20,7 @@ interface ProjectWithProgress {
   completedCount: number;
 }
 
-const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0);
+const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0) + 1; // +1 for Serena
 
 const LogoIcon = ({ size = 80 }: { size?: number }) => (
   <img src="/prospera-logo-claro.png" alt="Prospera" style={{ height: size, width: "auto" }} className="object-contain" />

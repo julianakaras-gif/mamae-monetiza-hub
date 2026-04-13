@@ -291,12 +291,11 @@ function ParaQuem() {
 
 function OQueE() {
   const phaseDisplay = [
-    { emoji: "🌱", name: "Descoberta", count: 2 },
-    { emoji: "🎯", name: "Estratégia", count: 4 },
+    { emoji: "🌱", name: "Descoberta", count: 3 },
+    { emoji: "🎯", name: "Estratégia", count: 3 },
     { emoji: "📦", name: "Produto", count: 5 },
-    { emoji: "✨", name: "Conteúdo", count: 7 },
-    { emoji: "💰", name: "Vendas", count: 5 },
-    { emoji: "🚀", name: "Execução", count: 2 },
+    { emoji: "✨", name: "Conteúdo", count: 8 },
+    { emoji: "💰", name: "Vendas", count: 6 },
   ];
 
   return (
