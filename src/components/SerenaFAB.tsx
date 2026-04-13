@@ -30,17 +30,22 @@ const SerenaFAB = () => {
         </div>
       )}
 
-      <button
-        onClick={() => setShowTooltip((v) => !v)}
-        className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl transition-transform hover:scale-105 active:scale-95"
-        style={{
-          background: "linear-gradient(135deg, #3A5C46, #1C3C2C)",
-          boxShadow: "0 4px 20px rgba(28, 60, 44, 0.4)",
-        }}
-        title="Serena"
-      >
-        🧘‍♀️
-      </button>
+      <div className="flex flex-col items-center gap-1">
+        <button
+          onClick={() => setShowTooltip((v) => !v)}
+          className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl transition-transform hover:scale-105 active:scale-95"
+          style={{
+            background: "linear-gradient(135deg, #3A5C46, #1C3C2C)",
+            boxShadow: "0 4px 20px rgba(28, 60, 44, 0.4)",
+          }}
+          title="Serena"
+        >
+          🧘‍♀️
+        </button>
+        <span style={{ fontFamily: "'Instrument Sans', sans-serif", fontSize: 10, color: "#6E9876" }} className="text-center leading-tight max-w-[80px]">
+          Apoio emocional & Mindset
+        </span>
+      </div>
     </div>
   );
 };
