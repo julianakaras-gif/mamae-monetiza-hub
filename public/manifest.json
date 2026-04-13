@@ -1,0 +1,25 @@
+{
+  "name": "Prospera — Método Mamãe Monetiza",
+  "short_name": "Prospera",
+  "description": "Sua trilha de especialistas em IA para construir o negócio que você merecia ter antes.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1C3C2C",
+  "theme_color": "#1C3C2C",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "education"]
+}

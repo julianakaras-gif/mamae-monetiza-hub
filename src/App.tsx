@@ -19,6 +19,7 @@ import Chat from "@/pages/Chat";
 import Configuracoes from "@/pages/Configuracoes";
 import AdminPage from "@/pages/AdminPage";
 import NotFound from "@/pages/NotFound";
+import { InstallBanner } from "@/components/InstallBanner";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <InstallBanner />
       <BrowserRouter>
         <AuthProvider>
           <ProjectProvider>
