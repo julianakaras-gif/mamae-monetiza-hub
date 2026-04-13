@@ -26,6 +26,26 @@ const Trilha = () => {
   );
   const { getAgentStatus, getPhaseStatus, getPhaseProgress, favorites, toggleFavorite, loading } = useAgentProgress();
   const { activeProject } = useProject();
+  const { startTour } = useOnboarding();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function verificarOnboarding() {
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("id", user.id)
+        .single();
+
+      if (!(data as any)?.onboarding_completed) {
+        setTimeout(() => startTour(), 800);
+      }
+    }
+    if (!loading) {
+      verificarOnboarding();
+    }
+  }, [user, loading, startTour]);
 
   if (loading) {
     return (
