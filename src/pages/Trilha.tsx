@@ -39,6 +39,7 @@ const Trilha = () => {
         .single();
 
       if (!(data as any)?.onboarding_completed) {
+        setOpenPhaseId(1); // Open first phase so Clara card is visible
         setTimeout(() => startTour(), 800);
       }
     }
