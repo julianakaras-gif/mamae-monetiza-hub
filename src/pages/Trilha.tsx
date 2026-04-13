@@ -1,9 +1,12 @@
-import { useState, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ChevronDown, Info, FolderOpen } from "lucide-react";
 import { PHASES } from "@/data/agents";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
 import { useProject } from "@/hooks/useProject";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import AgentCard from "@/components/AgentCard";
 import { Badge } from "@/components/ui/badge";
 

@@ -13,7 +13,7 @@ export function useOnboarding() {
       overlayOpacity: 0.75,
       stagePadding: 12,
       allowClose: false,
-      overlayClickNext: false,
+      
       disableActiveInteraction: true,
       nextBtnText: "Próximo →",
       prevBtnText: "← Voltar",
