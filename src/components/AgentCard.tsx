@@ -36,6 +36,7 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
 
   return (
     <div
+      id={agent.id === "clara" ? "agente-clara" : undefined}
       onClick={() => !isLocked && navigate(`/chat/${agent.id}`)}
       className={`relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-card transition-all duration-200 ${
         isLocked
@@ -90,7 +91,13 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
 
         {isLocked && <Lock size={16} className="text-muted-foreground/50" />}
         {isCompleted && <CheckCircle2 size={16} className="text-sage-mid fill-sage-pale" />}
-        {status === "unlocked" && <ChevronRight size={16} className="text-muted-foreground" />}
+        {status === "unlocked" && (
+          <ChevronRight
+            size={16}
+            id={agent.id === "clara" ? "btn-conversar-clara" : undefined}
+            className="text-muted-foreground"
+          />
+        )}
       </div>
     </div>
   );

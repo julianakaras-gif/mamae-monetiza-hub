@@ -84,7 +84,7 @@ const Trilha = () => {
         Sua jornada com os agentes de IA, fase por fase.
       </p>
 
-      <div className="space-y-3">
+      <div id="trilha-agentes" className="space-y-3">
         {PHASES.map((phase) => {
           const isOpen = openPhaseId === phase.id;
           const status = getPhaseStatus(phase);
