@@ -1,9 +1,12 @@
-import { useState, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ChevronDown, Info, FolderOpen } from "lucide-react";
 import { PHASES } from "@/data/agents";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
 import { useProject } from "@/hooks/useProject";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import AgentCard from "@/components/AgentCard";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,6 +26,27 @@ const Trilha = () => {
   );
   const { getAgentStatus, getPhaseStatus, getPhaseProgress, favorites, toggleFavorite, loading } = useAgentProgress();
   const { activeProject } = useProject();
+  const { startTour } = useOnboarding();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function verificarOnboarding() {
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("id", user.id)
+        .single();
+
+      if (!(data as any)?.onboarding_completed) {
+        setOpenPhaseId(1); // Open first phase so Clara card is visible
+        setTimeout(() => startTour(), 800);
+      }
+    }
+    if (!loading) {
+      verificarOnboarding();
+    }
+  }, [user, loading, startTour]);
 
   if (loading) {
     return (
@@ -61,7 +85,7 @@ const Trilha = () => {
         Sua jornada com os agentes de IA, fase por fase.
       </p>
 
-      <div className="space-y-3">
+      <div id="trilha-agentes" className="space-y-3">
         {PHASES.map((phase) => {
           const isOpen = openPhaseId === phase.id;
           const status = getPhaseStatus(phase);

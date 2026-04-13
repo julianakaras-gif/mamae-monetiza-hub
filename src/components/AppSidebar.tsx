@@ -7,7 +7,7 @@ import { useAgentProgress } from "@/hooks/useAgentProgress";
 const menuItems = [
   { title: "Início", path: "/home", icon: Home },
   { title: "Trilha", path: "/trilha", icon: Map },
-  { title: "Projetos", path: "/projetos", icon: FolderOpen },
+  { title: "Projetos", path: "/projetos", icon: FolderOpen, id: "sidebar-projetos" },
   { title: "Favoritos", path: "/favoritos", icon: Star },
   { title: "Configurações", path: "/configuracoes", icon: Settings },
 ];
@@ -39,6 +39,7 @@ const AppSidebar = () => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                id={(item as any).id || undefined}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors relative ${
                   isActive
                     ? "bg-[rgba(255,255,255,0.13)]"
