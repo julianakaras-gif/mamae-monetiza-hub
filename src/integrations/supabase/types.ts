@@ -144,6 +144,7 @@ export type Database = {
           is_admin: boolean
           name: string | null
           niche: string | null
+          onboarding_completed: boolean
           phone: string | null
           subscription_plan: string | null
           subscription_status: string
@@ -160,6 +161,7 @@ export type Database = {
           is_admin?: boolean
           name?: string | null
           niche?: string | null
+          onboarding_completed?: boolean
           phone?: string | null
           subscription_plan?: string | null
           subscription_status?: string
@@ -176,6 +178,7 @@ export type Database = {
           is_admin?: boolean
           name?: string | null
           niche?: string | null
+          onboarding_completed?: boolean
           phone?: string | null
           subscription_plan?: string | null
           subscription_status?: string
