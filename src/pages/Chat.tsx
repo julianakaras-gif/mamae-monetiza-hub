@@ -204,11 +204,18 @@ const Chat = () => {
 
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      const accessToken = authSession?.access_token;
+      if (!accessToken) {
+        toast.error("Sessão expirada. Faça login novamente.");
+        setIsStreaming(false);
+        return;
+      }
       const resp = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           agent_id: agentId,
@@ -279,18 +286,24 @@ const Chat = () => {
 
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/complete-agent`;
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      const accessToken = authSession?.access_token;
+      if (!accessToken) {
+        toast.error("Sessão expirada. Faça login novamente.");
+        setIsCompleting(false);
+        return;
+      }
       const resp = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           agent_id: agentId,
           agent_name: agent.name,
           agent_role: agent.role,
           session_id: sessionId,
-          user_id: user.id,
           project_id: selectedProjectId,
         }),
       });
