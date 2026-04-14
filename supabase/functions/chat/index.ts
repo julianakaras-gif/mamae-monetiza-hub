@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -154,6 +156,34 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // === AUTH: Verify the caller's JWT ===
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Não autorizado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Não autorizado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userId = claimsData.claims.sub as string;
+
     const { agent_id, session_id, message, context_outputs, project_id } = await req.json();
 
     const systemPromptBase = SYSTEM_PROMPTS[agent_id];
@@ -164,8 +194,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // Verify session belongs to this user
+    const sessionCheck = await fetch(
+      `${supabaseUrl}/rest/v1/agent_sessions?id=eq.${session_id}&user_id=eq.${userId}&select=id`,
+      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
+    );
+    const sessionData = await sessionCheck.json();
+    if (!Array.isArray(sessionData) || sessionData.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Sessão não encontrada" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Build context from previous agents
     let contextSection = "";
@@ -182,7 +222,7 @@ Deno.serve(async (req) => {
     if (CONTENT_AGENTS.includes(agent_id) && project_id) {
       const projRes = await fetch(
         `${supabaseUrl}/rest/v1/projects?id=eq.${project_id}&select=name,niche,target_audience`,
-        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+        { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
       );
       const projData = await projRes.json();
       if (projData?.[0]) {
@@ -192,7 +232,7 @@ Deno.serve(async (req) => {
 
       const outputRes = await fetch(
         `${supabaseUrl}/rest/v1/agent_outputs?project_id=eq.${project_id}&agent_id=in.(alice,kaia,talia,alma)&select=agent_id,summary`,
-        { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+        { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
       );
       const outputs = await outputRes.json();
       if (outputs?.length > 0) {
@@ -215,7 +255,7 @@ Deno.serve(async (req) => {
     // Fetch message history from Supabase
     const historyRes = await fetch(
       `${supabaseUrl}/rest/v1/messages?session_id=eq.${session_id}&order=created_at.asc`,
-      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
     );
     const history = await historyRes.json();
     const historyArray = Array.isArray(history) ? history : [];
@@ -237,8 +277,8 @@ Deno.serve(async (req) => {
     await fetch(`${supabaseUrl}/rest/v1/messages`, {
       method: "POST",
       headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
+        apikey: supabaseServiceKey,
+        Authorization: `Bearer ${supabaseServiceKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ session_id, role: "user", content: message }),
@@ -293,8 +333,8 @@ Deno.serve(async (req) => {
               await fetch(`${supabaseUrl}/rest/v1/messages`, {
                 method: "POST",
                 headers: {
-                  apikey: supabaseKey,
-                  Authorization: `Bearer ${supabaseKey}`,
+                  apikey: supabaseServiceKey,
+                  Authorization: `Bearer ${supabaseServiceKey}`,
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ session_id, role: "assistant", content: fullResponse }),

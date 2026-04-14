@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -9,12 +11,37 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { agent_id, agent_name, agent_role, session_id, user_id } = await req.json();
+    // === AUTH: Verify the caller's JWT ===
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Não autorizado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Não autorizado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userId = claimsData.claims.sub as string;
+
+    const { agent_id, agent_name, agent_role, session_id, project_id } = await req.json();
+
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
     if (!ANTHROPIC_API_KEY) {
       return new Response(
         JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }),
@@ -22,10 +49,23 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Verify session belongs to this user
+    const sessionCheck = await fetch(
+      `${supabaseUrl}/rest/v1/agent_sessions?id=eq.${session_id}&user_id=eq.${userId}&select=id`,
+      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
+    );
+    const sessionData = await sessionCheck.json();
+    if (!Array.isArray(sessionData) || sessionData.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Sessão não encontrada" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Fetch last 8 assistant messages from session
     const msgRes = await fetch(
       `${supabaseUrl}/rest/v1/messages?session_id=eq.${session_id}&role=eq.assistant&order=created_at.desc&limit=8`,
-      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+      { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
     );
     const rawMessages = await msgRes.json();
     const messagesArr = Array.isArray(rawMessages) ? rawMessages : [];
@@ -67,20 +107,20 @@ Deno.serve(async (req) => {
     await fetch(`${supabaseUrl}/rest/v1/agent_outputs`, {
       method: "POST",
       headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
+        apikey: supabaseServiceKey,
+        Authorization: `Bearer ${supabaseServiceKey}`,
         "Content-Type": "application/json",
         Prefer: "resolution=merge-duplicates",
       },
-      body: JSON.stringify({ user_id, agent_id, summary: summaryText }),
+      body: JSON.stringify({ user_id: userId, agent_id, summary: summaryText }),
     });
 
     // Mark session as completed
     await fetch(`${supabaseUrl}/rest/v1/agent_sessions?id=eq.${session_id}`, {
       method: "PATCH",
       headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
+        apikey: supabaseServiceKey,
+        Authorization: `Bearer ${supabaseServiceKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ status: "completed", completed_at: new Date().toISOString() }),
@@ -90,12 +130,12 @@ Deno.serve(async (req) => {
     await fetch(`${supabaseUrl}/rest/v1/user_progress`, {
       method: "POST",
       headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
+        apikey: supabaseServiceKey,
+        Authorization: `Bearer ${supabaseServiceKey}`,
         "Content-Type": "application/json",
         Prefer: "resolution=merge-duplicates",
       },
-      body: JSON.stringify({ user_id, agent_id, completed: true, completed_at: new Date().toISOString() }),
+      body: JSON.stringify({ user_id: userId, agent_id, completed: true, completed_at: new Date().toISOString() }),
     });
 
     return new Response(
