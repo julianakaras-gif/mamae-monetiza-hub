@@ -39,6 +39,20 @@ Deno.serve(async (req) => {
 
     const userId = claimsData.claims.sub as string;
 
+    // Check subscription status
+    const { data: profile } = await userClient
+      .from('profiles')
+      .select('subscription_status')
+      .eq('id', userId)
+      .single();
+
+    if (profile?.subscription_status !== 'active') {
+      return new Response(
+        JSON.stringify({ error: "Assinatura inativa" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { agent_id, agent_name, agent_role, session_id, project_id } = await req.json();
 
     const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
