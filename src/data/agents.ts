@@ -34,7 +34,7 @@ export const PHASES: Phase[] = [
         role: 'Reveladora de Negócios Autênticos',
         desc: 'Descobre o negócio alinhado aos seus dons genuínos e ao mercado real. Faz perguntas estratégicas e entrega 5 conceitos com análise SWOT e roadmap de 90 dias.',
         context: [],
-        welcome: 'Olá! Eu sou a Clara 🌸\n\nMeu trabalho é te ajudar a descobrir o negócio mais autêntico para você: aquele que combina seus dons reais com o que o mercado realmente precisa.\n\nPara começar, me conta: **o que você faz tão naturalmente que às vezes nem percebe que é um talento?**',
+        welcome: 'Olá! Eu sou a Clara 🌸\n\nMinha missão é te encontrar onde você está na jornada e te ajudar a descobrir, estruturar ou validar seu negócio.\n\nPara começarmos do jeito certo, **me conta: qual é o seu nome?**',
       },
       {
         id: 'aya',
