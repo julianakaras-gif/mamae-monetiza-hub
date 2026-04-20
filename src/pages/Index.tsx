@@ -387,7 +387,7 @@ function AgentesDestaque() {
                 onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,0.10)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)"; }}
               >
-                <AgentAvatar name={agent.nome} foto={agent.foto} size={80} />
+                <AgentAvatar id={agent.id} name={agent.nome} size={80} />
                 <h3 className="font-display mt-5 mb-2" style={{ fontSize: 20, color: "#1C3C2C" }}>{agent.nome}</h3>
                 <p style={{ fontSize: 12, color: "#6E9876", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 12 }}>
                   {agent.role}
@@ -423,7 +423,7 @@ function AgentesDestaque() {
                 className="bg-white p-4 flex items-center gap-3"
                 style={{ borderRadius: 16, border: "1px solid #E2D9C8", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
               >
-                <AgentAvatar name={agent.nome} foto={agent.foto} size={56} />
+                <AgentAvatar id={agent.id} name={agent.nome} size={56} />
                 <div className="min-w-0">
                   <h3 className="font-display leading-none mb-1" style={{ fontSize: 15, color: "#1C3C2C" }}>{agent.nome}</h3>
                   <p style={{ fontSize: 12, color: "#6E9876", lineHeight: 1.3 }}>{agent.role}</p>
