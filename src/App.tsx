@@ -79,6 +79,7 @@ const App = () => (
                 </PublicRoute>
               }
             />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/acesso-bloqueado" element={<AcessoBloqueado />} />
 
             <Route
