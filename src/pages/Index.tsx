@@ -89,16 +89,16 @@ function Reveal({ children, className = "" }: { children: React.ReactNode; class
 }
 
 function AgentAvatar({
+  id,
   name,
-  foto,
   size = 80,
 }: {
+  id: string;
   name: string;
-  foto?: string | null;
   size?: number;
 }) {
   const [error, setError] = useState(false);
-  const src = foto ? `${ROBO_BASE}/${foto}` : null;
+  const src = getAgentPhotoUrl(id);
 
   if (!src || error) {
     return (
