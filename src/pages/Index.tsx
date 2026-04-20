@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, LockOpen, Check, X, ChevronDown } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
 import Logo from "@/components/Logo";
+import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import {
   Accordion,
   AccordionContent,
