@@ -14,17 +14,14 @@ const scrollTo = (id: string) => {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 };
 
-const SALES_URL = (import.meta.env.VITE_SALES_PAGE_URL as string | undefined) || "";
-
-const goToSales = () => {
-  if (!SALES_URL) {
-    toast({ title: "Link de compra em breve", description: "Logo a inscrição estará disponível." });
-    return;
-  }
-  window.open(SALES_URL, "_blank", "noopener,noreferrer");
+const HOTMART_LINKS = {
+  mensal: "https://pay.hotmart.com/G105292559C?off=3v5pivbp",
+  fundadora: "https://pay.hotmart.com/G105292559C?off=rt0xc1u6",
 };
 
-const ROBO_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/robos`;
+const openHotmart = (plan: keyof typeof HOTMART_LINKS) => {
+  window.open(HOTMART_LINKS[plan], "_blank", "noopener,noreferrer");
+};
 
 const agentesDestaque = [
   { id: "clara", nome: "Clara", foto: "CLARA.png", role: "Reveladora de Negócios", frase: "Vamos descobrir o negócio que combina seus dons reais com o que o mercado precisa." },
