@@ -8,6 +8,7 @@ import { ProjectProvider } from "@/hooks/useProject";
 import { AgentProgressProvider } from "@/contexts/AgentProgressContext";
 import AppLayout from "@/components/AppLayout";
 import Login from "@/pages/Login";
+import ResetPassword from "@/pages/ResetPassword";
 import Index from "@/pages/Index";
 import AcessoBloqueado from "@/pages/AcessoBloqueado";
 import Home from "@/pages/Home";
@@ -78,6 +79,7 @@ const App = () => (
                 </PublicRoute>
               }
             />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/acesso-bloqueado" element={<AcessoBloqueado />} />
 
             <Route
