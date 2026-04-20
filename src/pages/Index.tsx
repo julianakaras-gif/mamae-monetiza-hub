@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, LockOpen, Check, X, ChevronDown } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
 import Logo from "@/components/Logo";
+import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import {
   Accordion,
   AccordionContent,
@@ -14,17 +14,14 @@ const scrollTo = (id: string) => {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 };
 
-const SALES_URL = (import.meta.env.VITE_SALES_PAGE_URL as string | undefined) || "";
-
-const goToSales = () => {
-  if (!SALES_URL) {
-    toast({ title: "Link de compra em breve", description: "Logo a inscrição estará disponível." });
-    return;
-  }
-  window.open(SALES_URL, "_blank", "noopener,noreferrer");
+const HOTMART_LINKS = {
+  mensal: "https://pay.hotmart.com/G105292559C?off=3v5pivbp",
+  fundadora: "https://pay.hotmart.com/G105292559C?off=rt0xc1u6",
 };
 
-const ROBO_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/robos`;
+const openHotmart = (plan: keyof typeof HOTMART_LINKS) => {
+  window.open(HOTMART_LINKS[plan], "_blank", "noopener,noreferrer");
+};
 
 const agentesDestaque = [
   { id: "clara", nome: "Clara", foto: "CLARA.png", role: "Reveladora de Negócios", frase: "Vamos descobrir o negócio que combina seus dons reais com o que o mercado precisa." },
@@ -92,16 +89,16 @@ function Reveal({ children, className = "" }: { children: React.ReactNode; class
 }
 
 function AgentAvatar({
+  id,
   name,
-  foto,
   size = 80,
 }: {
+  id: string;
   name: string;
-  foto?: string | null;
   size?: number;
 }) {
   const [error, setError] = useState(false);
-  const src = foto ? `${ROBO_BASE}/${foto}` : null;
+  const src = getAgentPhotoUrl(id);
 
   if (!src || error) {
     return (
@@ -390,7 +387,7 @@ function AgentesDestaque() {
                 onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,0.10)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.06)"; }}
               >
-                <AgentAvatar name={agent.nome} foto={agent.foto} size={80} />
+                <AgentAvatar id={agent.id} name={agent.nome} size={80} />
                 <h3 className="font-display mt-5 mb-2" style={{ fontSize: 20, color: "#1C3C2C" }}>{agent.nome}</h3>
                 <p style={{ fontSize: 12, color: "#6E9876", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 12 }}>
                   {agent.role}
@@ -426,7 +423,7 @@ function AgentesDestaque() {
                 className="bg-white p-4 flex items-center gap-3"
                 style={{ borderRadius: 16, border: "1px solid #E2D9C8", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
               >
-                <AgentAvatar name={agent.nome} foto={agent.foto} size={56} />
+                <AgentAvatar id={agent.id} name={agent.nome} size={56} />
                 <div className="min-w-0">
                   <h3 className="font-display leading-none mb-1" style={{ fontSize: 15, color: "#1C3C2C" }}>{agent.nome}</h3>
                   <p style={{ fontSize: 12, color: "#6E9876", lineHeight: 1.3 }}>{agent.role}</p>
@@ -602,7 +599,7 @@ function Precos() {
               </ul>
 
               <button
-                onClick={goToSales}
+                onClick={() => openHotmart("mensal")}
                 className="w-full font-bold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "#1C3C2C", color: "#FFFFFF", borderRadius: 40, padding: "14px 0", fontSize: 15 }}
               >
@@ -681,7 +678,7 @@ function Precos() {
               </ul>
 
               <button
-                onClick={goToSales}
+                onClick={() => openHotmart("fundadora")}
                 className="w-full font-bold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "#C6A86C", color: "#1C3C2C", borderRadius: 40, padding: "16px 0", fontSize: 16 }}
               >
@@ -857,7 +854,7 @@ function CtaFinal() {
             26 especialistas. Uma trilha. O negócio que você merecia ter construído antes.
           </p>
           <button
-            onClick={goToSales}
+            onClick={() => openHotmart("fundadora")}
             className="font-bold transition-opacity hover:opacity-90"
             style={{
               backgroundColor: "#C6A86C",
