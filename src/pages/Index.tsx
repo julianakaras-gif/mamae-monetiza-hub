@@ -599,7 +599,7 @@ function Precos() {
               </ul>
 
               <button
-                onClick={goToSales}
+                onClick={() => openHotmart("mensal")}
                 className="w-full font-bold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "#1C3C2C", color: "#FFFFFF", borderRadius: 40, padding: "14px 0", fontSize: 15 }}
               >
@@ -678,7 +678,7 @@ function Precos() {
               </ul>
 
               <button
-                onClick={goToSales}
+                onClick={() => openHotmart("fundadora")}
                 className="w-full font-bold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "#C6A86C", color: "#1C3C2C", borderRadius: 40, padding: "16px 0", fontSize: 16 }}
               >
@@ -854,7 +854,7 @@ function CtaFinal() {
             26 especialistas. Uma trilha. O negócio que você merecia ter construído antes.
           </p>
           <button
-            onClick={goToSales}
+            onClick={() => openHotmart("fundadora")}
             className="font-bold transition-opacity hover:opacity-90"
             style={{
               backgroundColor: "#C6A86C",
