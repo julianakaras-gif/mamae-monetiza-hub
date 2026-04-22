@@ -10,7 +10,6 @@ import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import ChatMessageContent from "@/components/ChatMessage";
-import ProjectSelector from "@/components/ProjectSelector";
 
 interface ChatMessage {
   id?: string;
@@ -24,19 +23,14 @@ const Chat = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { favorites, toggleFavorite, refetch } = useAgentProgress();
-  const { activeProjectId } = useProject();
+  const { activeProjectId, projects, loading: projectsLoading } = useProject();
 
-  const [showProjectSelector, setShowProjectSelector] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    searchParams.get("project") || activeProjectId
-  );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [initializing, setInitializing] = useState(true);
-  const [projectResolved, setProjectResolved] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -73,19 +67,18 @@ const Chat = () => {
   const totalMessages = messages.length;
   const canComplete = totalMessages >= 4 && !isSerena;
 
+  // Guard: non-Serena chats require an active project
   useEffect(() => {
-    if (!isSerena && !selectedProjectId && !projectResolved) {
-      setShowProjectSelector(true);
-    } else {
-      setProjectResolved(true);
+    if (isSerena || projectsLoading) return;
+    if (!activeProjectId) {
+      if (projects.length === 0) {
+        navigate("/home?new=1", { replace: true });
+      } else {
+        toast("Selecione um projeto para continuar.");
+        navigate("/home", { replace: true });
+      }
     }
-  }, [isSerena, selectedProjectId, projectResolved]);
-
-  const handleProjectSelect = (projectId: string | null) => {
-    setSelectedProjectId(projectId);
-    setShowProjectSelector(false);
-    setProjectResolved(true);
-  };
+  }, [isSerena, projectsLoading, activeProjectId, projects.length, navigate]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
