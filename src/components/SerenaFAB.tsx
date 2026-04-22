@@ -11,7 +11,7 @@ const SerenaFAB = () => {
   if (location.pathname === "/chat/serena") return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-2">
+    <div className="fixed top-1/2 right-4 -translate-y-1/2 z-50 flex flex-col items-end gap-2">
       {showTooltip && (
         <div className="bg-card border shadow-lg rounded-xl p-3 max-w-[220px] animate-fade-in">
           <div className="flex items-center justify-between mb-1">
