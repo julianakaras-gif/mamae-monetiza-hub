@@ -25,10 +25,23 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseUser.auth.getUser();
+
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { data: profile, error: profileError } = await supabaseUser
       .from("profiles")
       .select("is_admin")
-      .single();
+      .eq("id", user.id)
+      .maybeSingle();
 
     if (profileError || !profile?.is_admin) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
