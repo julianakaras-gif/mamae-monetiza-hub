@@ -184,11 +184,20 @@ const Chat = () => {
 
     let contextOutputs: any[] = [];
     if (agent.context.length > 0 && user) {
-      const { data: outputs } = await supabase
+      let outputsQuery = supabase
         .from("agent_outputs")
         .select("agent_id, summary")
         .eq("user_id", user.id)
         .in("agent_id", agent.context);
+
+      // Scope context outputs to the active project so each project keeps its own history
+      if (sessionProjectId) {
+        outputsQuery = outputsQuery.eq("project_id", sessionProjectId);
+      } else {
+        outputsQuery = outputsQuery.is("project_id", null);
+      }
+
+      const { data: outputs } = await outputsQuery;
 
       if (outputs) {
         contextOutputs = outputs.map((o) => {
@@ -220,7 +229,7 @@ const Chat = () => {
         body: JSON.stringify({
           agent_id: agentId,
           session_id: sessionId,
-          project_id: selectedProjectId,
+          project_id: sessionProjectId,
           message: userMessage,
           context_outputs: contextOutputs,
         }),
@@ -278,7 +287,7 @@ const Chat = () => {
     } finally {
       setIsStreaming(false);
     }
-  }, [input, sessionId, isStreaming, agentId, agent, user, selectedProjectId]);
+  }, [input, sessionId, isStreaming, agentId, agent, user, sessionProjectId]);
 
   const handleComplete = async () => {
     if (!sessionId || !user || !agent || !phase) return;
@@ -304,7 +313,7 @@ const Chat = () => {
           agent_name: agent.name,
           agent_role: agent.role,
           session_id: sessionId,
-          project_id: selectedProjectId,
+          project_id: sessionProjectId,
         }),
       });
 
@@ -335,7 +344,7 @@ const Chat = () => {
     );
   }
 
-  if (initializing && projectResolved) {
+  if (!ready || initializing) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -345,12 +354,6 @@ const Chat = () => {
 
   return (
     <>
-      <ProjectSelector
-        open={showProjectSelector}
-        onSelect={handleProjectSelect}
-        onClose={() => handleProjectSelect(null)}
-      />
-
       <div className="flex flex-col h-[100dvh] md:h-[calc(100vh)] bg-background">
         {/* Header */}
         <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 border-b bg-card shrink-0">
@@ -532,6 +535,12 @@ const Chat = () => {
               <Send size={18} />
             </button>
           </div>
+
+          {!isSerena && (
+            <p className="mt-2 text-[11px] text-muted-foreground/70 text-center">
+              Para iniciar uma nova conversa com este agente, crie um novo projeto em Início.
+            </p>
+          )}
         </div>
       </div>
     </>
