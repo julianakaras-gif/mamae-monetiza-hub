@@ -237,18 +237,24 @@ Deno.serve(async (req) => {
     // Content agents get automatic project/brand context
     let contentContext = '';
     if (CONTENT_AGENTS.includes(agent_id) && project_id) {
+      // SECURITY: Scope project lookup to the authenticated caller to prevent IDOR
       const projRes = await fetch(
-        `${supabaseUrl}/rest/v1/projects?id=eq.${project_id}&select=name,niche,target_audience`,
+        `${supabaseUrl}/rest/v1/projects?id=eq.${project_id}&user_id=eq.${userId}&select=name,niche,target_audience`,
         { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
       );
       const projData = await projRes.json();
-      if (projData?.[0]) {
-        const p = projData[0];
-        contentContext += `\n\n---\nCONTEXTO DO PROJETO:\nNome: ${p.name}${p.niche ? `\nNicho: ${p.niche}` : ''}${p.target_audience ? `\nPúblico-alvo: ${p.target_audience}` : ''}\n---\n`;
+      if (!Array.isArray(projData) || projData.length === 0) {
+        return new Response(
+          JSON.stringify({ error: "Projeto não encontrado ou acesso negado" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
+      const p = projData[0];
+      contentContext += `\n\n---\nCONTEXTO DO PROJETO:\nNome: ${p.name}${p.niche ? `\nNicho: ${p.niche}` : ''}${p.target_audience ? `\nPúblico-alvo: ${p.target_audience}` : ''}\n---\n`;
 
+      // SECURITY: Scope agent outputs to the authenticated caller's data only
       const outputRes = await fetch(
-        `${supabaseUrl}/rest/v1/agent_outputs?project_id=eq.${project_id}&agent_id=in.(alice,kaia,talia,alma)&select=agent_id,summary`,
+        `${supabaseUrl}/rest/v1/agent_outputs?project_id=eq.${project_id}&user_id=eq.${userId}&agent_id=in.(alice,kaia,talia,alma)&select=agent_id,summary`,
         { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
       );
       const outputs = await outputRes.json();
