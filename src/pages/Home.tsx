@@ -29,7 +29,7 @@ const LogoIcon = ({ size = 80 }: { size?: number }) => (
 
 const Home = () => {
   const { user } = useAuth();
-  const { projects, activeProjectId, setProject, createProject, loading: projectsLoading } = useProject();
+  const { projects, activeProjectId, setProject, createProject, loadProjects, loading: projectsLoading } = useProject();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -38,6 +38,8 @@ const Home = () => {
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Auto-open create modal when redirected with ?new=1 (e.g., from Trilha with no projects)
   useEffect(() => {
