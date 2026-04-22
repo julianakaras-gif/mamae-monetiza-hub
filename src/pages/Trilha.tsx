@@ -1,6 +1,7 @@
 import { useState, useEffect, memo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ChevronDown, Info, FolderOpen } from "lucide-react";
+import { toast } from "sonner";
 import { PHASES } from "@/data/agents";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
 import { useProject } from "@/hooks/useProject";
@@ -25,9 +26,22 @@ const Trilha = () => {
     returnPhase ? Number(returnPhase) : null
   );
   const { getAgentStatus, getPhaseStatus, getPhaseProgress, favorites, toggleFavorite, loading } = useAgentProgress();
-  const { activeProject } = useProject();
+  const { activeProject, activeProjectId, projects, loading: projectsLoading } = useProject();
   const { startTour } = useOnboarding();
   const { user } = useAuth();
+
+  // Guard: never render Trilha without an active project
+  useEffect(() => {
+    if (projectsLoading) return;
+    if (!activeProjectId) {
+      if (projects.length === 0) {
+        navigate("/home?new=1", { replace: true });
+      } else {
+        toast("Selecione um projeto para continuar.");
+        navigate("/home", { replace: true });
+      }
+    }
+  }, [projectsLoading, activeProjectId, projects.length, navigate]);
 
   useEffect(() => {
     async function verificarOnboarding() {
@@ -43,12 +57,12 @@ const Trilha = () => {
         setTimeout(() => startTour(), 800);
       }
     }
-    if (!loading) {
+    if (!loading && activeProjectId) {
       verificarOnboarding();
     }
-  }, [user, loading, startTour]);
+  }, [user, loading, activeProjectId, startTour]);
 
-  if (loading) {
+  if (projectsLoading || loading || !activeProjectId) {
     return (
       <div className="p-8 flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
