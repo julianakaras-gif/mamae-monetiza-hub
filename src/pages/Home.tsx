@@ -296,6 +296,45 @@ const Home = () => {
         creating={creating}
         onCreate={handleCreate}
       />
+
+      <Dialog open={!!deleteTarget} onOpenChange={(v) => !v && !deleting && setDeleteTarget(null)}>
+        <DialogContent
+          className="bg-white p-8"
+          style={{ borderRadius: 20, maxWidth: 420 }}
+        >
+          <DialogHeader>
+            <DialogTitle className="font-display" style={{ fontSize: 22, color: "#1C3C2C" }}>
+              Deletar projeto
+            </DialogTitle>
+          </DialogHeader>
+          <p className="mt-2" style={{ fontSize: 15, color: "#6E9876", lineHeight: 1.5 }}>
+            Tem certeza? Isso apagará todas as conversas e o progresso deste projeto. Essa ação não pode ser desfeita.
+          </p>
+          <div className="flex gap-3 mt-5">
+            <button
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+              className="flex-1 py-2.5 font-medium transition-all hover:opacity-80 disabled:opacity-50"
+              style={{ color: "#6E9876", fontSize: 15 }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="flex-1 py-2.5 font-medium transition-all hover:opacity-90 disabled:opacity-50"
+              style={{
+                backgroundColor: "#FCE8E6",
+                color: "#B85450",
+                borderRadius: 12,
+                fontSize: 15,
+              }}
+            >
+              {deleting ? "Deletando..." : "Deletar projeto"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
