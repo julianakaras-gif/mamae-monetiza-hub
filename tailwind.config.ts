@@ -61,10 +61,11 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        "sage-dark": "#1C3C2C",
-        "sage-mid": "#3A5C46",
-        "sage-light": "#6E9876",
-        "sage-pale": "#B6D0BE",
+        "sage-dark": "#1A4540",
+        "sage-mid": "#276E5E",
+        "sage-light": "#469580",
+        "sage-pale": "#A8D4CB",
+        "sage-xlight": "#E0F2EE",
         gold: {
           DEFAULT: "#C6A86C",
           light: "#DEC888",
@@ -74,6 +75,7 @@ export default {
           dark: "#EDE5D2",
         },
         "warm-brown": "#7A5535",
+        "border-color": "#C8DDD9",
       },
       borderRadius: {
         lg: "var(--radius)",
