@@ -194,7 +194,7 @@ const Home = () => {
           return (
             <div
               key={p.id}
-              className="relative bg-white p-6 transition-all duration-200 hover:-translate-y-[3px]"
+              className="group relative bg-white p-6 transition-all duration-200 hover:-translate-y-[3px]"
               style={{
                 borderRadius: 20,
                 border: "1px solid #E2D9C8",
@@ -202,10 +202,23 @@ const Home = () => {
               onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)")}
               onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
             >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteTarget({ id: p.id, name: p.name });
+                }}
+                aria-label="Deletar projeto"
+                className="absolute top-3 right-3 p-1.5 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity hover:bg-red-50"
+                style={{ color: "#B85450" }}
+              >
+                <Trash2 size={16} />
+              </button>
+
               {isActive && (
                 <span
-                  className="absolute top-4 right-4 font-medium"
+                  className="absolute top-4 font-medium"
                   style={{
+                    right: 44,
                     backgroundColor: "#B6D0BE",
                     color: "#1C3C2C",
                     borderRadius: 20,
