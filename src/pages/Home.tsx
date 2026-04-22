@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, FolderOpen } from "lucide-react";
+import { Plus, FolderOpen, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
 import { PHASES } from "@/data/agents";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
