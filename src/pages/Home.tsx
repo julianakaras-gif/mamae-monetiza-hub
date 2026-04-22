@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, FolderOpen } from "lucide-react";
+import { Plus, FolderOpen, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
 import { PHASES } from "@/data/agents";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +29,7 @@ const LogoIcon = ({ size = 80 }: { size?: number }) => (
 
 const Home = () => {
   const { user } = useAuth();
-  const { projects, activeProjectId, setProject, createProject, loading: projectsLoading } = useProject();
+  const { projects, activeProjectId, setProject, createProject, loadProjects, loading: projectsLoading } = useProject();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -37,6 +38,8 @@ const Home = () => {
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Auto-open create modal when redirected with ?new=1 (e.g., from Trilha with no projects)
   useEffect(() => {
@@ -86,6 +89,25 @@ const Home = () => {
   function handleOpenProject(projectId: string) {
     setProject(projectId);
     navigate("/trilha");
+  }
+
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("projects").delete().eq("id", deleteTarget.id);
+    if (error) {
+      toast.error("Erro ao deletar projeto");
+      setDeleting(false);
+      return;
+    }
+    if (activeProjectId === deleteTarget.id) {
+      localStorage.removeItem("mamae_active_project_id");
+    }
+    toast.success("Projeto deletado");
+    setDeleteTarget(null);
+    setDeleting(false);
+    await loadProjects();
+    await loadProgress();
   }
 
   if (projectsLoading) {
@@ -172,7 +194,7 @@ const Home = () => {
           return (
             <div
               key={p.id}
-              className="relative bg-white p-6 transition-all duration-200 hover:-translate-y-[3px]"
+              className="group relative bg-white p-6 transition-all duration-200 hover:-translate-y-[3px]"
               style={{
                 borderRadius: 20,
                 border: "1px solid #E2D9C8",
@@ -180,10 +202,23 @@ const Home = () => {
               onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)")}
               onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
             >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteTarget({ id: p.id, name: p.name });
+                }}
+                aria-label="Deletar projeto"
+                className="absolute top-3 right-3 p-1.5 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity hover:bg-red-50"
+                style={{ color: "#B85450" }}
+              >
+                <Trash2 size={16} />
+              </button>
+
               {isActive && (
                 <span
-                  className="absolute top-4 right-4 font-medium"
+                  className="absolute top-4 font-medium"
                   style={{
+                    right: 44,
                     backgroundColor: "#B6D0BE",
                     color: "#1C3C2C",
                     borderRadius: 20,
@@ -261,6 +296,45 @@ const Home = () => {
         creating={creating}
         onCreate={handleCreate}
       />
+
+      <Dialog open={!!deleteTarget} onOpenChange={(v) => !v && !deleting && setDeleteTarget(null)}>
+        <DialogContent
+          className="bg-white p-8"
+          style={{ borderRadius: 20, maxWidth: 420 }}
+        >
+          <DialogHeader>
+            <DialogTitle className="font-display" style={{ fontSize: 22, color: "#1C3C2C" }}>
+              Deletar projeto
+            </DialogTitle>
+          </DialogHeader>
+          <p className="mt-2" style={{ fontSize: 15, color: "#6E9876", lineHeight: 1.5 }}>
+            Tem certeza? Isso apagará todas as conversas e o progresso deste projeto. Essa ação não pode ser desfeita.
+          </p>
+          <div className="flex gap-3 mt-5">
+            <button
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+              className="flex-1 py-2.5 font-medium transition-all hover:opacity-80 disabled:opacity-50"
+              style={{ color: "#6E9876", fontSize: 15 }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="flex-1 py-2.5 font-medium transition-all hover:opacity-90 disabled:opacity-50"
+              style={{
+                backgroundColor: "#FCE8E6",
+                color: "#B85450",
+                borderRadius: 12,
+                fontSize: 15,
+              }}
+            >
+              {deleting ? "Deletando..." : "Deletar projeto"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
