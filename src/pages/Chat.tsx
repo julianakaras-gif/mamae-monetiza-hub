@@ -10,7 +10,6 @@ import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import ChatMessageContent from "@/components/ChatMessage";
-import ProjectSelector from "@/components/ProjectSelector";
 
 interface ChatMessage {
   id?: string;
@@ -24,19 +23,14 @@ const Chat = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { favorites, toggleFavorite, refetch } = useAgentProgress();
-  const { activeProjectId } = useProject();
+  const { activeProjectId, projects, loading: projectsLoading } = useProject();
 
-  const [showProjectSelector, setShowProjectSelector] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    searchParams.get("project") || activeProjectId
-  );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [initializing, setInitializing] = useState(true);
-  const [projectResolved, setProjectResolved] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -73,19 +67,18 @@ const Chat = () => {
   const totalMessages = messages.length;
   const canComplete = totalMessages >= 4 && !isSerena;
 
+  // Guard: non-Serena chats require an active project
   useEffect(() => {
-    if (!isSerena && !selectedProjectId && !projectResolved) {
-      setShowProjectSelector(true);
-    } else {
-      setProjectResolved(true);
+    if (isSerena || projectsLoading) return;
+    if (!activeProjectId) {
+      if (projects.length === 0) {
+        navigate("/home?new=1", { replace: true });
+      } else {
+        toast("Selecione um projeto para continuar.");
+        navigate("/home", { replace: true });
+      }
     }
-  }, [isSerena, selectedProjectId, projectResolved]);
-
-  const handleProjectSelect = (projectId: string | null) => {
-    setSelectedProjectId(projectId);
-    setShowProjectSelector(false);
-    setProjectResolved(true);
-  };
+  }, [isSerena, projectsLoading, activeProjectId, projects.length, navigate]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -98,8 +91,12 @@ const Chat = () => {
     }
   }, [input]);
 
+  // For non-Serena agents we require a project; Serena runs free.
+  const sessionProjectId = isSerena ? null : activeProjectId;
+  const ready = isSerena || !!activeProjectId;
+
   useEffect(() => {
-    if (!user || !agentId || !agent || !projectResolved) return;
+    if (!user || !agentId || !agent || !ready) return;
 
     const init = async () => {
       setInitializing(true);
@@ -113,8 +110,10 @@ const Chat = () => {
         .order("started_at", { ascending: false })
         .limit(1);
 
-      if (selectedProjectId) {
-        query = query.eq("project_id", selectedProjectId);
+      if (sessionProjectId) {
+        query = query.eq("project_id", sessionProjectId);
+      } else {
+        query = query.is("project_id", null);
       }
 
       const { data: existingSessions } = await query;
@@ -142,7 +141,7 @@ const Chat = () => {
         }
       } else {
         const insertData: any = { user_id: user.id, agent_id: agentId };
-        if (selectedProjectId) insertData.project_id = selectedProjectId;
+        if (sessionProjectId) insertData.project_id = sessionProjectId;
 
         const { data: newSession, error } = await supabase
           .from("agent_sessions")
@@ -172,7 +171,8 @@ const Chat = () => {
     };
 
     init();
-  }, [user, agentId, projectResolved, selectedProjectId]);
+  }, [user, agentId, ready, sessionProjectId]);
+
 
   const sendMessage = useCallback(async () => {
     if (!input.trim() || !sessionId || isStreaming || !agent) return;
@@ -184,11 +184,20 @@ const Chat = () => {
 
     let contextOutputs: any[] = [];
     if (agent.context.length > 0 && user) {
-      const { data: outputs } = await supabase
+      let outputsQuery = supabase
         .from("agent_outputs")
         .select("agent_id, summary")
         .eq("user_id", user.id)
         .in("agent_id", agent.context);
+
+      // Scope context outputs to the active project so each project keeps its own history
+      if (sessionProjectId) {
+        outputsQuery = outputsQuery.eq("project_id", sessionProjectId);
+      } else {
+        outputsQuery = outputsQuery.is("project_id", null);
+      }
+
+      const { data: outputs } = await outputsQuery;
 
       if (outputs) {
         contextOutputs = outputs.map((o) => {
@@ -220,7 +229,7 @@ const Chat = () => {
         body: JSON.stringify({
           agent_id: agentId,
           session_id: sessionId,
-          project_id: selectedProjectId,
+          project_id: sessionProjectId,
           message: userMessage,
           context_outputs: contextOutputs,
         }),
@@ -278,7 +287,7 @@ const Chat = () => {
     } finally {
       setIsStreaming(false);
     }
-  }, [input, sessionId, isStreaming, agentId, agent, user, selectedProjectId]);
+  }, [input, sessionId, isStreaming, agentId, agent, user, sessionProjectId]);
 
   const handleComplete = async () => {
     if (!sessionId || !user || !agent || !phase) return;
@@ -304,7 +313,7 @@ const Chat = () => {
           agent_name: agent.name,
           agent_role: agent.role,
           session_id: sessionId,
-          project_id: selectedProjectId,
+          project_id: sessionProjectId,
         }),
       });
 
@@ -335,7 +344,7 @@ const Chat = () => {
     );
   }
 
-  if (initializing && projectResolved) {
+  if (!ready || initializing) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -345,12 +354,6 @@ const Chat = () => {
 
   return (
     <>
-      <ProjectSelector
-        open={showProjectSelector}
-        onSelect={handleProjectSelect}
-        onClose={() => handleProjectSelect(null)}
-      />
-
       <div className="flex flex-col h-[100dvh] md:h-[calc(100vh)] bg-background">
         {/* Header */}
         <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 border-b bg-card shrink-0">
@@ -532,6 +535,12 @@ const Chat = () => {
               <Send size={18} />
             </button>
           </div>
+
+          {!isSerena && (
+            <p className="mt-2 text-[11px] text-muted-foreground/70 text-center">
+              Para iniciar uma nova conversa com este agente, crie um novo projeto em Início.
+            </p>
+          )}
         </div>
       </div>
     </>
