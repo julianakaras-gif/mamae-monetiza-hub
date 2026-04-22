@@ -64,8 +64,12 @@ Deno.serve(async (req) => {
     }
 
     // Verify session belongs to this user
+    const sessionProjectFilter = project_id
+      ? `&project_id=eq.${project_id}`
+      : `&project_id=is.null`;
+
     const sessionCheck = await fetch(
-      `${supabaseUrl}/rest/v1/agent_sessions?id=eq.${session_id}&user_id=eq.${userId}&select=id`,
+      `${supabaseUrl}/rest/v1/agent_sessions?id=eq.${session_id}&user_id=eq.${userId}${sessionProjectFilter}&select=id`,
       { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
     );
     const sessionData = await sessionCheck.json();
@@ -117,17 +121,39 @@ Deno.serve(async (req) => {
     const summaryData = await summaryRes.json();
     const summaryText = summaryData.content?.[0]?.text || "";
 
-    // Upsert agent_outputs (per project)
-    await fetch(`${supabaseUrl}/rest/v1/agent_outputs?on_conflict=user_id,agent_id,project_id`, {
-      method: "POST",
-      headers: {
-        apikey: supabaseServiceKey,
-        Authorization: `Bearer ${supabaseServiceKey}`,
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates",
-      },
-      body: JSON.stringify({ user_id: userId, agent_id, project_id: project_id ?? null, summary: summaryText }),
-    });
+    const projectOutputFilter = project_id
+      ? `project_id=eq.${project_id}`
+      : `project_id=is.null`;
+
+    const existingOutputRes = await fetch(
+      `${supabaseUrl}/rest/v1/agent_outputs?user_id=eq.${userId}&agent_id=eq.${agent_id}&${projectOutputFilter}&select=id&limit=1`,
+      {
+        headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` },
+      }
+    );
+    const existingOutput = await existingOutputRes.json();
+
+    if (Array.isArray(existingOutput) && existingOutput.length > 0) {
+      await fetch(`${supabaseUrl}/rest/v1/agent_outputs?id=eq.${existingOutput[0].id}`, {
+        method: "PATCH",
+        headers: {
+          apikey: supabaseServiceKey,
+          Authorization: `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ summary: summaryText }),
+      });
+    } else {
+      await fetch(`${supabaseUrl}/rest/v1/agent_outputs`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseServiceKey,
+          Authorization: `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_id: userId, agent_id, project_id: project_id ?? null, summary: summaryText }),
+      });
+    }
 
     // Mark session as completed
     await fetch(`${supabaseUrl}/rest/v1/agent_sessions?id=eq.${session_id}`, {
@@ -140,30 +166,61 @@ Deno.serve(async (req) => {
       body: JSON.stringify({ status: "completed", completed_at: new Date().toISOString() }),
     });
 
-    // Upsert user_progress (per project) so each project tracks its own completion
-    const upsertProgressRes = await fetch(
-      `${supabaseUrl}/rest/v1/user_progress?on_conflict=user_id,agent_id,project_id`,
+    const progressCompletedAt = new Date().toISOString();
+    const projectProgressFilter = project_id
+      ? `project_id=eq.${project_id}`
+      : `project_id=is.null`;
+
+    const existingProgressRes = await fetch(
+      `${supabaseUrl}/rest/v1/user_progress?user_id=eq.${userId}&agent_id=eq.${agent_id}&${projectProgressFilter}&select=id&limit=1`,
       {
+        headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` },
+      }
+    );
+    const existingProgress = await existingProgressRes.json();
+
+    if (Array.isArray(existingProgress) && existingProgress.length > 0) {
+      const updateProgressRes = await fetch(
+        `${supabaseUrl}/rest/v1/user_progress?id=eq.${existingProgress[0].id}`,
+        {
+          method: "PATCH",
+          headers: {
+            apikey: supabaseServiceKey,
+            Authorization: `Bearer ${supabaseServiceKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            completed: true,
+            completed_at: progressCompletedAt,
+          }),
+        }
+      );
+
+      if (!updateProgressRes.ok) {
+        const errText = await updateProgressRes.text();
+        console.error("user_progress update error:", updateProgressRes.status, errText);
+      }
+    } else {
+      const insertProgressRes = await fetch(`${supabaseUrl}/rest/v1/user_progress`, {
         method: "POST",
         headers: {
           apikey: supabaseServiceKey,
           Authorization: `Bearer ${supabaseServiceKey}`,
           "Content-Type": "application/json",
-          Prefer: "resolution=merge-duplicates",
         },
         body: JSON.stringify({
           user_id: userId,
           agent_id,
           project_id: project_id ?? null,
           completed: true,
-          completed_at: new Date().toISOString(),
+          completed_at: progressCompletedAt,
         }),
-      }
-    );
+      });
 
-    if (!upsertProgressRes.ok) {
-      const errText = await upsertProgressRes.text();
-      console.error("user_progress upsert error:", upsertProgressRes.status, errText);
+      if (!insertProgressRes.ok) {
+        const errText = await insertProgressRes.text();
+        console.error("user_progress insert error:", insertProgressRes.status, errText);
+      }
     }
 
     return new Response(
