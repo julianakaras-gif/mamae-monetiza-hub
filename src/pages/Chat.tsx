@@ -103,12 +103,11 @@ const Chat = () => {
 
       let query = supabase
         .from("agent_sessions")
-        .select("id")
+        .select("id, status")
         .eq("user_id", user.id)
         .eq("agent_id", agentId)
-        .eq("status", "active")
         .order("started_at", { ascending: false })
-        .limit(1);
+        .limit(10);
 
       if (sessionProjectId) {
         query = query.eq("project_id", sessionProjectId);
@@ -121,12 +120,28 @@ const Chat = () => {
       let sid: string;
 
       if (existingSessions && existingSessions.length > 0) {
-        sid = existingSessions[0].id;
-        const { data: historyMessages } = await supabase
-          .from("messages")
-          .select("id, role, content")
-          .eq("session_id", sid)
-          .order("created_at", { ascending: true });
+        const sessionsWithHistory = await Promise.all(
+          existingSessions.map(async (session) => {
+            const { data: historyMessages } = await supabase
+              .from("messages")
+              .select("id, role, content")
+              .eq("session_id", session.id)
+              .order("created_at", { ascending: true });
+
+            return {
+              session,
+              historyMessages: historyMessages ?? [],
+            };
+          })
+        );
+
+        const selectedSession =
+          sessionsWithHistory.find(({ historyMessages }) =>
+            historyMessages.some((message) => message.role === "user")
+          ) ?? sessionsWithHistory[0];
+
+        sid = selectedSession.session.id;
+        const historyMessages = selectedSession.historyMessages;
 
         if (historyMessages && historyMessages.length > 0) {
           setMessages(
