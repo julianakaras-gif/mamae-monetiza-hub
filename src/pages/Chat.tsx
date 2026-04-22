@@ -91,8 +91,12 @@ const Chat = () => {
     }
   }, [input]);
 
+  // For non-Serena agents we require a project; Serena runs free.
+  const sessionProjectId = isSerena ? null : activeProjectId;
+  const ready = isSerena || !!activeProjectId;
+
   useEffect(() => {
-    if (!user || !agentId || !agent || !projectResolved) return;
+    if (!user || !agentId || !agent || !ready) return;
 
     const init = async () => {
       setInitializing(true);
@@ -106,8 +110,10 @@ const Chat = () => {
         .order("started_at", { ascending: false })
         .limit(1);
 
-      if (selectedProjectId) {
-        query = query.eq("project_id", selectedProjectId);
+      if (sessionProjectId) {
+        query = query.eq("project_id", sessionProjectId);
+      } else {
+        query = query.is("project_id", null);
       }
 
       const { data: existingSessions } = await query;
@@ -135,7 +141,7 @@ const Chat = () => {
         }
       } else {
         const insertData: any = { user_id: user.id, agent_id: agentId };
-        if (selectedProjectId) insertData.project_id = selectedProjectId;
+        if (sessionProjectId) insertData.project_id = sessionProjectId;
 
         const { data: newSession, error } = await supabase
           .from("agent_sessions")
@@ -165,7 +171,8 @@ const Chat = () => {
     };
 
     init();
-  }, [user, agentId, projectResolved, selectedProjectId]);
+  }, [user, agentId, ready, sessionProjectId]);
+
 
   const sendMessage = useCallback(async () => {
     if (!input.trim() || !sessionId || isStreaming || !agent) return;
