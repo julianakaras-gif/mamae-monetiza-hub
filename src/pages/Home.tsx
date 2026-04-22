@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Plus, FolderOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,12 +30,24 @@ const Home = () => {
   const { user } = useAuth();
   const { projects, activeProjectId, setProject, createProject, loading: projectsLoading } = useProject();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [projectProgress, setProjectProgress] = useState<Record<string, number>>({});
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
+
+  // Auto-open create modal when redirected with ?new=1 (e.g., from Trilha with no projects)
+  useEffect(() => {
+    if (projectsLoading) return;
+    if (searchParams.get("new") === "1") {
+      setShowModal(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete("new");
+      setSearchParams(next, { replace: true });
+    }
+  }, [projectsLoading, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!user || projects.length === 0) return;
