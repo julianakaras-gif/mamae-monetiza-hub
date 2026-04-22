@@ -91,6 +91,25 @@ const Home = () => {
     navigate("/trilha");
   }
 
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("projects").delete().eq("id", deleteTarget.id);
+    if (error) {
+      toast.error("Erro ao deletar projeto");
+      setDeleting(false);
+      return;
+    }
+    if (activeProjectId === deleteTarget.id) {
+      localStorage.removeItem("mamae_active_project_id");
+    }
+    toast.success("Projeto deletado");
+    setDeleteTarget(null);
+    setDeleting(false);
+    await loadProjects();
+    await loadProgress();
+  }
+
   if (projectsLoading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
