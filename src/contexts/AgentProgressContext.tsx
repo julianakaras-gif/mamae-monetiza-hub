@@ -25,6 +25,12 @@ export function AgentProgressProvider({ children }: { children: React.ReactNode 
 
     if (!activeProjectId || !user) return;
 
+    const handlePayload = (payload: any) => {
+      if (payload.new?.completed && payload.new?.agent_id) {
+        setRealtimeCompleted((prev) => new Set([...prev, payload.new.agent_id]));
+      }
+    };
+
     const channel = supabase
       .channel(`agent-progress-${activeProjectId}`)
       .on(
@@ -35,11 +41,17 @@ export function AgentProgressProvider({ children }: { children: React.ReactNode 
           table: "user_progress",
           filter: `project_id=eq.${activeProjectId}`,
         },
-        (payload: any) => {
-          if (payload.new?.completed && payload.new?.agent_id) {
-            setRealtimeCompleted((prev) => new Set([...prev, payload.new.agent_id]));
-          }
-        }
+        handlePayload
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "user_progress",
+          filter: `project_id=eq.${activeProjectId}`,
+        },
+        handlePayload
       )
       .subscribe();
 

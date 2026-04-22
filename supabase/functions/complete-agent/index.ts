@@ -117,8 +117,8 @@ Deno.serve(async (req) => {
     const summaryData = await summaryRes.json();
     const summaryText = summaryData.content?.[0]?.text || "";
 
-    // Upsert agent_outputs
-    await fetch(`${supabaseUrl}/rest/v1/agent_outputs`, {
+    // Upsert agent_outputs (per project)
+    await fetch(`${supabaseUrl}/rest/v1/agent_outputs?on_conflict=user_id,agent_id,project_id`, {
       method: "POST",
       headers: {
         apikey: supabaseServiceKey,
@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
         Prefer: "resolution=merge-duplicates",
       },
-      body: JSON.stringify({ user_id: userId, agent_id, summary: summaryText }),
+      body: JSON.stringify({ user_id: userId, agent_id, project_id: project_id ?? null, summary: summaryText }),
     });
 
     // Mark session as completed
@@ -140,17 +140,31 @@ Deno.serve(async (req) => {
       body: JSON.stringify({ status: "completed", completed_at: new Date().toISOString() }),
     });
 
-    // Upsert user_progress
-    await fetch(`${supabaseUrl}/rest/v1/user_progress`, {
-      method: "POST",
-      headers: {
-        apikey: supabaseServiceKey,
-        Authorization: `Bearer ${supabaseServiceKey}`,
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates",
-      },
-      body: JSON.stringify({ user_id: userId, agent_id, completed: true, completed_at: new Date().toISOString() }),
-    });
+    // Upsert user_progress (per project) so each project tracks its own completion
+    const upsertProgressRes = await fetch(
+      `${supabaseUrl}/rest/v1/user_progress?on_conflict=user_id,agent_id,project_id`,
+      {
+        method: "POST",
+        headers: {
+          apikey: supabaseServiceKey,
+          Authorization: `Bearer ${supabaseServiceKey}`,
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          agent_id,
+          project_id: project_id ?? null,
+          completed: true,
+          completed_at: new Date().toISOString(),
+        }),
+      }
+    );
+
+    if (!upsertProgressRes.ok) {
+      const errText = await upsertProgressRes.text();
+      console.error("user_progress upsert error:", upsertProgressRes.status, errText);
+    }
 
     return new Response(
       JSON.stringify({ success: true, summary: summaryText }),
