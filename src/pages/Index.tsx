@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Lock, LockOpen, Check, X, ChevronDown } from "lucide-react";
 import Logo from "@/components/Logo";
 import { getAgentPhotoUrl } from "@/data/agentPhotos";
@@ -903,6 +904,9 @@ function Footer() {
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <link rel="canonical" href="https://prospera-mamaemonetiza.lovable.app/" />
+      </Helmet>
       <Navbar />
       <Hero />
       <Dor />

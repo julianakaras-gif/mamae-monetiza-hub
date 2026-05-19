@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Plus, FolderOpen, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -165,6 +166,13 @@ const Home = () => {
   // Projects list
   return (
     <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
+      <Helmet>
+        <title>Meus projetos | Prospera</title>
+        <meta name="description" content="Gerencie seus projetos no Prospera e acompanhe a evolução da sua trilha com os 26 agentes." />
+        <link rel="canonical" href="https://prospera-mamaemonetiza.lovable.app/home" />
+        <meta property="og:url" content="https://prospera-mamaemonetiza.lovable.app/home" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display" style={{ fontSize: 34, color: "#1C3C2C" }}>
           Meus projetos

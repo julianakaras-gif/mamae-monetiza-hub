@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Loader2, Lock, Check } from "lucide-react";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
@@ -57,6 +58,12 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6 animate-fade-in">
+      <Helmet>
+        <title>Redefinir senha | Prospera</title>
+        <meta name="description" content="Crie uma nova senha para acessar sua conta no Prospera." />
+        <link rel="canonical" href="https://prospera-mamaemonetiza.lovable.app/reset-password" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="w-full max-w-md bg-card rounded-3xl shadow-card p-8 lg:p-10">
         <div className="flex justify-center mb-6">
           <Logo size={56} />
