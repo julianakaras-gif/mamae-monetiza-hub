@@ -64,9 +64,9 @@ const ResetPassword = () => {
 
         {validSession === false && (
           <>
-            <h2 className="font-display text-[24px] text-foreground mb-2 text-center">
+            <h1 className="font-display text-[24px] text-foreground mb-2 text-center">
               Link inválido ou expirado
-            </h2>
+            </h1>
             <p className="text-sm text-muted-foreground text-center mb-6">
               Este link de recuperação não é mais válido. Solicite um novo link na tela de login.
             </p>
@@ -90,9 +90,9 @@ const ResetPassword = () => {
             <div className="w-14 h-14 rounded-full bg-sage-pale/40 flex items-center justify-center mx-auto mb-4">
               <Lock size={26} className="text-sage-dark" />
             </div>
-            <h2 className="font-display text-[24px] text-foreground mb-2 text-center">
+            <h1 className="font-display text-[24px] text-foreground mb-2 text-center">
               Crie sua nova senha
-            </h2>
+            </h1>
             <p className="text-sm text-muted-foreground text-center mb-6">
               Escolha uma senha segura com no mínimo 6 caracteres.
             </p>
@@ -105,10 +105,11 @@ const ResetPassword = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+                <label htmlFor="reset-password-new" className="block text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
                   Nova senha
                 </label>
                 <input
+                  id="reset-password-new"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -120,10 +121,11 @@ const ResetPassword = () => {
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+                <label htmlFor="reset-password-confirm" className="block text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">
                   Confirme a nova senha
                 </label>
                 <input
+                  id="reset-password-confirm"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
