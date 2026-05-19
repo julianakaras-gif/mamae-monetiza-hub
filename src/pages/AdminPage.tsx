@@ -3,8 +3,9 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useAdmin } from "@/hooks/useAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { PHASES } from "@/data/agents";
-import { ArrowLeft, Search, ChevronUp, ChevronDown, Users, FolderOpen, CheckCircle, Activity, X, UserPlus } from "lucide-react";
+import { ArrowLeft, Search, ChevronUp, ChevronDown, Users, FolderOpen, CheckCircle, Activity, X, UserPlus, Pencil } from "lucide-react";
 import CreateAlunaModal from "@/components/CreateAlunaModal";
+import EditAlunaModal from "@/components/EditAlunaModal";
 
 const ALL_AGENTS = PHASES.flatMap((p) => p.agents);
 const TOTAL_AGENTS = ALL_AGENTS.length;
@@ -38,6 +39,7 @@ const AdminPage = () => {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [selectedAluna, setSelectedAluna] = useState<Aluna | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editAluna, setEditAluna] = useState<Aluna | null>(null);
 
   useEffect(() => {
     if (isAdmin) loadData();
@@ -345,7 +347,16 @@ const AdminPage = () => {
           >
             <div className="sticky top-0 z-10 flex items-center justify-between p-5" style={{ backgroundColor: "#1C3C2C" }}>
               <h2 className="font-display text-white" style={{ fontSize: 20 }}>{selectedAluna.name || "Sem nome"}</h2>
-              <button onClick={() => setSelectedAluna(null)} className="text-white hover:opacity-80"><X size={20} /></button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setEditAluna(selectedAluna)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "#6E9876" }}
+                >
+                  <Pencil size={14} /> Editar
+                </button>
+                <button onClick={() => setSelectedAluna(null)} className="text-white hover:opacity-80"><X size={20} /></button>
+              </div>
             </div>
             <div className="p-5 space-y-5">
               {/* Info */}
@@ -411,6 +422,25 @@ const AdminPage = () => {
       )}
 
       <CreateAlunaModal open={modalOpen} onClose={() => setModalOpen(false)} onSuccess={loadData} />
+      <EditAlunaModal
+        open={!!editAluna}
+        aluna={editAluna}
+        onClose={() => setEditAluna(null)}
+        onSuccess={async () => {
+          await loadData();
+          if (editAluna) {
+            // refresh selected drawer with new data
+            const updated = (await (supabase
+              .from("profiles")
+              .select("id, name, email, phone, instagram_handle, niche, target_audience, subscription_plan, subscription_status, created_at") as any)
+              .eq("id", editAluna.id)
+              .single()).data;
+            if (updated && selectedAluna) {
+              setSelectedAluna({ ...selectedAluna, ...updated });
+            }
+          }
+        }}
+      />
     </div>
   );
 };
