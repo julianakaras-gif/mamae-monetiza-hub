@@ -908,15 +908,17 @@ const Index = () => {
         <link rel="canonical" href="https://prospera-mamaemonetiza.lovable.app/" />
       </Helmet>
       <Navbar />
-      <Hero />
-      <Dor />
-      <OQueE />
-      <AgentesDestaque />
-      <Depoimentos />
-      <Precos />
-      <ParaQuem />
-      <Faq />
-      <CtaFinal />
+      <main id="main">
+        <Hero />
+        <Dor />
+        <OQueE />
+        <AgentesDestaque />
+        <Depoimentos />
+        <Precos />
+        <ParaQuem />
+        <Faq />
+        <CtaFinal />
+      </main>
       <Footer />
     </div>
   );
