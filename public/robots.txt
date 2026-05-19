@@ -12,3 +12,14 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /home
+Disallow: /trilha
+Disallow: /projetos
+Disallow: /favoritos
+Disallow: /configuracoes
+Disallow: /chat
+Disallow: /acesso-bloqueado
+Disallow: /reset-password
+
+Sitemap: https://prospera-mamaemonetiza.lovable.app/sitemap.xml

@@ -87,7 +87,9 @@ const Projetos = () => {
       </div>
 
       <div className="flex gap-2 mb-8">
+        <label htmlFor="projetos-novo-nome" className="sr-only">Nome do novo projeto</label>
         <input
+          id="projetos-novo-nome"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -120,7 +122,7 @@ const Projetos = () => {
                 className="text-left bg-card rounded-2xl p-5 border border-border hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-bold text-foreground">{p.name}</h3>
+                  <h2 className="font-bold text-foreground">{p.name}</h2>
                   <ChevronRight size={16} className="text-muted-foreground mt-1" />
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">

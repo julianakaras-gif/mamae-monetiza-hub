@@ -9,7 +9,7 @@ const Logo = ({ size = 48, light = false }: LogoProps) => {
   return (
     <img
       src={src}
-      alt="Prospera"
+      alt="Logotipo Prospera"
       style={{ height: size, width: "auto" }}
       className="object-contain"
     />

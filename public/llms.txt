@@ -1,0 +1,10 @@
+# Prospera
+
+> Método Mamãe Monetiza: 26 agentes de IA que guiam mães empreendedoras na construção de um negócio digital do zero, com tempo, leveza e direção clara.
+
+Prospera é a plataforma do Método Mamãe Monetiza. Cada agente é especializado em uma parte do negócio (descoberta, estratégia, produto, conteúdo, vendas, execução) e os agentes compartilham contexto entre si, de modo que a aluna nunca precisa repetir o que já contou.
+
+## Pages
+
+- [Página inicial](/): Apresenta o método, os 26 agentes, depoimentos, preços e FAQ.
+- [Login](/login): Entrada para alunas ativas do Método Mamãe Monetiza.
