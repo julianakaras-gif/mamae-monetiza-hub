@@ -6,10 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 const AcessoBloqueado = () => {
   const navigate = useNavigate();
 
-  const handleQueroSerAluna = () => {
-    window.open("/", "_blank", "noopener,noreferrer");
-  };
-
   const handleJaSouAluna = async () => {
     await supabase.auth.signOut();
     navigate("/login");
@@ -34,15 +30,8 @@ const AcessoBloqueado = () => {
         </h1>
 
         <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
-          Para acessar os 26 agentes e iniciar sua trilha de transformação, você precisa ser aluna ativa do Método Mamãe Monetiza.
+          Sua conta ainda não foi liberada. Entre em contato com a equipe do Método Mamãe Monetiza para liberar seu acesso aos 26 agentes.
         </p>
-
-        <button
-          onClick={handleQueroSerAluna}
-          className="inline-block w-full py-3.5 rounded-pill bg-sage-dark text-white font-semibold text-sm hover:opacity-90 transition-opacity mb-3"
-        >
-          Quero me tornar aluna
-        </button>
 
         <button
           onClick={handleJaSouAluna}
