@@ -64,8 +64,11 @@ const Chat = () => {
   const photoUrl = agentId ? getAgentPhotoUrl(agentId) : null;
 
   const isFav = agentId ? favorites.has(agentId) : false;
-  const totalMessages = messages.length;
-  const canComplete = totalMessages >= 4 && !isSerena;
+  const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+  const canComplete =
+    !isSerena &&
+    !!lastAssistant &&
+    /concluir esta etapa/i.test(lastAssistant.content);
 
   // Guard: non-Serena chats require an active project
   useEffect(() => {
