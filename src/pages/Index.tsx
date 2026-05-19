@@ -293,7 +293,7 @@ function OQueE() {
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 items-start">
         <Reveal>
           <div>
-            <span style={{ fontSize: 12, letterSpacing: "2px", color: "#6E9876", textTransform: "uppercase", fontWeight: 600 }}>
+            <span style={{ fontSize: 12, letterSpacing: "2px", color: "#3D6B4D", textTransform: "uppercase", fontWeight: 600 }}>
               O MÉTODO
             </span>
             <h2 className="font-display mt-3 mb-6" style={{ fontSize: 38, color: "#1C3C2C", lineHeight: 1.2 }}>
@@ -345,7 +345,7 @@ function OQueE() {
                       Fase {i + 1}: {p.name}
                     </div>
                   </div>
-                  <span style={{ fontSize: 13, color: "#6E9876" }}>
+                  <span style={{ fontSize: 13, color: "#3D6B4D" }}>
                     {p.count} {p.count === 1 ? "agente" : "agentes"} {p.suffix || ""}
                   </span>
                 </div>
@@ -390,7 +390,7 @@ function AgentesDestaque() {
               >
                 <AgentAvatar id={agent.id} name={agent.nome} size={80} />
                 <h3 className="font-display mt-5 mb-2" style={{ fontSize: 20, color: "#1C3C2C" }}>{agent.nome}</h3>
-                <p style={{ fontSize: 12, color: "#6E9876", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 12 }}>
+                <p style={{ fontSize: 12, color: "#3D6B4D", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 12 }}>
                   {agent.role}
                 </p>
                 <p style={{ fontSize: 14, color: "#3A5C46", lineHeight: 1.6, fontStyle: "italic" }}>
@@ -427,7 +427,7 @@ function AgentesDestaque() {
                 <AgentAvatar id={agent.id} name={agent.nome} size={56} />
                 <div className="min-w-0">
                   <h3 className="font-display leading-none mb-1" style={{ fontSize: 15, color: "#1C3C2C" }}>{agent.nome}</h3>
-                  <p style={{ fontSize: 12, color: "#6E9876", lineHeight: 1.3 }}>{agent.role}</p>
+                  <p style={{ fontSize: 12, color: "#3D6B4D", lineHeight: 1.3 }}>{agent.role}</p>
                 </div>
               </div>
             ))}
@@ -515,7 +515,7 @@ function Depoimentos() {
           ))}
         </div>
 
-        <p className="text-center italic mt-10" style={{ fontSize: 13, color: "#6E9876" }}>
+        <p className="text-center italic mt-10" style={{ fontSize: 13, color: "#3D6B4D" }}>
           Prints reais do grupo privado de alunas.
         </p>
       </div>
@@ -579,14 +579,14 @@ function Precos() {
                 padding: 32,
               }}
             >
-              <span style={{ fontSize: 12, color: "#6E9876", textTransform: "uppercase", letterSpacing: "1.5px", fontWeight: 600 }}>
+              <span style={{ fontSize: 12, color: "#3D6B4D", textTransform: "uppercase", letterSpacing: "1.5px", fontWeight: 600 }}>
                 MENSAL
               </span>
               <div className="mt-3">
                 <span className="font-display" style={{ fontSize: 48, color: "#1C3C2C" }}>R$ 87</span>
               </div>
               <p style={{ fontSize: 14, color: "#3A5C46", marginTop: 4 }}>por mês, cobrado mensalmente</p>
-              <p style={{ fontSize: 13, color: "#6E9876", marginTop: 2 }}>Cancele quando quiser</p>
+              <p style={{ fontSize: 13, color: "#3D6B4D", marginTop: 2 }}>Cancele quando quiser</p>
 
               <div style={{ borderTop: "1px solid #E2D9C8", margin: "20px 0" }} />
 
@@ -908,15 +908,17 @@ const Index = () => {
         <link rel="canonical" href="https://prospera-mamaemonetiza.lovable.app/" />
       </Helmet>
       <Navbar />
-      <Hero />
-      <Dor />
-      <OQueE />
-      <AgentesDestaque />
-      <Depoimentos />
-      <Precos />
-      <ParaQuem />
-      <Faq />
-      <CtaFinal />
+      <main id="main">
+        <Hero />
+        <Dor />
+        <OQueE />
+        <AgentesDestaque />
+        <Depoimentos />
+        <Precos />
+        <ParaQuem />
+        <Faq />
+        <CtaFinal />
+      </main>
       <Footer />
     </div>
   );
