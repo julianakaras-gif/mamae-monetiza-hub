@@ -365,10 +365,11 @@ function NewProjectModal({ open, onClose, name, setName, desc, setDesc, creating
 
         <div className="space-y-4 mt-2">
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
+            <label htmlFor="home-new-project-name" className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
               Nome do projeto *
             </label>
             <input
+              id="home-new-project-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Meu curso de meditação"
@@ -377,10 +378,11 @@ function NewProjectModal({ open, onClose, name, setName, desc, setDesc, creating
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
+            <label htmlFor="home-new-project-desc" className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
               Descrição (opcional)
             </label>
             <textarea
+              id="home-new-project-desc"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               placeholder="Curso para mães que querem meditar em 5 minutos"
