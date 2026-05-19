@@ -388,12 +388,12 @@ const Configuracoes = () => {
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>Nome do projeto *</label>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Meu curso de meditação" className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+              <label htmlFor="config-new-project-name" className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>Nome do projeto *</label>
+              <input id="config-new-project-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Meu curso de meditação" className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>Descrição (opcional)</label>
-              <textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Curso para mães que querem meditar" rows={3} className={`${inputStyle} resize-none`} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+              <label htmlFor="config-new-project-desc" className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>Descrição (opcional)</label>
+              <textarea id="config-new-project-desc" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Curso para mães que querem meditar" rows={3} className={`${inputStyle} resize-none`} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
             </div>
           </div>
           <div className="flex gap-3 mt-4">
