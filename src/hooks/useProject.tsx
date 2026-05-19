@@ -50,10 +50,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
     if (data) {
       setProjects(data as Project[]);
-      // Se o projeto ativo não existe mais, limpa
+      // Se o projeto ativo não existe mais, limpa e seleciona o primeiro
       if (activeProjectId && !data.find((p) => p.id === activeProjectId)) {
         localStorage.removeItem(STORAGE_KEY);
         setActiveProjectId(null);
+      }
+      // Auto-seleciona o primeiro projeto se nenhum estiver ativo
+      if (!activeProjectId && data.length > 0) {
+        localStorage.setItem(STORAGE_KEY, data[0].id);
+        setActiveProjectId(data[0].id);
       }
     }
     setLoading(false);
