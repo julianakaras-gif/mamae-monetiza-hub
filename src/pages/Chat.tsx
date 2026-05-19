@@ -383,13 +383,14 @@ const Chat = () => {
           {photoUrl ? (
             <img
               src={photoUrl}
-              alt={agent.name}
+              alt={`Foto da agente ${agent.name}`}
               className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shrink-0"
             />
           ) : (
             <div
               className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
               style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+              aria-hidden="true"
             >
               {agent.name.charAt(0)}
             </div>
@@ -397,9 +398,9 @@ const Chat = () => {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-display text-sm text-foreground">
+              <h1 className="font-display text-sm text-foreground m-0">
                 {agent.name}
-              </span>
+              </h1>
               <Badge
                 className="text-xs px-2 py-0 border-0 hidden sm:inline-flex"
                 style={{ backgroundColor: `${phase.color}20`, color: phase.color }}
@@ -451,13 +452,14 @@ const Chat = () => {
                 photoUrl ? (
                   <img
                     src={photoUrl}
-                    alt={agent.name}
+                    alt={`Foto da agente ${agent.name}`}
                     className="w-[36px] h-[36px] rounded-full object-cover shrink-0 mr-2 mt-1"
                   />
                 ) : (
                   <div
                     className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
                     style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+                    aria-hidden="true"
                   >
                     {agent.name.charAt(0)}
                   </div>
@@ -485,13 +487,14 @@ const Chat = () => {
               {photoUrl ? (
                 <img
                   src={photoUrl}
-                  alt={agent.name}
+                  alt={`Foto da agente ${agent.name}`}
                   className="w-[36px] h-[36px] rounded-full object-cover shrink-0 mr-2 mt-1"
                 />
               ) : (
                 <div
                   className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
                   style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+                  aria-hidden="true"
                 >
                   {agent.name.charAt(0)}
                 </div>
@@ -530,7 +533,9 @@ const Chat = () => {
           )}
 
           <div className="flex items-end gap-2">
+            <label htmlFor="chat-message-input" className="sr-only">Mensagem para o agente</label>
             <textarea
+              id="chat-message-input"
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}

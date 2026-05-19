@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Check, Loader2, X, Mail } from "lucide-react";
 import Logo from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
@@ -81,6 +82,14 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex animate-fade-in">
+      <Helmet>
+        <title>Entrar | Prospera</title>
+        <meta name="description" content="Acesse sua conta Prospera e continue sua trilha com os 26 agentes de IA do Método Mamãe Monetiza." />
+        <link rel="canonical" href="https://prospera-mamaemonetiza.lovable.app/login" />
+        <meta property="og:title" content="Entrar | Prospera" />
+        <meta property="og:description" content="Acesse sua conta Prospera e continue sua trilha com os 26 agentes de IA do Método Mamãe Monetiza." />
+        <meta property="og:url" content="https://prospera-mamaemonetiza.lovable.app/login" />
+      </Helmet>
       {/* Left column */}
       <div
         className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12 relative overflow-hidden"

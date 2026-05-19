@@ -180,20 +180,20 @@ const Configuracoes = () => {
         </div>
         <div className="space-y-4">
           <div>
-            <label className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Nome completo *</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+            <label htmlFor="config-name" className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Nome completo *</label>
+            <input id="config-name" value={name} onChange={(e) => setName(e.target.value)} className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
           </div>
           <div>
-            <label className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Email</label>
-            <input value={profile?.email || ""} readOnly className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8", color: "#B6D0BE" }} />
+            <label htmlFor="config-email" className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Email</label>
+            <input id="config-email" value={profile?.email || ""} readOnly className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8", color: "#B6D0BE" }} />
           </div>
           <div>
-            <label className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Telefone / WhatsApp</label>
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+            <label htmlFor="config-phone" className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Telefone / WhatsApp</label>
+            <input id="config-phone" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
           </div>
           <div>
-            <label className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Instagram</label>
-            <input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@seuperfil" className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+            <label htmlFor="config-instagram" className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Instagram</label>
+            <input id="config-instagram" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@seuperfil" className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
           </div>
         </div>
       </div>
@@ -218,16 +218,17 @@ const Configuracoes = () => {
         </div>
         <div className="space-y-4">
           <div>
-            <label className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Nome da empresa / marca</label>
-            <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+            <label htmlFor="config-company" className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Nome da empresa / marca</label>
+            <input id="config-company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
           </div>
           <div>
-            <label className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Nicho principal</label>
-            <input value={niche} onChange={(e) => setNiche(e.target.value)} placeholder="Ex: coaching, artesanato, educação infantil" className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+            <label htmlFor="config-niche" className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Nicho principal</label>
+            <input id="config-niche" value={niche} onChange={(e) => setNiche(e.target.value)} placeholder="Ex: coaching, artesanato, educação infantil" className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
           </div>
           <div>
-            <label className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Público-alvo</label>
+            <label htmlFor="config-audience" className={labelStyle} style={{ color: "#6E9876", fontSize: 12 }}>Público-alvo</label>
             <textarea
+              id="config-audience"
               value={targetAudience}
               onChange={(e) => setTargetAudience(e.target.value)}
               placeholder="Descreva sua cliente ideal em 1 ou 2 frases"
@@ -323,7 +324,9 @@ const Configuracoes = () => {
         <h2 className="font-display mb-4" style={{ fontSize: 20, color: "#1C3C2C" }}>Segurança</h2>
         <p className="mb-3 font-medium" style={{ fontSize: 15, color: "#1C3C2C" }}>Alterar senha</p>
         <div className="space-y-3 max-w-sm">
+          <label htmlFor="config-new-password" className="sr-only">Nova senha</label>
           <input
+            id="config-new-password"
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
@@ -331,7 +334,9 @@ const Configuracoes = () => {
             className={inputStyle}
             style={{ fontSize: 15, borderColor: "#E2D9C8" }}
           />
+          <label htmlFor="config-confirm-password" className="sr-only">Confirmar nova senha</label>
           <input
+            id="config-confirm-password"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -383,12 +388,12 @@ const Configuracoes = () => {
           </DialogHeader>
           <div className="space-y-4 mt-2">
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>Nome do projeto *</label>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Meu curso de meditação" className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+              <label htmlFor="config-new-project-name" className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>Nome do projeto *</label>
+              <input id="config-new-project-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Meu curso de meditação" className={inputStyle} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>Descrição (opcional)</label>
-              <textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Curso para mães que querem meditar" rows={3} className={`${inputStyle} resize-none`} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
+              <label htmlFor="config-new-project-desc" className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>Descrição (opcional)</label>
+              <textarea id="config-new-project-desc" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Curso para mães que querem meditar" rows={3} className={`${inputStyle} resize-none`} style={{ fontSize: 15, borderColor: "#E2D9C8" }} />
             </div>
           </div>
           <div className="flex gap-3 mt-4">

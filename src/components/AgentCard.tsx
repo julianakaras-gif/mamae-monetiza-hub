@@ -51,7 +51,7 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
       {photoUrl ? (
         <img
           src={photoUrl}
-          alt={agent.name}
+          alt={`Foto da agente ${agent.name}`}
           className="w-[50px] h-[50px] rounded-full object-cover shrink-0"
           style={{ opacity: isLocked ? 0.5 : 1 }}
           onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }}

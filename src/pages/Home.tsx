@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Plus, FolderOpen, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -165,6 +166,13 @@ const Home = () => {
   // Projects list
   return (
     <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
+      <Helmet>
+        <title>Meus projetos | Prospera</title>
+        <meta name="description" content="Gerencie seus projetos no Prospera e acompanhe a evolução da sua trilha com os 26 agentes." />
+        <link rel="canonical" href="https://prospera-mamaemonetiza.lovable.app/home" />
+        <meta property="og:url" content="https://prospera-mamaemonetiza.lovable.app/home" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display" style={{ fontSize: 34, color: "#1C3C2C" }}>
           Meus projetos
@@ -365,10 +373,11 @@ function NewProjectModal({ open, onClose, name, setName, desc, setDesc, creating
 
         <div className="space-y-4 mt-2">
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
+            <label htmlFor="home-new-project-name" className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
               Nome do projeto *
             </label>
             <input
+              id="home-new-project-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Meu curso de meditação"
@@ -377,10 +386,11 @@ function NewProjectModal({ open, onClose, name, setName, desc, setDesc, creating
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
+            <label htmlFor="home-new-project-desc" className="block text-sm font-medium mb-1.5" style={{ color: "#1C3C2C" }}>
               Descrição (opcional)
             </label>
             <textarea
+              id="home-new-project-desc"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               placeholder="Curso para mães que querem meditar em 5 minutos"
