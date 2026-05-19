@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Plus, FolderOpen, Trash2 } from "lucide-react";
+import { Plus, FolderOpen, ArrowRight, Sparkles, MessageCircle, Map } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
-import { PHASES } from "@/data/agents";
+import { useAgentProgress } from "@/hooks/useAgentProgress";
+import { PHASES, SERENA } from "@/data/agents";
+import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -14,65 +16,33 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface ProjectWithProgress {
-  id: string;
-  name: string;
-  description: string | null;
-  created_at: string | null;
-  completedCount: number;
-}
-
-const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0) + 1; // +1 for Serena
-
-const LogoIcon = ({ size = 80 }: { size?: number }) => (
-  <img src="/prospera-logo-claro.png" alt="Prospera" style={{ height: size, width: "auto" }} className="object-contain" />
-);
+const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0) + 1;
 
 const Home = () => {
-  const { user } = useAuth();
-  const { projects, activeProjectId, setProject, createProject, loadProjects, loading: projectsLoading } = useProject();
+  const { user, profile } = useAuth();
+  const { projects, activeProject, activeProjectId, setProject, createProject, loading: projectsLoading } = useProject();
+  const { progressPercent, completedAgents, getNextAgent, loading: progressLoading } = useAgentProgress();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [projectProgress, setProjectProgress] = useState<Record<string, number>>({});
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  // Auto-open create modal when redirected with ?new=1 (e.g., from Trilha with no projects)
-  useEffect(() => {
-    if (projectsLoading) return;
-    if (searchParams.get("new") === "1") {
-      setShowModal(true);
-      const next = new URLSearchParams(searchParams);
-      next.delete("new");
-      setSearchParams(next, { replace: true });
-    }
-  }, [projectsLoading, searchParams, setSearchParams]);
+  const [recentAgent, setRecentAgent] = useState<{ agent_id: string; created_at: string } | null>(null);
 
   useEffect(() => {
-    if (!user || projects.length === 0) return;
-    loadProgress();
-  }, [user, projects]);
-
-  async function loadProgress() {
-    if (!user) return;
-    const { data } = await supabase
-      .from("user_progress")
-      .select("agent_id, project_id")
-      .eq("user_id", user.id)
-      .eq("completed", true);
-
-    const counts: Record<string, number> = {};
-    data?.forEach((r) => {
-      const pid = r.project_id || "__none__";
-      counts[pid] = (counts[pid] || 0) + 1;
-    });
-    setProjectProgress(counts);
-  }
+    if (!user || !activeProjectId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("agent_sessions")
+        .select("agent_id, started_at")
+        .eq("user_id", user.id)
+        .eq("project_id", activeProjectId)
+        .order("started_at", { ascending: false })
+        .limit(1);
+      if (data?.[0]) setRecentAgent({ agent_id: data[0].agent_id, created_at: data[0].started_at });
+    })();
+  }, [user, activeProjectId]);
 
   async function handleCreate() {
     if (!newName.trim()) return;
@@ -82,34 +52,15 @@ const Home = () => {
       setShowModal(false);
       setNewName("");
       setNewDesc("");
+      toast.success("Projeto criado!");
       navigate("/trilha");
     }
     setCreating(false);
   }
 
-  function handleOpenProject(projectId: string) {
-    setProject(projectId);
-    navigate("/trilha");
-  }
-
-  async function handleDeleteConfirm() {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    const { error } = await supabase.from("projects").delete().eq("id", deleteTarget.id);
-    if (error) {
-      toast.error("Erro ao deletar projeto");
-      setDeleting(false);
-      return;
-    }
-    if (activeProjectId === deleteTarget.id) {
-      localStorage.removeItem("mamae_active_project_id");
-    }
-    toast.success("Projeto deletado");
-    setDeleteTarget(null);
-    setDeleting(false);
-    await loadProjects();
-    await loadProgress();
-  }
+  const firstName = (profile?.name || "").split(" ")[0] || "aluna";
+  const nextAgent = getNextAgent();
+  const recent = recentAgent ? PHASES.flatMap((p) => p.agents).find((a) => a.id === recentAgent.agent_id) || (recentAgent.agent_id === SERENA.id ? SERENA : null) : null;
 
   if (projectsLoading) {
     return (
@@ -123,226 +74,196 @@ const Home = () => {
   if (projects.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] p-6 animate-fade-in">
-        <LogoIcon size={72} />
-        <h1
-          className="font-display mt-6 text-center"
-          style={{ fontSize: 34, color: "#1C3C2C" }}
-        >
-          Bem-vinda ao Prospera!
+        <img src="/prospera-logo-claro.png" alt="Prospera" style={{ height: 72 }} className="object-contain" />
+        <h1 className="font-display mt-6 text-center" style={{ fontSize: 32, color: "#1C3C2C" }}>
+          Bem-vinda ao Prospera, {firstName}!
         </h1>
-        <p
-          className="text-center mt-3 leading-relaxed"
-          style={{ fontSize: 16, color: "#6E9876", maxWidth: 420 }}
-        >
+        <p className="text-center mt-3 leading-relaxed" style={{ fontSize: 16, color: "#3D6B4D", maxWidth: 460 }}>
           Vamos criar o seu primeiro projeto. Cada projeto é uma jornada completa com os {TOTAL_AGENTS} agentes.
         </p>
         <button
           onClick={() => setShowModal(true)}
           className="mt-8 font-semibold text-white transition-all hover:opacity-90"
-          style={{
-            backgroundColor: "#1C3C2C",
-            borderRadius: 40,
-            fontSize: 16,
-            padding: "14px 32px",
-          }}
+          style={{ backgroundColor: "#1C3C2C", borderRadius: 40, fontSize: 16, padding: "14px 32px" }}
         >
           Criar meu primeiro projeto
         </button>
-
-        <NewProjectModal
-          open={showModal}
-          onClose={() => setShowModal(false)}
-          name={newName}
-          setName={setNewName}
-          desc={newDesc}
-          setDesc={setNewDesc}
-          creating={creating}
-          onCreate={handleCreate}
-        />
+        <NewProjectModal open={showModal} onClose={() => setShowModal(false)} name={newName} setName={setNewName} desc={newDesc} setDesc={setNewDesc} creating={creating} onCreate={handleCreate} />
       </div>
     );
   }
 
-  // Projects list
   return (
-    <div className="p-4 md:p-8 max-w-3xl animate-fade-in">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto animate-fade-in">
       <Helmet>
-        <title>Meus projetos | Prospera</title>
-        <meta name="description" content="Gerencie seus projetos no Prospera e acompanhe a evolução da sua trilha com os 26 agentes." />
+        <title>Início | Prospera</title>
+        <meta name="description" content="Sua jornada Prospera: continue de onde parou e fale com seus agentes de IA." />
         <link rel="canonical" href="https://prospera-mamaemonetiza.lovable.app/home" />
-        <meta property="og:url" content="https://prospera-mamaemonetiza.lovable.app/home" />
         <meta name="robots" content="noindex" />
       </Helmet>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display" style={{ fontSize: 34, color: "#1C3C2C" }}>
-          Meus projetos
+
+      {/* Welcome */}
+      <div className="mb-6">
+        <p className="text-xs uppercase tracking-widest" style={{ color: "#3D6B4D" }}>Olá novamente</p>
+        <h1 className="font-display mt-1" style={{ fontSize: 32, color: "#1C3C2C" }}>
+          Oi, {firstName} 🌿
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-1.5 font-semibold transition-all hover:opacity-90"
+        <p className="mt-1" style={{ fontSize: 15, color: "#3D6B4D" }}>
+          Bom te ver de volta. Vamos continuar de onde você parou?
+        </p>
+      </div>
+
+      {/* Hero: projeto ativo + progresso */}
+      {activeProject && (
+        <div
+          className="p-6 md:p-7 mb-6"
           style={{
-            backgroundColor: "#C6A86C",
-            color: "#1C3C2C",
-            borderRadius: 40,
-            fontSize: 15,
-            padding: "10px 20px",
+            background: "linear-gradient(135deg, #1C3C2C 0%, #2F5A45 100%)",
+            borderRadius: 24,
+            color: "#fff",
           }}
         >
-          <Plus size={16} />
-          Novo projeto
+          <div className="flex items-start justify-between gap-3 mb-5">
+            <div className="min-w-0">
+              <p className="text-xs uppercase tracking-widest" style={{ color: "#B6D0BE" }}>Projeto ativo</p>
+              <h2 className="font-display mt-1 truncate" style={{ fontSize: 24 }}>{activeProject.name}</h2>
+              {activeProject.description && (
+                <p className="mt-1 line-clamp-2" style={{ fontSize: 14, color: "rgba(255,255,255,0.75)" }}>
+                  {activeProject.description}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => navigate("/projetos")}
+              className="shrink-0 text-xs px-3 py-1.5 rounded-full transition-colors hover:bg-white/10"
+              style={{ border: "1px solid rgba(255,255,255,0.3)", color: "#fff" }}
+            >
+              Trocar
+            </button>
+          </div>
+
+          {/* Progress */}
+          <div className="mb-5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs uppercase tracking-widest" style={{ color: "#B6D0BE" }}>
+                Progresso geral
+              </span>
+              <span className="text-sm font-bold">{progressPercent}%</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.12)" }}>
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${progressPercent}%`, background: "linear-gradient(90deg, #6E9876, #C6A86C)" }}
+              />
+            </div>
+            <p className="text-xs mt-1.5" style={{ color: "#B6D0BE" }}>
+              {completedAgents.size} de {TOTAL_AGENTS} agentes concluídos
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => navigate("/trilha")}
+              className="flex items-center justify-center gap-2 font-semibold transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#C6A86C", color: "#1C3C2C", borderRadius: 40, fontSize: 15, padding: "12px 24px" }}
+            >
+              <Map size={16} />
+              Continuar trilha
+            </button>
+            {recent && (
+              <button
+                onClick={() => navigate(`/chat/${recent.id}`)}
+                className="flex items-center justify-center gap-2 font-medium transition-colors hover:bg-white/10"
+                style={{ border: "1px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 40, fontSize: 14, padding: "12px 20px" }}
+              >
+                <MessageCircle size={15} />
+                Retomar conversa com {recent.name}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Próximo agente sugerido */}
+      {nextAgent && !progressLoading && (
+        <div
+          className="p-5 md:p-6 mb-6 bg-white"
+          style={{ borderRadius: 20, border: "1px solid #E2D9C8" }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles size={16} style={{ color: "#C6A86C" }} />
+            <p className="text-xs uppercase tracking-widest font-semibold" style={{ color: "#3D6B4D" }}>
+              Próximo passo
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <img
+              src={getAgentPhotoUrl(nextAgent.agent.id) || ""}
+              alt={nextAgent.agent.name}
+              className="w-16 h-16 rounded-full object-cover shrink-0"
+              style={{ backgroundColor: "#B6D0BE" }}
+              onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
+            />
+            <div className="min-w-0 flex-1">
+              <h3 className="font-display" style={{ fontSize: 20, color: "#1C3C2C" }}>
+                {nextAgent.agent.name}
+              </h3>
+              <p style={{ fontSize: 13, color: "#3D6B4D" }} className="line-clamp-2">
+                {nextAgent.agent.role}
+              </p>
+            </div>
+            <button
+              onClick={() => navigate(`/chat/${nextAgent.agent.id}`)}
+              className="shrink-0 flex items-center gap-1.5 font-medium transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#1C3C2C", color: "#fff", borderRadius: 40, fontSize: 14, padding: "10px 18px" }}
+            >
+              Conversar
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Atalhos */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button
+          onClick={() => navigate("/projetos")}
+          className="text-left p-5 bg-white transition-all hover:-translate-y-0.5"
+          style={{ borderRadius: 20, border: "1px solid #E2D9C8" }}
+        >
+          <FolderOpen size={20} style={{ color: "#6E9876" }} />
+          <h3 className="font-display mt-3" style={{ fontSize: 17, color: "#1C3C2C" }}>Meus projetos</h3>
+          <p className="mt-1" style={{ fontSize: 13, color: "#3D6B4D" }}>
+            {projects.length} projeto{projects.length !== 1 ? "s" : ""} ativo{projects.length !== 1 ? "s" : ""}
+          </p>
+        </button>
+
+        <button
+          onClick={() => setShowModal(true)}
+          className="text-left p-5 bg-white transition-all hover:-translate-y-0.5"
+          style={{ borderRadius: 20, border: "1px solid #E2D9C8" }}
+        >
+          <Plus size={20} style={{ color: "#C6A86C" }} />
+          <h3 className="font-display mt-3" style={{ fontSize: 17, color: "#1C3C2C" }}>Novo projeto</h3>
+          <p className="mt-1" style={{ fontSize: 13, color: "#3D6B4D" }}>
+            Comece uma nova jornada com os agentes.
+          </p>
+        </button>
+
+        <button
+          onClick={() => navigate(`/chat/${SERENA.id}`)}
+          className="text-left p-5 transition-all hover:-translate-y-0.5"
+          style={{ borderRadius: 20, background: "linear-gradient(135deg, #F5F1E9 0%, #E2D9C8 100%)", border: "1px solid #E2D9C8" }}
+        >
+          <span className="text-xl">🧘‍♀️</span>
+          <h3 className="font-display mt-2" style={{ fontSize: 17, color: "#1C3C2C" }}>Falar com a Serena</h3>
+          <p className="mt-1" style={{ fontSize: 13, color: "#3D6B4D" }}>
+            Apoio emocional sempre disponível.
+          </p>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {projects.map((p) => {
-          const done = projectProgress[p.id] || 0;
-          const pct = TOTAL_AGENTS > 0 ? (done / TOTAL_AGENTS) * 100 : 0;
-          const isActive = p.id === activeProjectId;
-
-          return (
-            <div
-              key={p.id}
-              className="group relative bg-white p-6 transition-all duration-200 hover:-translate-y-[3px]"
-              style={{
-                borderRadius: 20,
-                border: "1px solid #E2D9C8",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)")}
-              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteTarget({ id: p.id, name: p.name });
-                }}
-                aria-label="Deletar projeto"
-                className="absolute top-3 right-3 p-1.5 rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity hover:bg-red-50"
-                style={{ color: "#B85450" }}
-              >
-                <Trash2 size={16} />
-              </button>
-
-              {isActive && (
-                <span
-                  className="absolute top-4 font-medium"
-                  style={{
-                    right: 44,
-                    backgroundColor: "#B6D0BE",
-                    color: "#1C3C2C",
-                    borderRadius: 20,
-                    fontSize: 12,
-                    padding: "2px 10px",
-                  }}
-                >
-                  Ativo
-                </span>
-              )}
-
-              <h2 className="font-display pr-16" style={{ fontSize: 22, color: "#1C3C2C" }}>
-                {p.name}
-              </h2>
-
-              {p.description && (
-                <p
-                  className="mt-1 line-clamp-2"
-                  style={{ fontSize: 14, color: "#6E9876" }}
-                >
-                  {p.description}
-                </p>
-              )}
-
-              {/* Progress bar */}
-              <div className="mt-4">
-                <div
-                  className="h-2 rounded-full overflow-hidden"
-                  style={{ backgroundColor: "#E2D9C8" }}
-                >
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${pct}%`,
-                      background: "linear-gradient(90deg, #6E9876, #C6A86C)",
-                    }}
-                  />
-                </div>
-                <p className="mt-1.5" style={{ fontSize: 13, color: "#6E9876" }}>
-                  {done} de {TOTAL_AGENTS} agentes concluídos
-                </p>
-              </div>
-
-              <p className="mt-2" style={{ fontSize: 12, color: "#B6D0BE" }}>
-                Criado em{" "}
-                {p.created_at
-                  ? new Date(p.created_at).toLocaleDateString("pt-BR")
-                  : "-"}
-              </p>
-
-              <button
-                onClick={() => handleOpenProject(p.id)}
-                className="mt-4 w-full font-medium text-white transition-all hover:opacity-90"
-                style={{
-                  backgroundColor: "#1C3C2C",
-                  borderRadius: 12,
-                  fontSize: 14,
-                  padding: "10px 0",
-                }}
-              >
-                Abrir projeto
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      <NewProjectModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        name={newName}
-        setName={setNewName}
-        desc={newDesc}
-        setDesc={setNewDesc}
-        creating={creating}
-        onCreate={handleCreate}
-      />
-
-      <Dialog open={!!deleteTarget} onOpenChange={(v) => !v && !deleting && setDeleteTarget(null)}>
-        <DialogContent
-          className="bg-white p-8"
-          style={{ borderRadius: 20, maxWidth: 420 }}
-        >
-          <DialogHeader>
-            <DialogTitle className="font-display" style={{ fontSize: 22, color: "#1C3C2C" }}>
-              Deletar projeto
-            </DialogTitle>
-          </DialogHeader>
-          <p className="mt-2" style={{ fontSize: 15, color: "#6E9876", lineHeight: 1.5 }}>
-            Tem certeza? Isso apagará todas as conversas e o progresso deste projeto. Essa ação não pode ser desfeita.
-          </p>
-          <div className="flex gap-3 mt-5">
-            <button
-              onClick={() => setDeleteTarget(null)}
-              disabled={deleting}
-              className="flex-1 py-2.5 font-medium transition-all hover:opacity-80 disabled:opacity-50"
-              style={{ color: "#6E9876", fontSize: 15 }}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleDeleteConfirm}
-              disabled={deleting}
-              className="flex-1 py-2.5 font-medium transition-all hover:opacity-90 disabled:opacity-50"
-              style={{
-                backgroundColor: "#FCE8E6",
-                color: "#B85450",
-                borderRadius: 12,
-                fontSize: 15,
-              }}
-            >
-              {deleting ? "Deletando..." : "Deletar projeto"}
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <NewProjectModal open={showModal} onClose={() => setShowModal(false)} name={newName} setName={setNewName} desc={newDesc} setDesc={setNewDesc} creating={creating} onCreate={handleCreate} />
     </div>
   );
 };
@@ -361,10 +282,7 @@ interface NewProjectModalProps {
 function NewProjectModal({ open, onClose, name, setName, desc, setDesc, creating, onCreate }: NewProjectModalProps) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent
-        className="bg-white p-8"
-        style={{ borderRadius: 20, maxWidth: 460 }}
-      >
+      <DialogContent className="bg-white p-8" style={{ borderRadius: 20, maxWidth: 460 }}>
         <DialogHeader>
           <DialogTitle className="font-display" style={{ fontSize: 24, color: "#1C3C2C" }}>
             Novo projeto
@@ -402,11 +320,7 @@ function NewProjectModal({ open, onClose, name, setName, desc, setDesc, creating
         </div>
 
         <div className="flex gap-3 mt-4">
-          <button
-            onClick={onClose}
-            className="flex-1 py-2.5 font-medium transition-all hover:opacity-80"
-            style={{ color: "#6E9876", fontSize: 15 }}
-          >
+          <button onClick={onClose} className="flex-1 py-2.5 font-medium transition-all hover:opacity-80" style={{ color: "#3D6B4D", fontSize: 15 }}>
             Cancelar
           </button>
           <button
