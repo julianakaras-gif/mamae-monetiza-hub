@@ -258,14 +258,36 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build context from previous agents
+    // Build context from previous agents — fetch summaries server-side from trusted DB
+    // to prevent prompt injection via client-supplied agent_name/agent_role/summary.
     let contextSection = "";
-    if (context_outputs && context_outputs.length > 0) {
-      contextSection = "\n\n---\nCONTEXTO DAS ETAPAS ANTERIORES:\n\n";
-      for (const output of context_outputs) {
-        contextSection += `[${output.agent_name.toUpperCase()} - ${output.agent_role}]\n${output.summary}\n\n`;
+    if (Array.isArray(context_outputs) && context_outputs.length > 0) {
+      const requestedIds = Array.from(
+        new Set(
+          context_outputs
+            .map((o: any) => (typeof o?.agent_id === "string" ? o.agent_id : null))
+            .filter((v: string | null): v is string => !!v && /^[a-z0-9_-]{1,32}$/i.test(v))
+        )
+      ).slice(0, MAX_CONTEXT_OUTPUTS);
+
+      if (requestedIds.length > 0) {
+        const idsList = requestedIds.map((id) => encodeURIComponent(id)).join(",");
+        const projFilter = project_id ? `&project_id=eq.${project_id}` : `&project_id=is.null`;
+        const trustedRes = await fetch(
+          `${supabaseUrl}/rest/v1/agent_outputs?user_id=eq.${userId}&agent_id=in.(${idsList})${projFilter}&select=agent_id,summary`,
+          { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
+        );
+        const trusted = await trustedRes.json();
+        if (Array.isArray(trusted) && trusted.length > 0) {
+          contextSection = "\n\n---\nCONTEXTO DAS ETAPAS ANTERIORES:\n\n";
+          for (const out of trusted) {
+            const safeId = String(out.agent_id).toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+            const safeSummary = String(out.summary ?? "").slice(0, MAX_SUMMARY_LENGTH);
+            contextSection += `[${safeId}]\n${safeSummary}\n\n`;
+          }
+          contextSection += "---\n";
+        }
       }
-      contextSection += "---\n";
     }
 
     // Content agents get automatic project/brand context
