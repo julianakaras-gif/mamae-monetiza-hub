@@ -53,7 +53,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { agent_id, agent_name, agent_role, session_id, project_id } = await req.json();
+    const { agent_id, session_id, project_id } = await req.json();
+
+    if (typeof agent_id !== "string" || !/^[a-z0-9_-]{1,32}$/i.test(agent_id)) {
+      return new Response(
+        JSON.stringify({ error: "agent_id inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const safeAgentLabel = agent_id.toUpperCase();
 
     const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
     if (!ANTHROPIC_API_KEY) {
