@@ -146,9 +146,18 @@ Sempre que fizer uma pergunta que exige reflexão profunda da usuária (sobre ha
 - Variar os exemplos entre sessões, sem repetir sempre os mesmos
 Esta regra NÃO se aplica a perguntas simples de confirmação (nome, sim/não, já tem Instagram, etc).`;
 
-// Append REGRA_EXEMPLOS to all agent prompts
+const REGRA_TAMANHO = `
+
+REGRA DE TAMANHO DAS RESPOSTAS (OBRIGATÓRIA):
+- Cada mensagem sua deve ter NO MÁXIMO 3500 caracteres (cerca de 600 palavras). Nunca ultrapasse esse limite, sob nenhuma hipótese.
+- Se a entrega final for naturalmente longa (plano, ecossistema, calendário, roteiros, sales page, etc.), QUEBRE em várias mensagens sequenciais, terminando cada uma com uma frase curta tipo "Posso continuar?" ou "Quer que eu siga para a próxima parte?" e aguarde a usuária responder antes de enviar a próxima parte.
+- Prefira respostas enxutas, com bullets e títulos curtos, em vez de parágrafos longos.
+- Nunca termine uma mensagem no meio de uma frase, lista ou seção. Sempre feche o raciocínio antes de pausar.
+- Ao fazer perguntas, faça UMA pergunta por vez (regra já existente), mantendo a mensagem curta.`;
+
+// Append global rules to all agent prompts
 for (const key of Object.keys(SYSTEM_PROMPTS)) {
-  SYSTEM_PROMPTS[key] += REGRA_EXEMPLOS;
+  SYSTEM_PROMPTS[key] += REGRA_EXEMPLOS + REGRA_TAMANHO;
 }
 
 const CONTENT_AGENTS = ['alma', 'malu', 'kaena', 'bill', 'lumi', 'luli', 'nara', 'kaia'];
