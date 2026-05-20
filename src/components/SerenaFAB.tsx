@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { SERENA } from "@/data/agents";
 
 const STORAGE_KEY = "serena_fab_pos_v1";
-const FAB_SIZE = 56;
+const FAB_SIZE = 72;
 const MARGIN = 12;
 
 function loadPos(): { x: number; y: number } | null {
