@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "user",
-            content: `Você é um assistente de síntese. Abaixo está a conversa que o agente "${agent_name} - ${agent_role}" teve com uma aluna. Crie um resumo estruturado em tópicos com os principais outputs e decisões tomadas. Este resumo será usado como contexto por outros agentes. Seja objetivo e preciso.\n\nCONVERSA:\n${assistantContent}\n\nRESUMO ESTRUTURADO:`,
+            content: `Você é um assistente de síntese. Abaixo está a conversa que o agente "${safeAgentLabel}" teve com uma aluna. Crie um resumo estruturado em tópicos com os principais outputs e decisões tomadas. Este resumo será usado como contexto por outros agentes. Seja objetivo e preciso.\n\nCONVERSA:\n${assistantContent}\n\nRESUMO ESTRUTURADO:`,
           },
         ],
       }),
