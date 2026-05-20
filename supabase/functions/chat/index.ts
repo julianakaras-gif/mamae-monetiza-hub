@@ -203,6 +203,40 @@ Deno.serve(async (req) => {
 
     const { agent_id, session_id, message, context_outputs, project_id } = await req.json();
 
+    // Input size validation to prevent API cost abuse
+    const MAX_MESSAGE_LENGTH = 4000;
+    const MAX_CONTEXT_OUTPUTS = 30;
+    const MAX_SUMMARY_LENGTH = 4000;
+
+    if (typeof message !== "string" || message.trim().length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Mensagem inválida" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: `Mensagem muito longa (máximo ${MAX_MESSAGE_LENGTH} caracteres)` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (context_outputs !== undefined && context_outputs !== null) {
+      if (!Array.isArray(context_outputs) || context_outputs.length > MAX_CONTEXT_OUTPUTS) {
+        return new Response(
+          JSON.stringify({ error: "context_outputs inválido" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      for (const o of context_outputs) {
+        if (typeof o?.summary === "string" && o.summary.length > MAX_SUMMARY_LENGTH) {
+          return new Response(
+            JSON.stringify({ error: "Resumo de contexto muito longo" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+    }
+
     const systemPromptBase = SYSTEM_PROMPTS[agent_id];
     if (!systemPromptBase) {
       return new Response(
