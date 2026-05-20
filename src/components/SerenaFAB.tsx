@@ -112,12 +112,13 @@ const SerenaFAB = () => {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className="rounded-full shadow-lg flex items-center justify-center text-2xl select-none"
+        className="rounded-full flex items-center justify-center select-none ring-4 ring-white/70"
         style={{
           width: FAB_SIZE,
           height: FAB_SIZE,
+          fontSize: 34,
           background: "linear-gradient(135deg, #3A5C46, #1C3C2C)",
-          boxShadow: "0 4px 20px rgba(28, 60, 44, 0.4)",
+          boxShadow: "0 8px 28px rgba(28, 60, 44, 0.55), 0 0 0 4px rgba(235, 199, 128, 0.35)",
           cursor: dragging ? "grabbing" : "grab",
           touchAction: "none",
           transition: dragging ? "none" : "transform 0.15s",
@@ -127,6 +128,24 @@ const SerenaFAB = () => {
       >
         🧘‍♀️
       </button>
+      <div
+        className="pointer-events-none mt-1.5 text-center mx-auto px-2 py-0.5 rounded-full"
+        style={{
+          width: "max-content",
+          maxWidth: 110,
+          fontFamily: "'Instrument Sans', sans-serif",
+          fontSize: 11,
+          fontWeight: 600,
+          color: "#1C3C2C",
+          background: "rgba(255,255,255,0.85)",
+          backdropFilter: "blur(4px)",
+          lineHeight: 1.15,
+          marginLeft: "auto",
+          marginRight: "auto",
+        }}
+      >
+        Apoio emocional
+      </div>
     </div>
   );
 };
