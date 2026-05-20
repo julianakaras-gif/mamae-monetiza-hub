@@ -129,22 +129,19 @@ const SerenaFAB = () => {
         🧘‍♀️
       </button>
       <div
-        className="pointer-events-none mt-1.5 text-center mx-auto px-2 py-0.5 rounded-full"
+        className="pointer-events-none mt-1.5 px-2 py-0.5 rounded-lg text-center"
         style={{
-          width: "max-content",
-          maxWidth: 110,
+          width: FAB_SIZE,
           fontFamily: "'Instrument Sans', sans-serif",
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: 600,
           color: "#1C3C2C",
           background: "rgba(255,255,255,0.85)",
           backdropFilter: "blur(4px)",
           lineHeight: 1.15,
-          marginLeft: "auto",
-          marginRight: "auto",
         }}
       >
-        Apoio emocional
+        Apoio Emocional & Mindset
       </div>
     </div>
   );
