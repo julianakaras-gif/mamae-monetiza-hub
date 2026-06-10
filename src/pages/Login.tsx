@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Check, Loader2, X, Mail } from "lucide-react";
+import { Check, Loader2, X, Mail, Eye, EyeOff } from "lucide-react";
 import Logo from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
