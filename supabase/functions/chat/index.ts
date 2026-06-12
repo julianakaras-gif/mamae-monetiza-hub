@@ -444,12 +444,10 @@ Deno.serve(async (req) => {
             if (!jsonStr) continue;
             try {
               const parsed = JSON.parse(jsonStr);
-              if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
-                const text = parsed.delta.text;
-                if (text) {
-                  fullResponse += text;
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
-                }
+              const text = parsed.choices?.[0]?.delta?.content;
+              if (text) {
+                fullResponse += text;
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
               }
             } catch { /* partial JSON */ }
           }
