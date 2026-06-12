@@ -349,14 +349,15 @@ Deno.serve(async (req) => {
     const historyArray = Array.isArray(history) ? history : [];
 
     const messages = [
+      { role: "system", content: systemPrompt },
       ...historyArray.map((m: any) => ({ role: m.role, content: m.content })),
       { role: "user", content: message },
     ];
 
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!ANTHROPIC_API_KEY) {
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
+    if (!DEEPSEEK_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "ANTHROPIC_API_KEY is not configured" }),
+        JSON.stringify({ error: "DEEPSEEK_API_KEY is not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -372,18 +373,16 @@ Deno.serve(async (req) => {
       body: JSON.stringify({ session_id, role: "user", content: message }),
     });
 
-    // Call Anthropic API with streaming
-    const aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
+    // Call DeepSeek API with streaming (OpenAI-compatible)
+    const aiResponse = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
+        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5-20250929",
+        model: "deepseek-chat",
         max_tokens: 8192,
-        system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
         messages,
         stream: true,
       }),
@@ -397,7 +396,7 @@ Deno.serve(async (req) => {
         );
       }
       const errText = await aiResponse.text();
-      console.error("Anthropic error:", aiResponse.status, errText);
+      console.error("DeepSeek error:", aiResponse.status, errText);
       return new Response(
         JSON.stringify({ error: "Erro ao conectar com a IA" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -445,12 +444,10 @@ Deno.serve(async (req) => {
             if (!jsonStr) continue;
             try {
               const parsed = JSON.parse(jsonStr);
-              if (parsed.type === "content_block_delta" && parsed.delta?.type === "text_delta") {
-                const text = parsed.delta.text;
-                if (text) {
-                  fullResponse += text;
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
-                }
+              const text = parsed.choices?.[0]?.delta?.content;
+              if (text) {
+                fullResponse += text;
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
               }
             } catch { /* partial JSON */ }
           }

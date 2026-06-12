@@ -63,10 +63,10 @@ Deno.serve(async (req) => {
     }
     const safeAgentLabel = agent_id.toUpperCase();
 
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!ANTHROPIC_API_KEY) {
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
+    if (!DEEPSEEK_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }),
+        JSON.stringify({ error: "DEEPSEEK_API_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -97,16 +97,15 @@ Deno.serve(async (req) => {
     const messagesArr = Array.isArray(rawMessages) ? rawMessages : [];
     const assistantContent = messagesArr.reverse().map((m: any) => m.content).join("\n\n");
 
-    // Generate structured summary via Anthropic (Haiku for cost efficiency)
-    const summaryRes = await fetch("https://api.anthropic.com/v1/messages", {
+    // Generate structured summary via DeepSeek (OpenAI-compatible)
+    const summaryRes = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
+        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
+        model: "deepseek-chat",
         max_tokens: 1024,
         messages: [
           {
@@ -127,7 +126,7 @@ Deno.serve(async (req) => {
     }
 
     const summaryData = await summaryRes.json();
-    const summaryText = summaryData.content?.[0]?.text || "";
+    const summaryText = summaryData.choices?.[0]?.message?.content || "";
 
     const projectOutputFilter = project_id
       ? `project_id=eq.${project_id}`
