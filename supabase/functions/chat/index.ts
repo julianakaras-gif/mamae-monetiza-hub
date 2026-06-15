@@ -377,7 +377,7 @@ Deno.serve(async (req) => {
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Lovable-API-Key": LOVABLE_API_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -396,14 +396,14 @@ Deno.serve(async (req) => {
         );
       }
       const errText = await aiResponse.text();
-      console.error("DeepSeek error:", aiResponse.status, errText);
+      console.error("Lovable AI error:", aiResponse.status, errText);
       return new Response(
         JSON.stringify({ error: "Erro ao conectar com a IA" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Stream Anthropic SSE response
+    // Stream Lovable AI Gateway SSE response
     const reader = aiResponse.body!.getReader();
     const decoder = new TextDecoder();
     const encoder = new TextEncoder();
