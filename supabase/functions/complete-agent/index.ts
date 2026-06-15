@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
     const summaryRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Lovable-API-Key": LOVABLE_API_KEY,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -119,9 +119,14 @@ Deno.serve(async (req) => {
     if (!summaryRes.ok) {
       const errText = await summaryRes.text();
       console.error("Summary AI error:", summaryRes.status, errText);
+      const errorMessage = summaryRes.status === 402
+        ? "Créditos da IA esgotados. Adicione créditos ao workspace para continuar."
+        : summaryRes.status === 429
+          ? "Muitas requisições. Aguarde um momento e tente novamente."
+          : "Erro ao gerar resumo";
       return new Response(
-        JSON.stringify({ error: "Erro ao gerar resumo" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: errorMessage }),
+        { status: summaryRes.status === 429 ? 429 : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
