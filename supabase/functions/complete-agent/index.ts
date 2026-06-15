@@ -63,10 +63,10 @@ Deno.serve(async (req) => {
     }
     const safeAgentLabel = agent_id.toUpperCase();
 
-    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
-    if (!DEEPSEEK_API_KEY) {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "DEEPSEEK_API_KEY not configured" }),
+        JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -97,16 +97,15 @@ Deno.serve(async (req) => {
     const messagesArr = Array.isArray(rawMessages) ? rawMessages : [];
     const assistantContent = messagesArr.reverse().map((m: any) => m.content).join("\n\n");
 
-    // Generate structured summary via DeepSeek (OpenAI-compatible)
-    const summaryRes = await fetch("https://api.deepseek.com/chat/completions", {
+    // Generate structured summary via Lovable AI Gateway (OpenAI-compatible)
+    const summaryRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
-        max_tokens: 1024,
+        model: "google/gemini-3-flash-preview",
         messages: [
           {
             role: "user",
@@ -115,6 +114,7 @@ Deno.serve(async (req) => {
         ],
       }),
     });
+
 
     if (!summaryRes.ok) {
       const errText = await summaryRes.text();

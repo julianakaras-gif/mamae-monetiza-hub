@@ -354,10 +354,10 @@ Deno.serve(async (req) => {
       { role: "user", content: message },
     ];
 
-    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
-    if (!DEEPSEEK_API_KEY) {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "DEEPSEEK_API_KEY is not configured" }),
+        JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -373,20 +373,20 @@ Deno.serve(async (req) => {
       body: JSON.stringify({ session_id, role: "user", content: message }),
     });
 
-    // Call DeepSeek API with streaming (OpenAI-compatible)
-    const aiResponse = await fetch("https://api.deepseek.com/chat/completions", {
+    // Call Lovable AI Gateway (OpenAI-compatible) with streaming
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
-        max_tokens: 8192,
+        model: "google/gemini-3-flash-preview",
         messages,
         stream: true,
       }),
     });
+
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
