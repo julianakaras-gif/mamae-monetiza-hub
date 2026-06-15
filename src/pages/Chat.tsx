@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
 import { useProject } from "@/hooks/useProject";
-import { findAgent, SERENA } from "@/data/agents";
+import { findAgent, PHASES, SERENA } from "@/data/agents";
 import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -65,10 +65,14 @@ const Chat = () => {
 
   const isFav = agentId ? favorites.has(agentId) : false;
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-  const canComplete =
-    !isSerena &&
-    !!lastAssistant &&
-    /concluir esta etapa/i.test(lastAssistant.content);
+  const hasUserMessage = messages.some((m) => m.role === "user");
+  const canComplete = !isSerena && hasUserMessage && !!lastAssistant && !isStreaming;
+
+  const getNextAgentId = (completedAgentId: string) => {
+    const orderedAgents = PHASES.flatMap((currentPhase) => currentPhase.agents);
+    const currentIndex = orderedAgents.findIndex((currentAgent) => currentAgent.id === completedAgentId);
+    return currentIndex >= 0 ? orderedAgents[currentIndex + 1]?.id ?? null : null;
+  };
 
   // Guard: non-Serena chats require an active project
   useEffect(() => {
@@ -337,9 +341,15 @@ const Chat = () => {
 
       if (!resp.ok) throw new Error("Erro ao concluir etapa");
 
-      toast.success("Etapa concluída! Continue sua trilha. 🎉");
+      const nextAgentId = agentId ? getNextAgentId(agentId) : null;
+      toast.success(nextAgentId ? "Etapa concluída! Indo para o próximo agente. 🎉" : "Etapa concluída! 🎉");
       await refetch();
-      navigate(`/trilha?phase=${phase.id}`);
+      if (nextAgentId) {
+        const projectQuery = sessionProjectId ? `?project=${sessionProjectId}` : "";
+        navigate(`/chat/${nextAgentId}${projectQuery}`);
+      } else {
+        navigate(`/trilha?phase=${phase.id}`);
+      }
     } catch (err: any) {
       toast.error(err.message || "Erro ao concluir etapa");
     } finally {
