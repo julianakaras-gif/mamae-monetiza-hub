@@ -677,6 +677,27 @@ Deno.serve(async (req) => {
       { role: "user", content: message },
     ];
 
+    // === SOFIA: calcula trilha a partir das tags [[Qn:x]] salvas no histórico ===
+    if (agent_id === "sofia") {
+      const rawAll = historyArray.map((m: any) => String(m.content || "")).join("\n");
+      const respostas: Record<number, "a" | "b" | "c"> = {};
+      const re = /\[\[\s*Q([1-6])\s*:\s*([abc])\s*\]\]/gi;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(rawAll)) !== null) {
+        respostas[Number(m[1])] = m[2].toLowerCase() as "a" | "b" | "c";
+      }
+      const jaCalculado = /\[\[\s*TRILHA_CONFIRMADA\s*:/i.test(rawAll);
+      const completo = [1, 2, 3, 4, 5, 6].every((q) => respostas[q]);
+      if (completo && !jaCalculado) {
+        const { trilha, motivos } = calcularTrilhaSofia(respostas);
+        messages.push({
+          role: "system",
+          content: `RESULTADO_CALCULADO: trilha=${trilha}, motivos=${JSON.stringify(motivos)}. Use exatamente esses dados pra montar a revelação pra aluna. Não recalcule, não invente outro motivo.`,
+        });
+      }
+    }
+
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(
