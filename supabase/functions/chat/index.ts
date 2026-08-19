@@ -370,6 +370,53 @@ for (const key of Object.keys(SYSTEM_PROMPTS)) {
 
 const CONTENT_AGENTS = ['alma', 'malu', 'kaena', 'bill', 'lumi', 'luli', 'nara', 'kaia'];
 
+// Filters out [[...]] markers from streamed text so users never see them,
+// while keeping the raw response (with markers) saved to the database.
+class TagStreamFilter {
+  private pending = "";
+  private inTag = false;
+
+  push(chunk: string): string {
+    let text = chunk;
+    if (this.pending) {
+      text = this.pending + text;
+      this.pending = "";
+    }
+
+    let output = "";
+    while (text.length > 0) {
+      if (this.inTag) {
+        const closeIdx = text.indexOf("]]");
+        if (closeIdx !== -1) {
+          text = text.slice(closeIdx + 2);
+          this.inTag = false;
+        } else {
+          this.pending = text;
+          return output;
+        }
+      } else {
+        const openIdx = text.indexOf("[[");
+        if (openIdx !== -1) {
+          output += text.slice(0, openIdx);
+          text = text.slice(openIdx);
+          this.inTag = true;
+        } else {
+          output += text;
+          return output;
+        }
+      }
+    }
+    return output;
+  }
+
+  flush(): string {
+    const text = this.pending;
+    this.pending = "";
+    this.inTag = false;
+    return text;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
