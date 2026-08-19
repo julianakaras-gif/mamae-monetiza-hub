@@ -708,7 +708,10 @@ Deno.serve(async (req) => {
               const text = parsed.choices?.[0]?.delta?.content;
               if (text) {
                 fullResponse += text;
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+                const filtered = tagFilter.push(text);
+                if (filtered) {
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: filtered })}\n\n`));
+                }
               }
             } catch { /* partial JSON */ }
           }
