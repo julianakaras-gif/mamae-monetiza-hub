@@ -370,6 +370,74 @@ for (const key of Object.keys(SYSTEM_PROMPTS)) {
 
 const CONTENT_AGENTS = ['alma', 'malu', 'kaena', 'bill', 'lumi', 'luli', 'nara', 'kaia'];
 
+// ===== Lógica da Sofia (cálculo de trilha) =====
+const PERGUNTAS_SOFIA = [
+  { id: 1, opcoes: {
+    a: { pontos: { pp: 3 }, motivo: "Você já tem um assunto que as pessoas te procuram — isso é matéria-prima de produto." },
+    b: { pontos: { pp: 1, af: 1 }, motivo: "Você tem alguma bagagem, mas ainda sem forma. Aqui é melhor começar vendendo antes de criar." },
+    c: { pontos: { af: 2, ugc: 2, dk: 2 }, motivo: "Você não precisa ter o que ensinar pra começar a faturar. Essa trilha não depende disso." },
+  }},
+  { id: 2, opcoes: {
+    a: { pontos: { pp: 3, ugc: 1, af: 1 }, motivo: "Você aparece sem travar, e rosto na tela encurta muito o caminho até a venda." },
+    b: { pontos: { ugc: 3, af: 1, dk: 1 }, motivo: "Você grava sem mostrar o rosto — e existe um mercado inteiro que paga exatamente por isso." },
+    c: { pontos: { dk: 4, af: 1 }, motivo: "Você não quer aparecer, então a trilha foi montada pra funcionar sem a sua imagem." },
+  }},
+  { id: 3, opcoes: {
+    a: { pontos: { af: 2, dk: 1 }, motivo: "Seu tempo é curto e picado, então a trilha precisa render em sessões de poucos minutos." },
+    b: { pontos: { af: 2, ugc: 1, dk: 2, pp: 1 }, motivo: "Com até uma hora por dia dá pra manter constância sem virar segunda jornada." },
+    c: { pontos: { pp: 2, dk: 2, ugc: 1 }, motivo: "Você consegue um bloco de tempo inteiro, e isso permite construir algo mais denso." },
+  }},
+  { id: 4, opcoes: {
+    a: { pontos: { pp: 3 }, motivo: "Você quer algo seu, com o seu nome — e não adianta te empurrar produto dos outros." },
+    b: { pontos: { af: 3, ugc: 1 }, motivo: "Você prefere trabalhar com o que já está pronto, sem gastar meses criando." },
+    c: { pontos: { ugc: 3 }, motivo: "Você funciona melhor com prazo, entrega e cliente do outro lado." },
+  }},
+  { id: 5, opcoes: {
+    a: { pontos: { dk: 3, pp: 2 }, motivo: "Você aguenta construir sem retorno imediato, e é isso que essa trilha exige." },
+    b: { pontos: { af: 1, ugc: 1, dk: 1 }, motivo: "Sua constância oscila, então a trilha foi ordenada pra você ver avanço mesmo nos dias ruins." },
+    c: { pontos: { af: 2, ugc: 2 }, motivo: "Você precisa ver retorno logo no começo, e essa trilha coloca dinheiro perto do início." },
+  }},
+  { id: 6, opcoes: {
+    a: { pontos: { af: 3, pp: 2 }, motivo: "Você consegue conversar pra vender, e conversa é o atalho mais barato que existe." },
+    b: { pontos: { ugc: 3 }, motivo: "Você prefere o tom profissional: proposta, prazo e orçamento no lugar de papo de venda." },
+    c: { pontos: { dk: 3 }, motivo: "Você não quer negociar com ninguém, então a venda precisa acontecer sem você na conversa." },
+  }},
+] as const;
+
+function calcularTrilhaSofia(respostas: Record<number, "a" | "b" | "c">) {
+  const total: Record<string, number> = { pp: 0, af: 0, ugc: 0, dk: 0 };
+  for (const p of PERGUNTAS_SOFIA) {
+    const escolha = respostas[p.id];
+    if (!escolha) continue;
+    const opcao = (p.opcoes as any)[escolha];
+    for (const [k, v] of Object.entries(opcao.pontos as Record<string, number>)) {
+      total[k] += v ?? 0;
+    }
+  }
+  const max = Math.max(...Object.values(total));
+  const vencedores = Object.keys(total).filter((k) => total[k] === max);
+  let trilha = vencedores[0];
+  if (vencedores.length > 1) {
+    const desempate: Record<string, string> = { a: "pp", b: "af", c: "ugc" };
+    const p4 = respostas[4];
+    const escolhida = p4 ? desempate[p4] : undefined;
+    trilha = (escolhida && vencedores.includes(escolhida)) ? escolhida : "af";
+  }
+  const motivos = PERGUNTAS_SOFIA
+    .map((p) => {
+      const escolha = respostas[p.id];
+      if (!escolha) return null;
+      const opcao = (p.opcoes as any)[escolha];
+      const peso = (opcao.pontos as Record<string, number>)[trilha] ?? 0;
+      return peso > 0 ? { peso, motivo: opcao.motivo as string } : null;
+    })
+    .filter(Boolean)
+    .sort((a: any, b: any) => b.peso - a.peso)
+    .slice(0, 3)
+    .map((i: any) => i.motivo as string);
+  return { trilha, motivos };
+}
+
 // Filters out [[...]] markers from streamed text so users never see them,
 // while keeping the raw response (with markers) saved to the database.
 class TagStreamFilter {
