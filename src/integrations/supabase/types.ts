@@ -196,6 +196,7 @@ export type Database = {
           name: string
           niche: string | null
           target_audience: string | null
+          trilha: string | null
           updated_at: string | null
           user_id: string
         }
@@ -207,6 +208,7 @@ export type Database = {
           name: string
           niche?: string | null
           target_audience?: string | null
+          trilha?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -218,6 +220,7 @@ export type Database = {
           name?: string
           niche?: string | null
           target_audience?: string | null
+          trilha?: string | null
           updated_at?: string | null
           user_id?: string
         }
