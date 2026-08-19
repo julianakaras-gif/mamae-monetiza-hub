@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 const STORAGE_KEY = "mamae_active_project_id";
+const DEFAULT_PROJECT_NAME = "Meu primeiro projeto";
 
 interface Project {
   id: string;
@@ -13,6 +14,7 @@ interface Project {
   is_active: boolean;
   created_at: string | null;
   updated_at: string | null;
+  trilha?: string | null;
 }
 
 interface ProjectContextType {
@@ -23,6 +25,8 @@ interface ProjectContextType {
   createProject: (name: string, description?: string) => Promise<Project | null>;
   loadProjects: () => Promise<void>;
   loading: boolean;
+  autoCreatedProjectId: string | null;
+  clearAutoCreated: () => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -34,6 +38,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     localStorage.getItem(STORAGE_KEY)
   );
   const [loading, setLoading] = useState(true);
+  const [autoCreatedProjectId, setAutoCreatedProjectId] = useState<string | null>(null);
+  const autoCreateAttempted = useRef(false);
 
   const loadProjects = useCallback(async () => {
     if (!user) {
@@ -49,6 +55,25 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       .order("created_at", { ascending: false });
 
     if (data) {
+      // Conta nova sem nenhum projeto: cria automaticamente o primeiro
+      if (data.length === 0 && !autoCreateAttempted.current) {
+        autoCreateAttempted.current = true;
+        const { data: created } = await supabase
+          .from("projects")
+          .insert({ user_id: user.id, name: DEFAULT_PROJECT_NAME })
+          .select()
+          .single();
+        if (created) {
+          const project = created as Project;
+          setProjects([project]);
+          localStorage.setItem(STORAGE_KEY, project.id);
+          setActiveProjectId(project.id);
+          setAutoCreatedProjectId(project.id);
+          setLoading(false);
+          return;
+        }
+      }
+
       setProjects(data as Project[]);
       // Se o projeto ativo não existe mais, limpa e seleciona o primeiro
       if (activeProjectId && !data.find((p) => p.id === activeProjectId)) {
@@ -73,6 +98,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     setActiveProjectId(projectId);
   }
 
+  function clearAutoCreated() {
+    setAutoCreatedProjectId(null);
+  }
+
   async function createProject(name: string, description?: string) {
     if (!user) return null;
     const { data } = await supabase
@@ -94,12 +123,13 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
   return (
     <ProjectContext.Provider
-      value={{ projects, activeProject, activeProjectId, setProject, createProject, loadProjects, loading }}
+      value={{ projects, activeProject, activeProjectId, setProject, createProject, loadProjects, loading, autoCreatedProjectId, clearAutoCreated }}
     >
       {children}
     </ProjectContext.Provider>
   );
 }
+
 
 export function useProject() {
   const context = useContext(ProjectContext);
