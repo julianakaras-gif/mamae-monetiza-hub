@@ -664,6 +664,7 @@ Deno.serve(async (req) => {
     const encoder = new TextEncoder();
     let fullResponse = "";
     let buffer = "";
+    const tagFilter = new TagStreamFilter();
 
     const readable = new ReadableStream({
       async pull(controller) {
