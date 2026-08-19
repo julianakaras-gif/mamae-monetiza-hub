@@ -1,0 +1,1 @@
+ALTER TABLE public.user_progress ADD COLUMN skipped boolean NOT NULL DEFAULT false;
