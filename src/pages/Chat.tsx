@@ -176,7 +176,7 @@ const Chat = () => {
             historyMessages.map((m) => ({
               id: m.id,
               role: m.role as "user" | "assistant",
-              content: m.content,
+              content: m.role === "assistant" ? m.content.replace(/\[\[[^\]]*\]\]/g, "") : m.content,
             }))
           );
         } else {
