@@ -765,6 +765,28 @@ Deno.serve(async (req) => {
             if (flushed) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: flushed })}\n\n`));
             }
+            // SOFIA: grava a trilha confirmada no projeto
+            if (agent_id === "sofia" && project_id && fullResponse) {
+              const tm = fullResponse.match(/\[\[\s*TRILHA_CONFIRMADA\s*:\s*(af|ugc|pp|dk)\s*\]\]/i);
+              if (tm) {
+                try {
+                  await fetch(
+                    `${supabaseUrl}/rest/v1/projects?id=eq.${project_id}&user_id=eq.${userId}`,
+                    {
+                      method: "PATCH",
+                      headers: {
+                        apikey: supabaseServiceKey,
+                        Authorization: `Bearer ${supabaseServiceKey}`,
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ trilha: tm[1].toLowerCase() }),
+                    }
+                  );
+                } catch (e) {
+                  console.error("sofia trilha patch error:", e);
+                }
+              }
+            }
             // Save assistant response (with raw markers intact)
             if (fullResponse) {
               await fetch(`${supabaseUrl}/rest/v1/messages`, {
