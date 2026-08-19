@@ -590,41 +590,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build context from previous agents — fetch summaries server-side from trusted DB
-    // to prevent prompt injection via client-supplied agent_name/agent_role/summary.
+    // Build context from previous agents — sempre server-side, escopado por projeto e usuário.
     let contextSection = "";
-    if (Array.isArray(context_outputs) && context_outputs.length > 0) {
-      const requestedIds = Array.from(
-        new Set(
-          context_outputs
-            .map((o: any) => (typeof o?.agent_id === "string" ? o.agent_id : null))
-            .filter((v: string | null): v is string => !!v && /^[a-z0-9_-]{1,32}$/i.test(v))
-        )
-      ).slice(0, MAX_CONTEXT_OUTPUTS);
-
-      if (requestedIds.length > 0) {
-        const idsList = requestedIds.map((id) => encodeURIComponent(id)).join(",");
-        const projFilter = project_id ? `&project_id=eq.${project_id}` : `&project_id=is.null`;
-        const trustedRes = await fetch(
-          `${supabaseUrl}/rest/v1/agent_outputs?user_id=eq.${userId}&agent_id=in.(${idsList})${projFilter}&select=agent_id,summary`,
-          { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
-        );
-        const trusted = await trustedRes.json();
-        if (Array.isArray(trusted) && trusted.length > 0) {
-          contextSection = "\n\n---\nCONTEXTO DAS ETAPAS ANTERIORES:\n\n";
-          for (const out of trusted) {
-            const safeId = String(out.agent_id).toUpperCase().replace(/[^A-Z0-9_-]/g, "");
-            const safeSummary = String(out.summary ?? "").slice(0, MAX_SUMMARY_LENGTH);
-            contextSection += `[${safeId}]\n${safeSummary}\n\n`;
-          }
-          contextSection += "---\n";
-        }
-      }
-    }
-
-    // Content agents get automatic project/brand context
-    let contentContext = '';
-    if (CONTENT_AGENTS.includes(agent_id) && project_id) {
+    if (project_id) {
       // SECURITY: Scope project lookup to the authenticated caller to prevent IDOR
       const projRes = await fetch(
         `${supabaseUrl}/rest/v1/projects?id=eq.${project_id}&user_id=eq.${userId}&select=name,niche,target_audience`,
@@ -638,30 +606,27 @@ Deno.serve(async (req) => {
         );
       }
       const p = projData[0];
-      contentContext += `\n\n---\nCONTEXTO DO PROJETO:\nNome: ${p.name}${p.niche ? `\nNicho: ${p.niche}` : ''}${p.target_audience ? `\nPúblico-alvo: ${p.target_audience}` : ''}\n---\n`;
+      contextSection += `\n\n---\nCONTEXTO DO PROJETO:\nNome: ${p.name}${p.niche ? `\nNicho: ${p.niche}` : ''}${p.target_audience ? `\nPúblico-alvo: ${p.target_audience}` : ''}\n---\n`;
 
-      // SECURITY: Scope agent outputs to the authenticated caller's data only
+      // Todos os resumos já gerados neste projeto, sem lista curada.
       const outputRes = await fetch(
-        `${supabaseUrl}/rest/v1/agent_outputs?project_id=eq.${project_id}&user_id=eq.${userId}&agent_id=in.(alice,kaia,talia,alma)&select=agent_id,summary`,
+        `${supabaseUrl}/rest/v1/agent_outputs?project_id=eq.${project_id}&user_id=eq.${userId}&select=agent_id,summary,created_at&order=created_at.asc`,
         { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } }
       );
       const outputs = await outputRes.json();
-      if (outputs?.length > 0) {
-        const labels: Record<string, string> = {
-          alice: 'IDENTIDADE DE MARCA',
-          kaia: 'POSICIONAMENTO DE CONTEÚDO',
-          talia: 'ECOSSISTEMA DE PRODUTOS',
-          alma: 'COPYWRITING JÁ CRIADO',
-        };
-        contentContext += '\n\n---\nCONTEXTO DE MARCA E PRODUTO (use para personalizar todo o conteúdo):\n\n';
-        for (const out of outputs) {
-          contentContext += `[${labels[out.agent_id] || out.agent_id.toUpperCase()}]\n${out.summary}\n\n`;
+      if (Array.isArray(outputs) && outputs.length > 0) {
+        contextSection += "\n\n---\nCONTEXTO DAS ETAPAS ANTERIORES (use para personalizar tudo):\n\n";
+        for (const out of outputs.slice(0, MAX_CONTEXT_OUTPUTS)) {
+          const rawId = String(out.agent_id ?? "").replace(/[^a-zA-Z0-9_-]/g, "");
+          const safeName = rawId ? rawId.charAt(0).toUpperCase() + rawId.slice(1) : "Agente";
+          const safeSummary = String(out.summary ?? "").slice(0, MAX_SUMMARY_LENGTH);
+          contextSection += `[${safeName}]\n${safeSummary}\n\n`;
         }
-        contentContext += '---\n';
+        contextSection += "---\n";
       }
     }
 
-    const systemPrompt = systemPromptBase + contentContext + contextSection;
+    const systemPrompt = systemPromptBase + contextSection;
 
     // Fetch message history from Supabase
     const historyRes = await fetch(
