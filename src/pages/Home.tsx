@@ -20,7 +20,7 @@ const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0) + 1;
 
 const Home = () => {
   const { user, profile } = useAuth();
-  const { projects, activeProject, activeProjectId, setProject, createProject, loading: projectsLoading } = useProject();
+  const { projects, activeProject, activeProjectId, setProject, createProject, loading: projectsLoading, autoCreatedProjectId, clearAutoCreated } = useProject();
   const { progressPercent, completedAgents, getNextAgent, loading: progressLoading } = useAgentProgress();
   const navigate = useNavigate();
 
@@ -29,6 +29,13 @@ const Home = () => {
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
   const [recentAgent, setRecentAgent] = useState<{ agent_id: string; created_at: string } | null>(null);
+
+  // Conta nova: projeto criado automaticamente leva direto para a Sofia
+  useEffect(() => {
+    if (!autoCreatedProjectId) return;
+    clearAutoCreated();
+    navigate("/chat/sofia", { replace: true });
+  }, [autoCreatedProjectId, clearAutoCreated, navigate]);
 
   useEffect(() => {
     if (!user || !activeProjectId) return;
@@ -53,7 +60,7 @@ const Home = () => {
       setNewName("");
       setNewDesc("");
       toast.success("Projeto criado!");
-      navigate("/trilha");
+      navigate("/chat/sofia");
     }
     setCreating(false);
   }

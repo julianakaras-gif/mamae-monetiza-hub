@@ -43,6 +43,14 @@ const Trilha = () => {
     }
   }, [projectsLoading, activeProjectId, projects.length, navigate]);
 
+  // Projeto ainda sem trilha definida: leva para a Sofia
+  useEffect(() => {
+    if (projectsLoading || !activeProject) return;
+    if (!(activeProject as any).trilha) {
+      navigate("/chat/sofia", { replace: true });
+    }
+  }, [projectsLoading, activeProject, navigate]);
+
   useEffect(() => {
     async function verificarOnboarding() {
       if (!user) return;

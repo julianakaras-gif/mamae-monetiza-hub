@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Plus, FolderOpen, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProject } from "@/hooks/useProject";
 import { findAgent, getAllAgentIds } from "@/data/agents";
 import { toast } from "sonner";
 
@@ -18,6 +19,7 @@ interface Project {
 const Projetos = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { setProject, loadProjects: reloadProjects } = useProject();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
@@ -59,17 +61,23 @@ const Projetos = () => {
   const handleCreate = async () => {
     if (!newName.trim() || !user) return;
     setCreating(true);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("projects")
-      .insert({ user_id: user.id, name: newName.trim() });
+      .insert({ user_id: user.id, name: newName.trim() })
+      .select("id")
+      .single();
 
-    if (error) {
+    if (error || !data) {
       toast.error("Erro ao criar projeto");
-    } else {
-      setNewName("");
-      loadProjects();
+      setCreating(false);
+      return;
     }
+
+    setNewName("");
+    await reloadProjects();
+    setProject(data.id);
     setCreating(false);
+    navigate("/chat/sofia");
   };
 
   if (loading) {
