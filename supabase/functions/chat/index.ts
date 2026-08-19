@@ -671,7 +671,12 @@ Deno.serve(async (req) => {
         while (true) {
           const { done, value } = await reader.read();
           if (done) {
-            // Save assistant response
+            // Flush any remaining text that was held while waiting for a tag close
+            const flushed = tagFilter.flush();
+            if (flushed) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: flushed })}\n\n`));
+            }
+            // Save assistant response (with raw markers intact)
             if (fullResponse) {
               await fetch(`${supabaseUrl}/rest/v1/messages`, {
                 method: "POST",
