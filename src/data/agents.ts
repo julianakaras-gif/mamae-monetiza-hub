@@ -3,151 +3,357 @@ export interface Agent {
   name: string;
   role: string;
   desc: string;
-  context: string[];
   welcome: string;
 }
 
-export interface Phase {
-  id: number;
-  name: string;
-  sub: string;
-  emoji: string;
-  color: string;
-  sequential?: boolean;
-  freeAgents?: boolean;
-  alwaysOpen?: boolean;
-  agents: Agent[];
+export type TrilhaId = "af" | "ugc" | "pp" | "dk";
+
+export interface TrilhaAlternativa {
+  agentId: string;
+  nome: string;
+  oque: string;
 }
 
-export const PHASES: Phase[] = [
-  {
-    id: 1,
-    name: 'Descoberta',
-    sub: 'Encontre seu negócio autêntico',
-    emoji: '🌱',
-    color: '#7A5535',
-    sequential: true,
-    agents: [
-      {
-        id: 'clara',
-        name: 'Clara',
-        role: 'Reveladora de Negócios Autênticos',
-        desc: 'Descobre o negócio alinhado aos seus dons genuínos e ao mercado real. Faz perguntas estratégicas e entrega 5 conceitos com análise SWOT e roadmap de 90 dias.',
-        context: [],
-        welcome: 'Olá! Eu sou a Clara 🌸\n\nMinha missão é te encontrar onde você está na jornada e te ajudar a descobrir, estruturar ou validar seu negócio.\n\nPara começarmos do jeito certo, **me conta: qual é o seu nome?**',
-      },
-      {
-        id: 'aya',
-        name: 'Aya',
-        role: 'Validadora de Mercado',
-        desc: 'Avalia a viabilidade real dos conceitos de negócio. Entrega veredicto (validado, pivotar ou abandonar) com 3 insights acionáveis e protocolo de teste de 48h.',
-        context: ['clara'],
-        welcome: 'Olá! Eu sou a Aya 📊\n\nRecebi os conceitos que você desenvolveu com a Clara. Já estou analisando cada um sob a ótica do mercado real.\n\nMinha função é ser honesta com você, porque começar no negócio certo economiza meses de esforço no negócio errado.\n\n**Qual dos conceitos você sente mais conexão? Isso vai me ajudar a priorizar minha análise.**',
-      },
-      {
-        id: 'talia',
-        name: 'Talia',
-        role: 'Arquiteta de Ecossistemas',
-        desc: 'Desenha sistema completo de 6 produtos: isca, tripwire, core, upsell, high ticket e recorrência. Inclui projeções de receita para 3 cenários.',
-        context: ['clara', 'aya'],
-        welcome: 'Olá! Eu sou a Talia 💎\n\nTenho o perfil completo do negócio e a validação da Aya. Agora vou construir o ecossistema de produtos.\n\nUm único produto não é negócio: é um emprego. **Qual é a transformação principal que você entrega para suas clientes?**',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Estratégia',
-    sub: 'Plano, marca e ecossistema de produtos',
-    emoji: '🎯',
-    color: '#3A5C46',
-    sequential: true,
-    agents: [
-      {
-        id: 'lucca',
-        name: 'Lucca',
-        role: 'Consultor Estratégico',
-        desc: 'Cria plano de implementação detalhado com base nos seus recursos reais. Entrega 2 opções de plano estratégico e cronograma semanal de ação.',
-        context: ['clara', 'aya', 'talia'],
-        welcome: 'Olá! Eu sou o Lucca 🎯\n\nRecebi os dados de validação da Aya e o perfil do seu negócio. Vou criar um plano de implementação realista com o tempo, orçamento e habilidades que você realmente tem.\n\n**Para calibrar o plano: qual é o seu orçamento mensal disponível para o negócio agora?**',
-      },
-      {
-        id: 'alice',
-        name: 'Alice',
-        role: 'Arquiteta de Marcas',
-        desc: 'Constrói identidade de marca completa de dentro para fora: 3 pilares, paleta visual, tipografia, manual de voz e 5 micro-histórias.',
-        context: ['clara', 'lucca'],
-        welcome: 'Olá! Eu sou a Alice ✨\n\nJá tenho o perfil do seu negócio e o plano do Lucca. Vou construir a marca que representa quem você realmente é: não uma persona, mas a sua essência potencializada.\n\n**Se sua marca fosse uma pessoa, como ela seria?**',
-      },
-      { id: 'maia', name: 'Maia', role: 'Arquiteta de Rotinas Estratégicas', desc: 'Constrói sistema de produtividade consciente de energia. Previne burnout com 4 opções de rotina adaptadas à sua realidade como mãe empreendedora.', context: [], welcome: 'Olá! Eu sou a Maia ⚡\n\nProdutividade para mãe empreendedora não é fazer mais: é fazer o que importa no tempo que você tem. Vou criar sua rotina respeitando sua energia, sua família e sua saúde.\n\n**Quantas horas por dia você tem disponível para o negócio?**' },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Produto',
-    sub: 'Crie seus produtos digitais e sua comunidade',
-    emoji: '📦',
-    color: '#1C3C2C',
-    freeAgents: true,
-    agents: [
-      { id: 'lira', name: 'Lira', role: 'Especialista em Ebooks', desc: 'Cria ebooks e iscas digitais para cada posição do funil com estrutura pedagógica real. Entrega arquitetura completa, roteiro, workbook e checklists.', context: ['talia'], welcome: 'Olá! Eu sou a Lira 📚\n\nA Talia já definiu o ecossistema de produtos. Vou pegar o ebook ou isca digital do seu ecossistema e transformar em estrutura pedagógica real.\n\n**Qual produto do ecossistema você quer criar primeiro como ebook?**' },
-      { id: 'noa', name: 'Noa', role: 'Especialista em Cursos Online', desc: 'Cria programas de aprendizagem estruturados com andragogia e microlearning. Inclui workbook, checklists, templates e sistema de certificação.', context: ['talia'], welcome: 'Olá! Eu sou a Noa 🎓\n\nTenho o ecossistema de produtos da Talia. Vou estruturar o seu curso com metodologia real, para que as alunas apliquem e tenham resultado, não apenas assistam.\n\n**Qual é o resultado que sua aluna ideal deve alcançar ao final do curso?**' },
-      { id: 'eron', name: 'Eron', role: 'Especialista em Mentorias de Alto Valor', desc: 'Desenha programas premium de mentoria com 6 pilares: metodologia proprietária, estrutura de sessão, roteiros, toolkit e acompanhamento.', context: ['talia', 'lucca'], welcome: 'Olá! Eu sou o Eron 💼\n\nMentoria de alto valor não é uma conversa cara: é uma transformação estruturada com metodologia e resultado garantido. Vou criar o programa que justifica o seu preço premium.\n\n**Qual formato você imagina: individual, grupo, VIP day ou retainer?**' },
-      { id: 'vera', name: 'Vera', role: 'Especialista em Comunidades Online', desc: 'Cria infraestrutura completa de comunidade como produto: identidade, estrutura, regras, calendário editorial de 30 dias e fluxo de onboarding.', context: ['talia', 'kaia'], welcome: 'Olá! Eu sou a Vera 🌐\n\nComunidade pode ser um produto de recorrência poderoso no seu ecossistema. Vou criar toda a estrutura para que os membros queiram ficar, participar e indicar.\n\n**Você imagina uma comunidade paga separada ou como bônus de outro produto?**' },
-      { id: 'cora', name: 'Cora', role: 'Especialista em Gamificação', desc: 'Cria sistema de engajamento com XP, níveis de progressão, badges, sistema de desafios e recompensas usando 8 princípios de psicologia comportamental.', context: ['vera'], welcome: 'Olá! Eu sou a Cora 🎮\n\nGameficação bem feita transforma participação passiva em engajamento ativo. Vou criar o sistema de pontos, níveis e recompensas que faz suas alunas quererem avançar.\n\n**Qual comportamento principal você quer incentivar nas suas alunas?**' },
-    ],
-  },
-  {
-    id: 4,
-    name: 'Conteúdo',
-    sub: 'Crie conteúdo que atrai, engaja e converte',
-    emoji: '✨',
-    color: '#C6A86C',
-    freeAgents: true,
-    agents: [
-      { id: 'kaia', name: 'Kaia', role: 'Estrategista de Conteúdo Autêntico', desc: 'Constrói posicionamento corajoso e específico. Entrega manifesto da marca, 3 a 5 pilares de conteúdo honestos e 10 posts autênticos.', context: ['alice', 'clara'], welcome: 'Olá! Eu sou a Kaia 📣\n\nRecebi a identidade de marca que a Alice construiu com você. Agora vou criar um posicionamento de conteúdo corajoso e específico.\n\nConteúdo genérico não constrói negócio. **Qual é a crença que você tem sobre o seu nicho que a maioria ainda não percebeu?**' },
-      { id: 'alma', name: 'Alma', role: 'Especialista em Copywriting Emocional', desc: 'Cria copy com framework de 3 camadas emocionais. Entrega 3 versões de texto: reconhecimento, transição e transformação.', context: ['alice', 'talia'], welcome: 'Olá! Eu sou a Alma 💬\n\nTenho a identidade de marca da Alice e o ecossistema da Talia. Vou criar os textos que fazem sua cliente sentir: ela está falando de mim.\n\n**Para qual produto você quer o copy primeiro?**' },
-      { id: 'malu', name: 'Malu', role: 'Estrategista de Calendário Editorial', desc: 'Organiza 30 dias de conteúdo com distribuição 40/35/25 de funil, horários de publicação, hashtags por plataforma e guia de produção em lote.', context: ['kaia', 'alma'], welcome: 'Olá! Eu sou a Malu 📅\n\nNão precisa postar todo dia para ter resultado: precisa postar com estratégia. Tenho os pilares de conteúdo da Kaia para montar seu calendário de 30 dias.\n\n**Em quais plataformas você quer publicar conteúdo?**' },
-      { id: 'kaena', name: 'Kaena', role: 'Roteirista Viral', desc: 'Cria roteiros para TikTok, Reels e Shorts usando 5 fórmulas psicológicas. Inclui legenda e métricas esperadas.', context: ['alma', 'kaia'], welcome: 'Olá! Eu sou a Kaena 🎬\n\nVídeos curtos que param o scroll seguem fórmulas psicológicas testadas. Vou criar roteiros que você grava em menos de 5 minutos.\n\n**Qual tema de conteúdo você quer gravar primeiro?**' },
-      { id: 'bill', name: 'Bill', role: 'Roteirista de YouTube', desc: 'Cria roteiro completo para YouTube com timestamps, especificações técnicas, 5 opções de título, conceitos de thumbnail e estratégias de retenção.', context: ['alma', 'kaia'], welcome: 'Olá! Eu sou o Bill 🎥\n\nYouTube é o maior motor de busca do mundo depois do Google. Vou criar um roteiro completo com o que falar, quando falar e como manter o espectador até o final.\n\n**Qual assunto você quer abordar no primeiro vídeo?**' },
-      { id: 'lumi', name: 'Lumi', role: 'Especialista em Carrosséis Virais', desc: 'Cria 3 carrosséis de 10 slides usando efeito Zeigarnik e valor progressivo. Entrega copy e orientação visual slide a slide.', context: ['alma', 'kaia'], welcome: 'Olá! Eu sou a Lumi 🎠\n\nCarrosséis bem feitos geram mais salvamentos e compartilhamentos do que qualquer outro formato. Vou criar 3 carrosséis completos com copy, visual e psicologia em cada slide.\n\n**Qual dos seus pilares de conteúdo você quer explorar primeiro?**' },
-      { id: 'luli', name: 'Luli', role: 'Especialista em Prompts de Imagem IA', desc: 'Cria arquitetura de prompt de 10 camadas para Midjourney, DALL-E e Leonardo. Gera imagens com identidade visual consistente da marca.', context: ['alice'], welcome: 'Olá! Eu sou a Luli 🎨\n\nTenho a identidade visual que a Alice criou para você. Vou transformar isso em prompts que geram imagens que parecem ser sempre da mesma fotógrafa.\n\n**Para qual plataforma você precisa de mais imagens agora?**' },
-      { id: 'nara', name: 'Nara', role: 'Especialista em Stories que Convertem', desc: 'Cria sequências de 8 a 12 stories com jornada emocional completa, elementos interativos e guia de produção.', context: ['alma', 'kaia'], welcome: 'Olá! Eu sou a Nara 📱\n\nStories são o canal mais íntimo das redes sociais: por isso convertem tão bem quando feitos com intenção. Vou criar sequências que levam sua seguidora de apenas olhando para quero comprar.\n\n**Você quer uma sequência para vender, engajar ou gerar leads?**' },
-    ],
-  },
-  {
-    id: 5,
-    name: 'Vendas',
-    sub: 'Monte sua máquina de vendas',
-    emoji: '💰',
-    color: '#6E9876',
-    freeAgents: true,
-    agents: [
-      { id: 'petra', name: 'Petra', role: 'Especialista em Sales Pages', desc: 'Cria páginas de vendas usando o framework de níveis de consciência de Eugene Schwartz.', context: ['talia', 'alma', 'alice'], welcome: 'Olá! Eu sou a Petra 📝\n\nTenho o ecossistema de produtos, o copy da Alma e a identidade da Alice. Página que converte não é sobre design bonito: é sobre falar a coisa certa para a pessoa certa no momento certo.\n\n**Para qual produto você quer criar a página de vendas primeiro?**' },
-      { id: 'alana', name: 'Alana', role: 'Especialista em Vendas Humanizadas', desc: 'Cria infraestrutura completa de vendas: stack de oferta, copy, scripts de WhatsApp, sequências de stories e tratamento de objeções.', context: ['talia', 'alma'], welcome: 'Olá! Eu sou a Alana 🤝\n\nVender não precisa ser chato ou desconfortável. Vou criar toda a infraestrutura de vendas da sua oferta com conexão humana em cada etapa.\n\n**Qual produto você quer estruturar as vendas agora?**' },
-      { id: 'nina', name: 'Nina', role: 'Arquiteta de Relacionamentos', desc: 'Constrói sequências de nutrição multicanal (WhatsApp, email e DM) com estratégia completa de 21 dias.', context: ['talia', 'alma'], welcome: 'Olá! Eu sou a Nina 💌\n\nLeads não compram na primeira vez: precisam de relacionamento. Vou criar as sequências automáticas que mantêm sua marca presente na vida da sua cliente até ela estar pronta para comprar.\n\n**Por onde você prefere começar: email, WhatsApp ou DM do Instagram?**' },
-      { id: 'elisa', name: 'Elisa', role: 'Especialista em Quiz Funnels', desc: 'Cria sistema de geração de leads via quiz com 5 mecanismos psicológicos e segmentação automática.', context: ['clara', 'talia'], welcome: 'Olá! Eu sou a Elisa 🎯\n\nQuiz é uma das formas mais poderosas de capturar leads e segmentá-los automaticamente. Vou criar o quiz completo: perguntas, resultados personalizados e sequência de email para cada perfil.\n\n**Qual é o tema do quiz?**' },
-      { id: 'luna', name: 'Luna', role: 'Arquiteta de Funis Automáticos', desc: 'Cria funis que vendem 24h por dia, adaptados ao nível técnico. Entrega checklist de implementação semana a semana.', context: ['talia', 'alana', 'nina'], welcome: 'Olá! Eu sou a Luna 🌙\n\nFunil automatizado não é coisa de empresa grande: é o jeito mais inteligente de uma pessoa só fazer o trabalho de uma equipe. Vou criar a estrutura que vende enquanto você dorme.\n\n**Você tem alguma ferramenta de email ou página de vendas já configurada?**' },
-      { id: 'liora', name: 'Liora', role: 'Decodificadora de Dados', desc: 'Transforma métricas em decisões acionáveis. Dashboard completo de Instagram, vendas e funil com roadmap de 90 dias priorizado por ROI.', context: [], welcome: 'Olá! Eu sou a Liora 📊\n\nNúmeros sem interpretação são só números. Vou transformar suas métricas em decisões claras: o que está funcionando, o que precisa mudar e o que priorizar nos próximos 90 dias.\n\n**Por qual área você quer começar: Instagram, vendas ou funil?**' },
-    ],
-  },
-];
+export interface TrilhaStep {
+  ordem: number;
+  agentId: string;
+  oque: string;
+  textoAntes?: string;
+  textoDepois?: string;
+  divisoria?: string;
+  alternativas?: TrilhaAlternativa[];
+}
 
-export const SERENA = {
-  id: 'serena',
-  name: 'Serena',
-  role: 'Desbloqueadora de Potencial',
-  color: '#6E9876',
-  welcome: 'Olá! Eu sou a Serena 💛\n\nEstou aqui para quando a jornada parecer pesada demais. Síndrome do impostor, medo de falhar, bloqueio criativo, sobrecarga emocional: traga pra cá. Juntas a gente desbloqueia o que está te impedindo de avançar.\n\n**O que você está sentindo agora?**',
+export interface TrilhaDef {
+  id: TrilhaId;
+  nome: string;
+  objetivo: string;
+  descricao: string;
+  cor: string;
+  emoji: string;
+  passos: TrilhaStep[];
+}
+
+export const AGENTS: Record<string, Agent> = {
+  clara: {
+    id: "clara",
+    name: "Clara",
+    role: "Reveladora de Negócios",
+    desc: "Descobre qual negócio está escondido na sua história e define o primeiro produto que você vai vender.",
+    welcome: "Oi, eu sou a Clara. Vou te ajudar a achar ou lapidar o negócio que você vai construir, e fechar o primeiro produto que você consegue vender logo.\n\nExistem três caminhos: você ainda não sabe o que fazer, tem uma ideia vaga, ou já sabe o que quer e só precisa fechar.\n\n**Qual desses é o seu caso agora?**",
+  },
+  aya: {
+    id: "aya",
+    name: "Aya",
+    role: "Pesquisa de Mercado",
+    desc: "Pesquisa o mercado com fontes reais e mostra o que encontrou.",
+    welcome: "Oi, eu sou a Aya. Meu trabalho é pesquisar o seu mercado de verdade, com fonte, e te mostrar o que encontrei, sem inventar nada bonito.\n\n**O que você quer vender, em uma frase?**",
+  },
+  talia: {
+    id: "talia",
+    name: "Talia",
+    role: "Preço e Formato",
+    desc: "Define o formato que você cria primeiro e por quanto vende.",
+    welcome: "Oi, eu sou a Talia. Vou fechar duas coisas com você: qual formato de produto você cria primeiro, e por quanto vende.\n\n**Qual desses você quer criar: e-book, planner ou planilha, curso online, ou mentoria e consultoria 1 a 1?**",
+  },
+  alice: {
+    id: "alice",
+    name: "Alice",
+    role: "Identidade de Marca",
+    desc: "Suas cores, fontes, jeito de falar, e gera a sua logo.",
+    welcome: "Oi, eu sou a Alice. Vou transformar o seu negócio numa identidade que você consegue aplicar essa semana: cores, fontes, jeito de escrever, e a sua logo, que eu mesma gero.\n\n**Quais cores você não suporta ver?**",
+  },
+  lira: {
+    id: "lira",
+    name: "Lira",
+    role: "E-book, Planner, Template e Planilha",
+    desc: "Cria seu produto escrito, do índice à entrega.",
+    welcome: "Oi, eu sou a Lira. Vou escrever o seu produto com você, e você sai daqui com o material pronto, não com um plano de escrever.\n\n**Qual formato você vai criar: e-book, planner, template ou planilha?**",
+  },
+  noa: {
+    id: "noa",
+    name: "Noa",
+    role: "Curso Online",
+    desc: "Monta seu curso e escreve os roteiros de teleprompter.",
+    welcome: "Oi, eu sou a Noa. Vou montar a arquitetura do seu curso e escrever os roteiros de teleprompter, palavra por palavra, prontos pra você gravar.\n\n**Quantas horas por semana você consegue reservar pra gravar e editar?**",
+  },
+  eron: {
+    id: "eron",
+    name: "Eron",
+    role: "Mentoria e Consultoria",
+    desc: "Estrutura seu programa e os roteiros de cada sessão.",
+    welcome: "Oi, eu sou o Eron. Mentoria e consultoria são o único formato que você pode vender antes de produzir qualquer coisa: você vende a vaga e entrega na semana seguinte.\n\n**Quantas horas por semana você consegue reservar pra atender, em horários que você tem certeza que cumpre?**",
+  },
+  bia: {
+    id: "bia",
+    name: "Bia",
+    role: "Afiliação",
+    desc: "Escolhe o produto pra afiliar e monta seu kit de divulgação.",
+    welcome: "Oi, eu sou a Bia. Vou te ajudar a escolher um produto pra afiliar e montar sua divulgação, do zero até a primeira comissão.\n\n**Que tipo de produto você teria orgulho de recomendar pra uma amiga: um curso ou material digital, ou produtos físicos do dia a dia, tipo casa, beleza, infantil?**",
+  },
+  manu: {
+    id: "manu",
+    name: "Manu",
+    role: "UGC pra Marcas",
+    desc: "Nicho, preço, lista de marcas, roteiros de portfólio e a proposta.",
+    welcome: "Oi, eu sou a Manu. Uma coisa antes de tudo: UGC não é ser influenciadora. Você não precisa de seguidores, e quem paga é a marca. Dá pra fazer sem aparecer de rosto, inclusive.\n\n**Que tipo de produto você já usa e conhece de verdade: casa, cozinha, beleza, infantil, organização, pet?**",
+  },
+  kaia: {
+    id: "kaia",
+    name: "Kaia",
+    role: "Posicionamento",
+    desc: "O que você defende, o que contesta, e 10 temas prontos.",
+    welcome: "Oi, eu sou a Kaia. Vou te ajudar a definir o que você defende, o que faz diferente, e te entregar 10 temas prontos pro seu conteúdo.\n\nAntes de tudo: me diz como você quer soar. Suave, você ensina e ajuda sem confrontar ninguém. Firme, você tem opinião e diz o que funciona, sem provocar. Direta, você quebra mito de frente e filtra audiência de propósito.\n\n**Qual é a sua?**",
+  },
+  lumi: {
+    id: "lumi",
+    name: "Lumi",
+    role: "Carrosséis",
+    desc: "Transforma um tema em carrossel, com o texto e as artes.",
+    welcome: "Oi, eu sou a Lumi. Vou transformar um tema do seu banco em carrossel, com o texto e as artes prontas.\n\n**Qual dos seus temas você quer transformar em carrossel agora?**",
+  },
+  nara: {
+    id: "nara",
+    name: "Nara",
+    role: "Stories",
+    desc: "Escolhe uma das sequências testadas e adapta ao seu caso.",
+    welcome: "Oi, eu sou a Nara. Vou montar uma sequência de stories que leva quem te segue até o seu direct.\n\n**O que você quer que aconteça no fim dessa sequência: as pessoas te chamarem no direct, mandarem pergunta na caixinha, clicarem no seu link, ou vender de verdade agora?**",
+  },
+  kaena: {
+    id: "kaena",
+    name: "Kaena",
+    role: "Roteiros de Vídeo",
+    desc: "Roteiro dos seus Reels, TikToks e Shorts.",
+    welcome: "Oi, eu sou a Kaena. Escrevo roteiros de Reels, TikTok e Shorts pra você gravar, do seu jeito.\n\n**Quem vai ver esse vídeo já sabe que tem esse problema, ou nem percebeu ainda?**",
+  },
+  malu: {
+    id: "malu",
+    name: "Malu",
+    role: "Calendário de Publicação",
+    desc: "Organiza o que você já criou num calendário que você consegue cumprir.",
+    welcome: "Oi, eu sou a Malu. Eu organizo o que você já criou num calendário que você consegue cumprir de verdade, sem inventar conteúdo novo.\n\n**Quantas publicações por semana você consegue fazer, numa semana ruim?**",
+  },
+  maia: {
+    id: "maia",
+    name: "Maia",
+    role: "Rotina",
+    desc: "Corta o trabalho em pedaços que cabem nos seus tempinhos.",
+    welcome: "Oi, eu sou a Maia. Vou te ajudar a encaixar o seu negócio no tempo que você realmente tem, não no tempo que os métodos assumem que você tem.\n\n**Me descreve um dia normal seu, do acordar ao dormir, sem arrumar, do jeito que é.**",
+  },
+  nina: {
+    id: "nina",
+    name: "Nina",
+    role: "Aquecimento",
+    desc: "Aquece quem comentou ou mandou direct até virar conversa de venda.",
+    welcome: "Oi, eu sou a Nina. Pego quem já demonstrou algum interesse em você, comentou, respondeu story, mandou direct, e aqueço até a pessoa estar pronta pra ouvir uma oferta.\n\n**Quantas pessoas já interagiram com você de alguma forma? Um número aproximado.**",
+  },
+  alana: {
+    id: "alana",
+    name: "Alana",
+    role: "Oferta e Venda",
+    desc: "Fecha sua oferta e escreve a conversa que vende.",
+    welcome: "Oi, eu sou a Alana. Meu trabalho é te levar até a primeira venda: fechar sua oferta e escrever a conversa que vende.\n\nAviso: eu não vou elogiar o que estiver fraco. Se sua oferta não estiver de pé, eu falo.\n\n**O que você precisa agora: montar a oferta e o preço, o script de WhatsApp, ou o texto pra post, story ou anúncio?**",
+  },
+  petra: {
+    id: "petra",
+    name: "Petra",
+    role: "Página de Vendas",
+    desc: "Transforma a oferta que você já vendeu numa página.",
+    welcome: "Oi, eu sou a Petra. Transformo a oferta que você já vendeu por conversa numa página.\n\n**Quem vai cair nessa página, em que ponto está: nem sabe que tem esse problema, sente o problema mas não sabe da solução, sabe da solução mas não conhece a sua, já conhece o seu produto, ou já quer comprar e só falta o link?**",
+  },
+  liora: {
+    id: "liora",
+    name: "Liora",
+    role: "Seus Números",
+    desc: "Lê o que você publicou e vendeu, e mostra o que funcionou.",
+    welcome: "Oi, eu sou a Liora. Leio os seus números e respondo uma pergunta: o que fez alguém chegar até você, e o que fez alguém comprar.\n\n**Nos últimos 30 dias, quantas publicações você fez?**",
+  },
+  lucca: {
+    id: "lucca",
+    name: "Lucca",
+    role: "Plano de Crescimento",
+    desc: "Mostra onde está seu gargalo e monta o plano de 4 semanas.",
+    welcome: "Oi, eu sou o Lucca. Entro depois que você já vendeu, ou pelo menos tentou.\n\n**Você já vendeu? Quantas vezes, e por qual caminho: conversa no WhatsApp, comentário num post, indicação?**",
+  },
+  luna: {
+    id: "luna",
+    name: "Luna",
+    role: "Automação Simples",
+    desc: "Automatiza o que você repete todo dia, pra sobrar tempo.",
+    welcome: "Oi, eu sou a Luna. Antes de tudo, uma verdade: automação não faz gente aparecer, ela cuida melhor de quem já apareceu.\n\n**Quantas pessoas te procuraram no último mês?**",
+  },
+  elisa: {
+    id: "elisa",
+    name: "Elisa",
+    role: "Quiz",
+    desc: "Monta o quiz que qualifica quem chega e te devolve as palavras do seu público.",
+    welcome: "Oi, eu sou a Elisa. Monto um quiz curto e gratuito que descobre o que a pessoa precisa e te devolve as palavras que o seu público usa de verdade.\n\n**Quantas pessoas te procuram por semana perguntando sobre o que você vende?**",
+  },
+  vera: {
+    id: "vera",
+    name: "Vera",
+    role: "Comunidade",
+    desc: "Monta e mantém o grupo com as pessoas que já compraram de você.",
+    welcome: "Oi, eu sou a Vera. Vou te ajudar a montar e manter um grupo com as pessoas que já compraram de você.\n\n**Antes de criar o grupo, uma pergunta honesta: quantos minutos por dia você consegue dedicar a ele, todo dia, pelos próximos três meses?**",
+  },
+  cora: {
+    id: "cora",
+    name: "Cora",
+    role: "Conclusão",
+    desc: "Faz quem comprou terminar, pra virar depoimento e não virar reembolso.",
+    welcome: "Oi, eu sou a Cora. Meu trabalho é fazer quem comprou de você terminar o que comprou, porque quem termina vira depoimento e quem não termina pede reembolso.\n\n**Quantas pessoas já compraram esse produto?**",
+  },
+  luli: {
+    id: "luli",
+    name: "Luli",
+    role: "Imagens",
+    desc: "Gera as imagens que você precisa: thumbnail, criativo, capa e imagem de apoio.",
+    welcome: "Oi, eu sou a Luli. Eu gero as imagens que você precisa: thumbnail, criativo, capa, imagem de apoio.\n\n**Onde essa imagem vai aparecer: thumbnail de vídeo, post no feed, story, capa de e-book, foto de perfil, ou criativo de anúncio?**",
+  },
+  bill: {
+    id: "bill",
+    name: "Bill",
+    role: "Canal sem Aparecer",
+    desc: "Monta seu canal sem rosto e escreve os roteiros.",
+    welcome: "Oi, eu sou o Bill. Monto canais onde você não aparece: sem rosto, sem a sua voz, com vídeo gerado por IA.\n\n**Onde você quer começar: vídeo curto (Shorts, TikTok, Reels) ou vídeo longo (YouTube)?**",
+  },
 };
 
-export function findAgent(agentId: string): { agent: Agent; phase: Phase } | null {
-  for (const phase of PHASES) {
-    const agent = phase.agents.find((a) => a.id === agentId);
-    if (agent) return { agent, phase };
-  }
-  return null;
+export const TRILHAS: Record<TrilhaId, TrilhaDef> = {
+  af: {
+    id: "af",
+    nome: "Afiliação",
+    objetivo: "Sua primeira comissão vendendo o produto de outra pessoa.",
+    descricao: "Você não cria nada. Escolhe um produto bom, recebe seu link e divulga pra quem tem o problema que aquele produto resolve.",
+    cor: "#3A5C46",
+    emoji: "🤝",
+    passos: [
+      { ordem: 1, agentId: "bia", oque: "Escolhe o produto, guia o cadastro, entrega o link e monta seu kit de divulgação" },
+      { ordem: 2, agentId: "alice", oque: "A cara da sua marca: cores, fontes e a logo, que ela mesma gera" },
+      { ordem: 3, agentId: "kaia", oque: "O que você defende, o que contesta, e 10 temas prontos pros próximos robôs" },
+      { ordem: 4, agentId: "lumi", oque: "Transforma um tema do seu banco em carrossel, com as artes" },
+      { ordem: 5, agentId: "nara", oque: "Sequências de stories que levam a pessoa até o seu direct" },
+      { ordem: 6, agentId: "kaena", oque: "Roteiros de Reels, TikTok e Shorts pra você gravar" },
+      { ordem: 7, agentId: "maia", oque: "Corta o trabalho em pedaços que cabem nos seus tempinhos" },
+      { ordem: 8, agentId: "malu", oque: "Calendário de 30 dias com o que você já criou" },
+      { ordem: 9, agentId: "nina", oque: "Aquece quem comentou ou mandou direct, até virar conversa de venda" },
+      { ordem: 10, agentId: "alana", oque: "Sua oferta, os scripts de venda, as objeções e a retomada" },
+      { ordem: 11, agentId: "liora", oque: "O que está funcionando e o que parar de fazer" },
+      { ordem: 12, agentId: "petra", oque: "Página que apresenta o produto com a sua cara" },
+      { ordem: 13, agentId: "luna", oque: "Automatiza o que você repete todo dia" },
+      { ordem: 14, agentId: "elisa", oque: "Quiz que qualifica quem chega e te devolve as palavras do seu público" },
+      { ordem: 15, agentId: "lucca", oque: "Onde está seu gargalo e o plano das próximas 4 semanas" },
+      { ordem: 16, agentId: "vera", oque: "Grupo com quem já comprou pelo seu link" },
+      { ordem: 17, agentId: "luli", oque: "Gera as imagens que você precisa: capa, criativo e imagem de apoio" },
+    ],
+  },
+  ugc: {
+    id: "ugc",
+    nome: "UGC",
+    objetivo: "Seu primeiro trabalho pago gravando vídeos caseiros pra marcas.",
+    descricao: "Você grava vídeos curtos de produto com o celular, em casa. Não precisa de seguidores, não precisa mostrar o rosto se não quiser. Quem paga é a marca, não o público.",
+    cor: "#C6A86C",
+    emoji: "🎥",
+    passos: [
+      { ordem: 1, agentId: "manu", oque: "Define seu nicho de produtos e sua tabela de preços" },
+      { ordem: 2, agentId: "manu", oque: "Monta sua lista de 20 marcas e o briefing dos 3 vídeos", textoAntes: "Você mapeia as marcas ANTES de ligar a câmera. Vídeo feito no vácuo não abre porta, porque cada marca quer ver o tipo de produto DELA sendo filmado." },
+      { ordem: 3, agentId: "manu", oque: "Escreve os roteiros dos 3 vídeos de portfólio, mirados nas marcas da sua lista" },
+      { ordem: 4, agentId: "manu", oque: "Mensagem de proposta, retomada e quando parar de insistir" },
+      { ordem: 5, agentId: "maia", oque: "Organiza gravação, edição e envio dentro da sua semana" },
+      { ordem: 6, agentId: "alice", oque: "Sua identidade como criadora: cores, fontes e logo" },
+      { ordem: 7, agentId: "luli", oque: "Gera as imagens da sua apresentação e do portfólio" },
+      { ordem: 8, agentId: "petra", oque: "Página de portfólio pra mandar junto com a proposta" },
+      { ordem: 9, agentId: "kaia", oque: "Seu posicionamento e os temas que fazem marcas te acharem" },
+      { ordem: 10, agentId: "lumi", oque: "Transforma um tema do seu banco em carrossel, com as artes" },
+      { ordem: 11, agentId: "nara", oque: "Sequências de stories" },
+      { ordem: 12, agentId: "malu", oque: "Calendário de publicação" },
+      { ordem: 13, agentId: "liora", oque: "O que está funcionando" },
+      { ordem: 14, agentId: "lucca", oque: "Onde está seu gargalo e o plano das próximas 4 semanas" },
+    ],
+  },
+  pp: {
+    id: "pp",
+    nome: "Produto Próprio",
+    objetivo: "Sua primeira venda de um produto criado por você.",
+    descricao: "Você transforma o que já sabe em e-book, curso, planner ou consultoria. É a trilha que dá mais trabalho no começo e mais liberdade depois.",
+    cor: "#1C3C2C",
+    emoji: "📦",
+    passos: [
+      { ordem: 1, agentId: "clara", oque: "Descobre qual negócio está escondido na sua história e nos seus talentos", textoAntes: "Já sabe o que quer vender? Pula a Clara e vai direto pra Aya." },
+      { ordem: 2, agentId: "aya", oque: "Pesquisa o mercado com fonte e link, e mostra o que encontrou" },
+      { ordem: 3, agentId: "talia", oque: "Define o formato que você cria primeiro e por quanto vende" },
+      { ordem: 4, agentId: "alice", oque: "Suas cores, suas fontes, seu jeito de falar, e ela GERA a sua logo" },
+      {
+        ordem: 5,
+        agentId: "escolha-formato",
+        oque: "Abra só o robô que a Talia indicou.",
+        textoAntes: "A Talia já definiu o seu formato. Abra só o robô que ela indicou.",
+        alternativas: [
+          { agentId: "lira", nome: "Lira", oque: "Cria e-book, planner, planilha ou template, do índice à entrega" },
+          { agentId: "noa", nome: "Noa", oque: "Estrutura seu curso em módulos e aulas, com roteiro de gravação" },
+          { agentId: "eron", nome: "Eron", oque: "Monta sua mentoria ou consultoria: formato, sessões e entrega" },
+        ],
+      },
+      { ordem: 6, agentId: "kaia", oque: "O que você defende, o que contesta, e 10 temas prontos pros próximos robôs" },
+      { ordem: 7, agentId: "lumi", oque: "Transforma um tema do seu banco em carrossel, com as artes" },
+      { ordem: 8, agentId: "nara", oque: "Sequências de stories que levam a pessoa até o seu direct" },
+      { ordem: 9, agentId: "kaena", oque: "Roteiros de Reels, TikTok e Shorts pra você gravar" },
+      { ordem: 10, agentId: "maia", oque: "Corta o trabalho em pedaços que cabem nos seus tempinhos" },
+      { ordem: 11, agentId: "malu", oque: "Calendário de 30 dias com o que você já criou" },
+      { ordem: 12, agentId: "nina", oque: "Aquece quem comentou ou mandou direct, até virar conversa de venda" },
+      { ordem: 13, agentId: "alana", oque: "Sua oferta, os scripts de venda, as objeções e a retomada", divisoria: "Daqui pra baixo é crescimento. A primeira venda já é possível com o que você tem." },
+      { ordem: 14, agentId: "lucca", oque: "Onde está seu gargalo e o plano das próximas 4 semanas", textoDepois: "Você não precisa de página de vendas pra fazer a primeira venda. WhatsApp com link de checkout resolve. A Petra te espera quando fizer sentido." },
+      { ordem: 15, agentId: "petra", oque: "Sua página de vendas" },
+      { ordem: 16, agentId: "liora", oque: "O que está funcionando e o que parar de fazer" },
+      { ordem: 17, agentId: "luna", oque: "Automatiza o que você repete todo dia" },
+      { ordem: 18, agentId: "elisa", oque: "Quiz que qualifica quem chega e te devolve as palavras do seu público" },
+      { ordem: 19, agentId: "vera", oque: "Grupo com as pessoas que já compraram de você" },
+      { ordem: 20, agentId: "cora", oque: "Faz quem comprou terminar, pra virar depoimento e não virar reembolso" },
+    ],
+  },
+  dk: {
+    id: "dk",
+    nome: "Canal Dark",
+    objetivo: "Sua primeira monetização de um canal sem aparecer.",
+    descricao: "Canal sem rosto e sem voz sua, com vídeos gerados por IA. Pode ser YouTube, Shorts, TikTok ou Reels. O dinheiro começa por comissão de afiliada dentro dos vídeos, porque o programa da plataforma leva meses e depende de requisitos que não estão na sua mão.",
+    cor: "#4a5759",
+    emoji: "🌙",
+    passos: [
+      { ordem: 1, agentId: "bill", oque: "Monta o canal: escolhe a plataforma, o nicho, o nome e a identidade", textoAntes: "Escolha UMA plataforma. Canal em dois lugares ao mesmo tempo, no começo, não dá conta." },
+      { ordem: 2, agentId: "bill", oque: "Roteiro do vídeo e os prompts de vídeo IA no formato da ferramenta que você usa" },
+      { ordem: 3, agentId: "luli", oque: "Gera a thumbnail e a capa do canal" },
+      { ordem: 4, agentId: "bia", oque: "Produtos de afiliada pra colocar na descrição e dentro do vídeo" },
+      { ordem: 5, agentId: "maia", oque: "Esteira de produção pra publicar com constância" },
+      { ordem: 6, agentId: "malu", oque: "Calendário do canal" },
+      { ordem: 7, agentId: "liora", oque: "O que está funcionando no canal" },
+      { ordem: 8, agentId: "luna", oque: "Automatiza o que você repete todo dia" },
+      { ordem: 9, agentId: "lucca", oque: "Onde está seu gargalo e o plano das próximas 4 semanas" },
+    ],
+  },
+};
+
+export const SERENA = {
+  id: "serena",
+  name: "Serena",
+  role: "Desbloqueadora de Potencial",
+  color: "#6E9876",
+  welcome: "Olá! Eu sou a Serena 💛\n\nEstou aqui para quando a jornada parecer pesada demais. Síndrome do impostor, medo de falhar, bloqueio criativo, sobrecarga emocional: traga pra cá. Juntas a gente desbloqueia o que está te impedindo de avançar.\n\n**O que você está sentindo agora?**",
+};
+
+export function findAgent(agentId: string): Agent | null {
+  return AGENTS[agentId] ?? null;
+}
+
+export function findTrilhaStep(trilhaId: TrilhaId, agentId: string): TrilhaStep | null {
+  const trilha = TRILHAS[trilhaId];
+  if (!trilha) return null;
+  return trilha.passos.find((p) => p.agentId === agentId || p.alternativas?.some((a) => a.agentId === agentId)) ?? null;
+}
+
+export function getTrilhaSteps(trilhaId: TrilhaId): TrilhaStep[] {
+  return TRILHAS[trilhaId]?.passos ?? [];
 }
 
 export function getAllAgentIds(): string[] {
-  return PHASES.flatMap((p) => p.agents.map((a) => a.id));
+  return Object.keys(AGENTS);
 }
