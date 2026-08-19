@@ -23,7 +23,7 @@ const Chat = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { favorites, toggleFavorite, refetch } = useAgentProgress();
-  const { activeProjectId, projects, loading: projectsLoading } = useProject();
+  const { activeProjectId, projects, loading: projectsLoading, loadProjects } = useProject();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -36,7 +36,28 @@ const Chat = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isSerena = agentId === "serena";
-  const agentInfo = isSerena
+  const isSofia = agentId === "sofia";
+  const agentInfo = isSofia
+    ? {
+        agent: {
+          id: "sofia",
+          name: "Sofia",
+          role: "Guia de Entrada",
+          desc: "",
+          context: [] as string[],
+          welcome:
+            "Oi! Eu sou a Sofia 🌿\n\nAntes de você começar, vou te fazer 6 perguntas rápidas pra descobrir qual trilha combina com o seu momento agora.\n\nPode responder com a letra da opção. Vamos?\n\n**Me conta: você já tem algum assunto, habilidade ou experiência que as pessoas costumam te procurar pra saber?**\n\na) Sim, tenho um assunto claro\nb) Mais ou menos, tenho alguma bagagem\nc) Não, não tenho nada assim ainda",
+        },
+        phase: {
+          id: 0,
+          name: "Entrada",
+          emoji: "🌿",
+          color: "#3A5C46",
+          sub: "",
+          agents: [],
+        },
+      }
+    : isSerena
     ? {
         agent: {
           id: "serena",
@@ -66,7 +87,7 @@ const Chat = () => {
   const isFav = agentId ? favorites.has(agentId) : false;
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
   const hasUserMessage = messages.some((m) => m.role === "user");
-  const canComplete = !isSerena && hasUserMessage && !!lastAssistant && !isStreaming;
+  const canComplete = !isSerena && !isSofia && hasUserMessage && !!lastAssistant && !isStreaming;
 
   const getNextAgentId = (completedAgentId: string) => {
     const orderedAgents = PHASES.flatMap((currentPhase) => currentPhase.agents);
@@ -309,7 +330,21 @@ const Chat = () => {
     } finally {
       setIsStreaming(false);
     }
-  }, [input, sessionId, isStreaming, agentId, agent, user, sessionProjectId]);
+
+    // Sofia: assim que a trilha for definida no projeto, segue para a trilha
+    if (isSofia && sessionProjectId) {
+      const { data: proj } = await supabase
+        .from("projects")
+        .select("trilha")
+        .eq("id", sessionProjectId)
+        .maybeSingle();
+      if ((proj as any)?.trilha) {
+        await loadProjects();
+        toast.success("Sua trilha foi definida! 🎉");
+        navigate("/trilha", { replace: true });
+      }
+    }
+  }, [input, sessionId, isStreaming, agentId, agent, user, sessionProjectId, isSofia, loadProjects, navigate]);
 
   const handleComplete = async () => {
     if (!sessionId || !user || !agent || !phase) return;
