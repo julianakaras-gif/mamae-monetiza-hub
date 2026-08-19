@@ -262,6 +262,7 @@ export type Database = {
           completed_at: string | null
           id: string
           project_id: string | null
+          skipped: boolean
           user_id: string
         }
         Insert: {
@@ -270,6 +271,7 @@ export type Database = {
           completed_at?: string | null
           id?: string
           project_id?: string | null
+          skipped?: boolean
           user_id: string
         }
         Update: {
@@ -278,6 +280,7 @@ export type Database = {
           completed_at?: string | null
           id?: string
           project_id?: string | null
+          skipped?: boolean
           user_id?: string
         }
         Relationships: [
