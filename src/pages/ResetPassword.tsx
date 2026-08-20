@@ -117,7 +117,7 @@ const ResetPassword = () => {
     setResendError("");
     setResendLoading(true);
     const { error: err } = await supabase.auth.resetPasswordForEmail(resendEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: "https://mamae-monetiza-hub.lovable.app/reset-password",
     });
     setResendLoading(false);
     if (err) {

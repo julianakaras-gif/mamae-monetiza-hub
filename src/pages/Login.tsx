@@ -62,7 +62,7 @@ const Login = () => {
     setForgotError("");
 
     const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: "https://mamae-monetiza-hub.lovable.app/reset-password",
     });
 
     setForgotLoading(false);
