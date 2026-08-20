@@ -4,23 +4,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useCallback } from "react";
 
+interface FirstAgent {
+  id: string;
+  name: string;
+}
+
 export function useOnboarding() {
   const navigate = useNavigate();
 
-  const startTour = useCallback(() => {
+  const startTour = useCallback((firstAgent: FirstAgent) => {
     const driverObj = driver({
       animate: true,
       overlayOpacity: 0.75,
       stagePadding: 12,
       allowClose: false,
-      
+
       disableActiveInteraction: true,
       nextBtnText: "Próximo →",
       prevBtnText: "← Voltar",
       doneBtnText: "Começar! 🌿",
       onDestroyed: async () => {
         await marcarConcluido();
-        navigate("/chat/clara");
+        navigate(`/chat/${firstAgent.id}`);
       },
       steps: [
         {
@@ -28,17 +33,16 @@ export function useOnboarding() {
           popover: {
             title: "👋 Bem-vinda ao Prospera!",
             description:
-              "Aqui estão suas 26 especialistas. Cada uma cuida de uma parte do seu negócio: marca, conteúdo, vendas, finanças e muito mais.",
+              "Aqui está a sua trilha. Cada especialista cuida de uma parte do seu negócio: marca, conteúdo, vendas, finanças e muito mais.",
             side: "right" as const,
             align: "start" as const,
           },
         },
         {
-          element: "#agente-clara",
+          element: `#agente-${firstAgent.id}`,
           popover: {
-            title: "🌸 Comece pela Clara",
-            description:
-              "A Clara é sua porta de entrada. Ela vai te conhecer, entender onde você está agora e abrir o caminho para as próximas especialistas.",
+            title: `🌸 Comece pela ${firstAgent.name}`,
+            description: `A ${firstAgent.name} é sua porta de entrada nesta trilha. Ela vai te conhecer, entender onde você está agora e abrir o caminho para as próximas especialistas.`,
             side: "right" as const,
             align: "start" as const,
           },
@@ -54,11 +58,10 @@ export function useOnboarding() {
           },
         },
         {
-          element: "#btn-conversar-clara",
+          element: `#btn-conversar-${firstAgent.id}`,
           popover: {
             title: "✨ Pronta para começar?",
-            description:
-              "Clique em 'Conversar' e inicie sua jornada. A Clara já sabe como te ajudar, mesmo que você ainda não saiba o que quer vender.",
+            description: `Clique em 'Conversar' e inicie sua jornada. A ${firstAgent.name} já sabe como te ajudar, mesmo que você ainda não saiba tudo.`,
             side: "top" as const,
             align: "center" as const,
           },
