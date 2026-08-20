@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Lock, ChevronRight, CheckCircle2, Star } from "lucide-react";
+import { Lock, ChevronRight, CheckCircle2, SkipForward, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { Agent } from "@/data/agents";
 import type { AgentStatus } from "@/hooks/useAgentProgress";
@@ -8,20 +8,23 @@ import { getAgentPhotoUrl } from "@/data/agentPhotos";
 
 interface AgentCardProps {
   agent: Agent;
-  phaseColor: string;
+  color: string;
   status: AgentStatus;
   isFavorite: boolean;
   onToggleFavorite: (agentId: string) => void;
+  onSkip?: (agentId: string) => void;
 }
 
-const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorite }: AgentCardProps) => {
+const AgentCard = memo(({ agent, color, status, isFavorite, onToggleFavorite, onSkip }: AgentCardProps) => {
   const navigate = useNavigate();
   const isLocked = status === "locked";
   const isCompleted = status === "completed";
+  const isSkipped = status === "skipped";
+  const isUnlocked = status === "unlocked";
 
-  const borderColor = isLocked ? "#E2D9C8" : phaseColor;
-  const avatarBg = isLocked ? "rgba(226, 217, 200, 0.15)" : `${phaseColor}15`;
-  const avatarColor = isLocked ? "#b0a89f" : phaseColor;
+  const borderColor = isLocked ? "#E2D9C8" : color;
+  const avatarBg = isLocked ? "rgba(226, 217, 200, 0.15)" : `${color}15`;
+  const avatarColor = isLocked ? "#b0a89f" : color;
   const photoUrl = getAgentPhotoUrl(agent.id);
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
@@ -34,9 +37,15 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
     }
   };
 
+  const handleSkip = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onSkip) return;
+    onSkip(agent.id);
+    toast("Etapa pulada");
+  };
+
   return (
     <div
-      id={agent.id === "clara" ? "agente-clara" : undefined}
       onClick={() => !isLocked && navigate(`/chat/${agent.id}`)}
       className={`relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-card transition-all duration-200 ${
         isLocked
@@ -54,7 +63,7 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
           alt={`Foto da agente ${agent.name}`}
           className="w-[50px] h-[50px] rounded-full object-cover shrink-0"
           style={{ opacity: isLocked ? 0.5 : 1 }}
-          onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }}
+          onError={(e) => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }}
         />
       ) : null}
       <div
@@ -73,6 +82,9 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
         )}
         <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 hidden sm:block">{agent.desc}</p>
+        {isSkipped && (
+          <p className="text-xs text-muted-foreground mt-1">Etapa pulada</p>
+        )}
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
@@ -89,12 +101,23 @@ const AgentCard = memo(({ agent, phaseColor, status, isFavorite, onToggleFavorit
           </button>
         )}
 
+        {isUnlocked && onSkip && (
+          <button
+            onClick={handleSkip}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Pular etapa"
+          >
+            <SkipForward size={14} />
+            <span className="hidden sm:inline">pular</span>
+          </button>
+        )}
+
         {isLocked && <Lock size={16} className="text-muted-foreground/50" />}
         {isCompleted && <CheckCircle2 size={16} className="text-sage-mid fill-sage-pale" />}
-        {status === "unlocked" && (
+        {isSkipped && <SkipForward size={16} className="text-muted-foreground/50" />}
+        {isUnlocked && (
           <ChevronRight
             size={16}
-            id={agent.id === "clara" ? "btn-conversar-clara" : undefined}
             className="text-muted-foreground"
           />
         )}
