@@ -71,7 +71,7 @@ const ProjetoDetalhe = () => {
             const info = findAgent(s.agent_id);
             const agentName = info?.name || s.agent_id;
             const agentRole = info?.role || "";
-            const color = undefined || "#1C3C2C";
+            const color = "#1C3C2C";
 
             return (
               <button
