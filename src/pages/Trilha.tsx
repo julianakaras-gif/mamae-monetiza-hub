@@ -49,6 +49,8 @@ function buildRenderNodes(trilha: TrilhaDef | undefined): RenderNode[] {
   return nodes;
 }
 
+const TODAS_TRILHAS: TrilhaId[] = ["af", "ugc", "pp", "dk"];
+
 const Trilha = () => {
   const navigate = useNavigate();
   const [tourStarted, setTourStarted] = useState(false);
@@ -156,6 +158,9 @@ const Trilha = () => {
             {trilha.emoji}
           </div>
           <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium mb-0.5" style={{ color: trilha.cor }}>
+              Escolhida pela Sofia
+            </p>
             <h1 className="font-display text-xl md:text-2xl text-foreground mb-0.5">
               {trilha.nome}
             </h1>
@@ -166,6 +171,36 @@ const Trilha = () => {
         <p className="text-muted-foreground text-sm mb-6">
           {trilha.descricao}
         </p>
+
+        {/* As 4 trilhas do método: só a escolhida está desbloqueada */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {TODAS_TRILHAS.map((id) => {
+            const t = TRILHAS[id];
+            const isActive = id === trilhaId;
+            return (
+              <button
+                key={id}
+                onClick={() => {
+                  if (!isActive) {
+                    toast("Essa trilha fica disponível se você criar um novo projeto.");
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-opacity ${
+                  isActive ? "" : "opacity-40 hover:opacity-60"
+                }`}
+                style={{
+                  backgroundColor: isActive ? `${t.cor}20` : "transparent",
+                  border: `1px solid ${isActive ? t.cor : "#E2D9C8"}`,
+                  color: isActive ? t.cor : "hsl(var(--muted-foreground))",
+                }}
+                aria-current={isActive ? "true" : undefined}
+              >
+                {t.emoji}
+                {t.nome}
+              </button>
+            );
+          })}
+        </div>
 
         <div className="flex items-center justify-between mb-6">
           <Badge
