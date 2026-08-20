@@ -35,6 +35,7 @@ function buildTrilhaNodes(trilha: TrilhaDef | undefined): TrilhaNode[] {
 
 export function useAgentProgress() {
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const { activeProject, activeProjectId } = useProject();
   const { realtimeCompleted } = useRealtimeProgress();
 
@@ -96,6 +97,9 @@ export function useAgentProgress() {
 
     const nodeIndex = nodes.findIndex((n) => n.agentIds.includes(agentId));
     if (nodeIndex === -1) return "locked";
+
+    // Admin vê todos os robôs da trilha desbloqueados para facilitar testes
+    if (isAdmin) return "unlocked";
 
     const node = nodes[nodeIndex];
     // Se este agente é uma alternativa (ex: Noa) e outra alternativa do
