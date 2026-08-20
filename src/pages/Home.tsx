@@ -16,12 +16,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const TOTAL_AGENTS = Object.keys(AGENTS).length + 1;
+
 
 const Home = () => {
   const { user, profile } = useAuth();
   const { projects, activeProject, activeProjectId, setProject, createProject, loading: projectsLoading, autoCreatedProjectId, clearAutoCreated } = useProject();
-  const { progressPercent, completedAgents, getNextAgent, loading: progressLoading } = useAgentProgress();
+  const { progressPercent, getTrilhaProgress, getNextAgent, loading: progressLoading } = useAgentProgress();
+  const { done: doneSteps, total: totalSteps } = getTrilhaProgress();
   const navigate = useNavigate();
 
   const [showModal, setShowModal] = useState(false);
@@ -86,7 +87,7 @@ const Home = () => {
           Bem-vinda ao Prospera, {firstName}!
         </h1>
         <p className="text-center mt-3 leading-relaxed" style={{ fontSize: 16, color: "#3D6B4D", maxWidth: 460 }}>
-          Vamos criar o seu primeiro projeto. Cada projeto é uma jornada completa com os {TOTAL_AGENTS} agentes.
+          Vamos criar o seu primeiro projeto. A Sofia vai te ajudar a encontrar a trilha certa e os agentes certos pro seu caminho.
         </p>
         <button
           onClick={() => setShowModal(true)}
@@ -164,7 +165,7 @@ const Home = () => {
               />
             </div>
             <p className="text-xs mt-1.5" style={{ color: "#B6D0BE" }}>
-              {completedAgents.size} de {TOTAL_AGENTS} agentes concluídos
+              {doneSteps} de {totalSteps} etapas concluídas
             </p>
           </div>
 
