@@ -3,24 +3,48 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
 import { useRealtimeProgress } from "@/contexts/AgentProgressContext";
-import { PHASES, type Agent, type Phase } from "@/data/agents";
+import { TRILHAS, findAgent, type Agent, type TrilhaId, type TrilhaDef } from "@/data/agents";
 
-export type AgentStatus = "locked" | "unlocked" | "completed";
+export type AgentStatus = "locked" | "unlocked" | "completed" | "skipped";
 
-export interface AgentState {
-  agent: Agent;
-  phase: Phase;
-  status: AgentStatus;
+interface TrilhaNode {
+  agentIds: string[];
+}
+
+/**
+ * Agrupa os passos da trilha em "nós" de desbloqueio.
+ * Quando o mesmo robô aparece em passos seguidos (ex: Manu 4x na UGC,
+ * Bill 2x na Canal Dark), isso é UMA única conversa contínua com aquele
+ * robô — não vira vários cards separados. Um passo com `alternativas`
+ * (ex: Lira/Noa/Eron) vira um único nó com os 3 agentIds juntos.
+ */
+function buildTrilhaNodes(trilha: TrilhaDef | undefined): TrilhaNode[] {
+  if (!trilha) return [];
+  const nodes: TrilhaNode[] = [];
+  for (const passo of trilha.passos) {
+    const ids = passo.alternativas ? passo.alternativas.map((a) => a.agentId) : [passo.agentId];
+    const last = nodes[nodes.length - 1];
+    if (last && !passo.alternativas && last.agentIds.length === 1 && last.agentIds[0] === ids[0]) {
+      continue; // mesma conversa continuando, não é um novo nó
+    }
+    nodes.push({ agentIds: ids });
+  }
+  return nodes;
 }
 
 export function useAgentProgress() {
   const { user } = useAuth();
-  const { activeProjectId } = useProject();
+  const { activeProject, activeProjectId } = useProject();
   const { realtimeCompleted } = useRealtimeProgress();
 
   const [completedAgents, setCompletedAgents] = useState<Set<string>>(new Set());
+  const [skippedAgents, setSkippedAgents] = useState<Set<string>>(new Set());
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+
+  const trilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
+  const trilha = trilhaId ? TRILHAS[trilhaId] : undefined;
+  const nodes = useMemo(() => buildTrilhaNodes(trilha), [trilha]);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -28,9 +52,8 @@ export function useAgentProgress() {
 
     let progressQuery = supabase
       .from("user_progress")
-      .select("agent_id, completed")
-      .eq("user_id", user.id)
-      .eq("completed", true);
+      .select("agent_id, completed, skipped")
+      .eq("user_id", user.id);
 
     if (activeProjectId) {
       progressQuery = progressQuery.eq("project_id", activeProjectId);
@@ -44,9 +67,9 @@ export function useAgentProgress() {
         .eq("user_id", user.id),
     ]);
 
-    setCompletedAgents(
-      new Set((progressRes.data ?? []).map((r) => r.agent_id))
-    );
+    const rows = progressRes.data ?? [];
+    setCompletedAgents(new Set(rows.filter((r) => r.completed).map((r) => r.agent_id)));
+    setSkippedAgents(new Set(rows.filter((r) => r.skipped).map((r) => r.agent_id)));
     setFavorites(new Set((favRes.data ?? []).map((r) => r.agent_id)));
     setLoading(false);
   }, [user, activeProjectId]);
@@ -55,76 +78,56 @@ export function useAgentProgress() {
     fetchData();
   }, [fetchData]);
 
-  // Merge fetched + realtime completed agents
+  // Mescla o que veio do banco com atualizações em tempo real
   const allCompleted = useMemo(() => {
     if (realtimeCompleted.size === 0) return completedAgents;
     return new Set([...completedAgents, ...realtimeCompleted]);
   }, [completedAgents, realtimeCompleted]);
 
+  const isDone = useCallback(
+    (agentId: string) => allCompleted.has(agentId) || skippedAgents.has(agentId),
+    [allCompleted, skippedAgents]
+  );
+
   function getAgentStatus(agentId: string): AgentStatus {
     if (allCompleted.has(agentId)) return "completed";
+    if (skippedAgents.has(agentId)) return "skipped";
 
-    const phase1 = PHASES[0];
-    if (phase1.agents.some((a) => a.id === agentId)) {
-      if (agentId === "clara") return "unlocked";
-      const idx = phase1.agents.findIndex((a) => a.id === agentId);
-      if (idx > 0) {
-        const prev = phase1.agents[idx - 1];
-        return allCompleted.has(prev.id) ? "unlocked" : "locked";
-      }
+    const nodeIndex = nodes.findIndex((n) => n.agentIds.includes(agentId));
+    if (nodeIndex === -1) return "locked";
+
+    const node = nodes[nodeIndex];
+    // Se este agente é uma alternativa (ex: Noa) e outra alternativa do
+    // mesmo nó já foi concluída (ex: a aluna já fez com a Lira), este
+    // aqui deixa de fazer sentido e fica bloqueado.
+    if (node.agentIds.length > 1 && node.agentIds.some((id) => id !== agentId && isDone(id))) {
+      return "locked";
     }
 
-    const phase2 = PHASES[1];
-    const taliaCompleted = allCompleted.has("talia");
-    if (phase2.agents.some((a) => a.id === agentId)) {
-      if (!taliaCompleted) return "locked";
-      const idx = phase2.agents.findIndex((a) => a.id === agentId);
-      if (idx === 0) return "unlocked";
-      const prev = phase2.agents[idx - 1];
-      return allCompleted.has(prev.id) ? "unlocked" : "locked";
-    }
-
-    const aliceCompleted = allCompleted.has("alice");
-    const freePhases = PHASES.filter((p) => p.freeAgents);
-    for (const phase of freePhases) {
-      if (phase.agents.some((a) => a.id === agentId)) {
-        return aliceCompleted ? "unlocked" : "locked";
-      }
-    }
-
-    return "locked";
+    if (nodeIndex === 0) return "unlocked";
+    const prevNode = nodes[nodeIndex - 1];
+    return prevNode.agentIds.some((id) => isDone(id)) ? "unlocked" : "locked";
   }
 
-  function getPhaseStatus(phase: Phase): "locked" | "in_progress" | "completed" | "free" {
-    const statuses = phase.agents.map((a) => getAgentStatus(a.id));
-    const allDone = statuses.every((s) => s === "completed");
-    const allLocked = statuses.every((s) => s === "locked");
-    const hasUnlocked = statuses.some((s) => s === "unlocked");
-
-    if (allDone) return "completed";
-    if (allLocked) return "locked";
-    if (phase.freeAgents && hasUnlocked) return "free";
-    return "in_progress";
+  function getTrilhaProgress(): { done: number; total: number } {
+    const done = nodes.filter((n) => n.agentIds.some((id) => isDone(id))).length;
+    return { done, total: nodes.length };
   }
 
-  function getPhaseProgress(phase: Phase): { done: number; total: number } {
-    const done = phase.agents.filter((a) => allCompleted.has(a.id)).length;
-    return { done, total: phase.agents.length };
-  }
-
-  function getNextAgent(): { agent: Agent; phase: Phase } | null {
-    for (const phase of PHASES) {
-      for (const agent of phase.agents) {
-        if (getAgentStatus(agent.id) === "unlocked") {
-          return { agent, phase };
+  function getNextAgent(): Agent | null {
+    for (const node of nodes) {
+      for (const agentId of node.agentIds) {
+        if (getAgentStatus(agentId) === "unlocked") {
+          const agent = findAgent(agentId);
+          if (agent) return agent;
         }
       }
     }
     return null;
   }
 
-  const totalAgents = useMemo(() => PHASES.reduce((sum, p) => sum + p.agents.length, 0), []);
-  const progressPercent = totalAgents > 0 ? Math.round((allCompleted.size / totalAgents) * 100) : 0;
+  const { done: doneCount, total: totalAgents } = getTrilhaProgress();
+  const progressPercent = totalAgents > 0 ? Math.round((doneCount / totalAgents) * 100) : 0;
 
   async function toggleFavorite(agentId: string) {
     if (!user) return;
@@ -148,16 +151,31 @@ export function useAgentProgress() {
     }
   }
 
+  async function skipAgent(agentId: string) {
+    if (!user || !activeProjectId) return;
+    await supabase.from("user_progress").upsert(
+      {
+        user_id: user.id,
+        project_id: activeProjectId,
+        agent_id: agentId,
+        skipped: true,
+      },
+      { onConflict: "user_id,agent_id,project_id" }
+    );
+    setSkippedAgents((prev) => new Set(prev).add(agentId));
+  }
+
   return {
     loading,
     completedAgents: allCompleted,
+    skippedAgents,
     favorites,
     getAgentStatus,
-    getPhaseStatus,
-    getPhaseProgress,
+    getTrilhaProgress,
     getNextAgent,
     progressPercent,
     toggleFavorite,
+    skipAgent,
     refetch: fetchData,
   };
 }
