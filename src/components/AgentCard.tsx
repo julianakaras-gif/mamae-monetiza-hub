@@ -45,9 +45,8 @@ const AgentCard = memo(({ agent, color, status, isFavorite, onToggleFavorite, on
   };
 
   return (
-    
-
- !isLocked && navigate(`/chat/${agent.id}`)}
+    <div
+      onClick={() => !isLocked && navigate(`/chat/${agent.id}`)}
       className={`relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-card transition-all duration-200 ${
         isLocked
           ? "opacity-55 cursor-not-allowed"
@@ -59,80 +58,71 @@ const AgentCard = memo(({ agent, color, status, isFavorite, onToggleFavorite, on
       aria-disabled={isLocked}
     >
       {photoUrl ? (
-         { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }}
+        <img
+          src={photoUrl}
+          alt={`Foto da agente ${agent.name}`}
+          className="w-[50px] h-[50px] rounded-full object-cover shrink-0"
+          style={{ opacity: isLocked ? 0.5 : 1 }}
+          onError={(e) => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove('hidden'); }}
         />
       ) : null}
-      
-
-
+      <div
+        className={`w-[50px] h-[50px] rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${photoUrl ? 'hidden' : ''}`}
+        style={{ backgroundColor: avatarBg, color: avatarColor }}
+      >
         {agent.name.charAt(0)}
-      
+      </div>
 
-
-
-      
-
-        
-
-{agent.name}
-
-
+      <div className="flex-1 min-w-0">
+        <p className="font-display text-sm text-foreground">{agent.name}</p>
         {agent.id === "serena" && (
-          
-
-
-            Apoio emocional & Mindset
-          
-
-
+          <p style={{ fontFamily: "'Instrument Sans', sans-serif", fontSize: 12, color: "#6E9876" }}>
+            Apoio emocional &amp; Mindset
+          </p>
         )}
-        
-
-{agent.role}
-
-
-        
-
-{agent.desc}
-
-
+        <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
+        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 hidden sm:block">{agent.desc}</p>
         {isSkipped && (
-          
-
-Etapa pulada
-
-
+          <p className="text-xs text-muted-foreground mt-1">Etapa pulada</p>
         )}
-      
+      </div>
 
-
-      
-
-
+      <div className="flex items-center gap-2 shrink-0">
         {!isLocked && (
-          
-            
-          
+          <button
+            onClick={handleToggleFavorite}
+            className="p-1 transition-colors"
+            aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          >
+            <Star
+              size={16}
+              className={isFavorite ? "fill-gold text-gold" : "text-muted-foreground/40 hover:text-gold"}
+            />
+          </button>
         )}
 
         {isUnlocked && onSkip && (
-          
-            pular
-          
+          <button
+            onClick={handleSkip}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Pular etapa"
+          >
+            <SkipForward size={14} />
+            <span className="hidden sm:inline">pular</span>
+          </button>
         )}
 
-        {isLocked && }
-        {isCompleted && }
-        {isSkipped && }
+        {isLocked && <Lock size={16} className="text-muted-foreground/50" />}
+        {isCompleted && <CheckCircle2 size={16} className="text-sage-mid fill-sage-pale" />}
+        {isSkipped && <SkipForward size={16} className="text-muted-foreground/50" />}
         {isUnlocked && (
-          
+          <ChevronRight
+            size={16}
+            className="text-muted-foreground"
+          />
         )}
-      
-
-
-    
-
-
+      </div>
+    </div>
   );
 });
 
