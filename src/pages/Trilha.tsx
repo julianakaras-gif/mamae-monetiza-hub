@@ -1,8 +1,8 @@
-import { useState, useEffect, memo } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { ChevronDown, Info, FolderOpen } from "lucide-react";
+import { useEffect, useMemo, useState, Fragment } from "react";
+import { useNavigate } from "react-router-dom";
+import { Info, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
-import { PHASES } from "@/data/agents";
+import { TRILHAS, findAgent, type TrilhaId, type TrilhaDef, type TrilhaAlternativa } from "@/data/agents";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
 import { useProject } from "@/hooks/useProject";
 import { useOnboarding } from "@/hooks/useOnboarding";
@@ -11,24 +11,62 @@ import { supabase } from "@/integrations/supabase/client";
 import AgentCard from "@/components/AgentCard";
 import { Badge } from "@/components/ui/badge";
 
-const phaseStatusLabel: Record<string, { label: string }> = {
-  locked: { label: "Bloqueada" },
-  in_progress: { label: "Em andamento" },
-  completed: { label: "Concluída" },
-  free: { label: "Livre" },
-};
+type RenderNode =
+  | { kind: "agent"; agentId: string; textoAntes?: string; textoDepois?: string; divisoria?: string }
+  | { kind: "alternativas"; alternativas: TrilhaAlternativa[]; textoAntes?: string; divisoria?: string };
+
+/**
+ * Agrupa os passos da trilha para exibição. Quando o mesmo robô aparece em
+ * passos seguidos (ex: Manu 4x na UGC), isso é UMA conversa contínua com
+ * aquele robô — vira um único card, não vários.
+ */
+function buildRenderNodes(trilha: TrilhaDef | undefined): RenderNode[] {
+  if (!trilha) return [];
+  const nodes: RenderNode[] = [];
+  for (const passo of trilha.passos) {
+    if (passo.alternativas) {
+      nodes.push({
+        kind: "alternativas",
+        alternativas: passo.alternativas,
+        textoAntes: passo.textoAntes,
+        divisoria: passo.divisoria,
+      });
+      continue;
+    }
+    const last = nodes[nodes.length - 1];
+    if (last && last.kind === "agent" && last.agentId === passo.agentId && !passo.divisoria) {
+      last.textoDepois = passo.textoDepois ?? last.textoDepois;
+      continue;
+    }
+    nodes.push({
+      kind: "agent",
+      agentId: passo.agentId,
+      textoAntes: passo.textoAntes,
+      textoDepois: passo.textoDepois,
+      divisoria: passo.divisoria,
+    });
+  }
+  return nodes;
+}
 
 const Trilha = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const returnPhase = searchParams.get("phase");
-  const [openPhaseId, setOpenPhaseId] = useState<number | null>(
-    returnPhase ? Number(returnPhase) : null
-  );
-  const { getAgentStatus, getPhaseStatus, getPhaseProgress, favorites, toggleFavorite, loading } = useAgentProgress();
+  const [tourStarted, setTourStarted] = useState(false);
+  const {
+    getAgentStatus,
+    getTrilhaProgress,
+    favorites,
+    toggleFavorite,
+    skipAgent,
+    loading,
+  } = useAgentProgress();
   const { activeProject, activeProjectId, projects, loading: projectsLoading } = useProject();
   const { startTour } = useOnboarding();
   const { user } = useAuth();
+
+  const trilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
+  const trilha = trilhaId ? TRILHAS[trilhaId] : undefined;
+  const nodes = useMemo(() => buildRenderNodes(trilha), [trilha]);
 
   // Guard: never render Trilha without an active project
   useEffect(() => {
@@ -53,7 +91,13 @@ const Trilha = () => {
 
   useEffect(() => {
     async function verificarOnboarding() {
-      if (!user) return;
+      if (!user || tourStarted || !trilha || nodes.length === 0) return;
+
+      const primeiroNo = nodes[0];
+      const primeiroAgentId = primeiroNo.kind === "agent" ? primeiroNo.agentId : primeiroNo.alternativas[0].agentId;
+      const primeiroAgent = findAgent(primeiroAgentId);
+      if (!primeiroAgent) return;
+
       const { data } = await supabase
         .from("profiles")
         .select("onboarding_completed")
@@ -61,22 +105,24 @@ const Trilha = () => {
         .single();
 
       if (!(data as any)?.onboarding_completed) {
-        setOpenPhaseId(1); // Open first phase so Clara card is visible
-        setTimeout(() => startTour(), 800);
+        setTourStarted(true);
+        setTimeout(() => startTour({ id: primeiroAgent.id, name: primeiroAgent.name }), 800);
       }
     }
     if (!loading && activeProjectId) {
       verificarOnboarding();
     }
-  }, [user, loading, activeProjectId, startTour]);
+  }, [user, loading, activeProjectId, startTour, trilha, nodes, tourStarted]);
 
-  if (projectsLoading || loading || !activeProjectId) {
+  if (projectsLoading || loading || !activeProjectId || !trilha) {
     return (
       <div className="p-8 flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
+
+  const { done, total } = getTrilhaProgress();
 
   return (
     <div className="animate-fade-in">
@@ -102,101 +148,104 @@ const Trilha = () => {
       )}
 
       <div className="p-4 md:p-8 max-w-3xl">
-      <h1 className="font-display text-xl md:text-2xl text-foreground mb-1">Trilha</h1>
-      <p className="text-muted-foreground text-sm mb-6">
-        Sua jornada com os agentes de IA, fase por fase.
-      </p>
+        <div className="flex items-start gap-3 mb-4">
+          <div
+            className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center text-xl md:text-2xl shrink-0"
+            style={{ backgroundColor: `${trilha.cor}15` }}
+          >
+            {trilha.emoji}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-display text-xl md:text-2xl text-foreground mb-0.5">
+              {trilha.nome}
+            </h1>
+            <p className="text-sm text-muted-foreground">{trilha.objetivo}</p>
+          </div>
+        </div>
 
-      <div id="trilha-agentes" className="space-y-3">
-        {PHASES.map((phase) => {
-          const isOpen = openPhaseId === phase.id;
-          const status = getPhaseStatus(phase);
-          const { done, total } = getPhaseProgress(phase);
-          const statusInfo = phaseStatusLabel[status];
-          const isLocked = status === "locked";
+        <p className="text-muted-foreground text-sm mb-6">
+          {trilha.descricao}
+        </p>
 
-          const badgeColor =
-            status === "completed"
-              ? "#3A5C46"
-              : status === "locked"
-              ? "hsl(var(--muted-foreground))"
-              : phase.color;
+        <div className="flex items-center justify-between mb-6">
+          <Badge
+            className="text-xs px-2 py-0.5 border-0"
+            style={{ backgroundColor: `${trilha.cor}20`, color: trilha.cor }}
+          >
+            {done}/{total} concluído
+          </Badge>
+        </div>
 
-          return (
-            <div key={phase.id} className="rounded-xl border bg-card overflow-hidden">
-              <button
-                onClick={() => setOpenPhaseId(isOpen ? null : phase.id)}
-                className="w-full flex items-center gap-2 md:gap-3 p-3 md:p-4 text-left hover:bg-muted/30 transition-colors"
-                aria-expanded={isOpen}
-                aria-label={`Fase ${phase.name}: ${statusInfo.label}`}
-              >
-                <div
-                  className="w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center text-base md:text-lg shrink-0"
-                  style={{ backgroundColor: `${phase.color}15` }}
-                >
-                  {phase.emoji}
-                </div>
+        <div id="trilha-agentes" className="space-y-4">
+          {nodes.map((node, index) => {
+            const key = node.kind === "agent" ? node.agentId : `alt-${index}`;
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-display text-sm text-foreground">
-                      {phase.name}
+            return (
+              <Fragment key={key}>
+                {node.divisoria && (
+                  <div className="flex items-center gap-3 my-5">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {node.divisoria}
                     </span>
-                    <Badge
-                      className="text-xs px-2 py-0 border-0"
-                      style={{ backgroundColor: `${badgeColor}20`, color: badgeColor }}
-                    >
-                      {statusInfo.label}
-                    </Badge>
+                    <div className="h-px flex-1 bg-border" />
                   </div>
-                  <p className="text-xs text-muted-foreground">{phase.sub}</p>
-                </div>
+                )}
 
-                <span className="text-xs text-muted-foreground shrink-0 mr-1 md:mr-2">
-                  {done}/{total}
-                </span>
+                {node.textoAntes && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground mb-2">
+                    <Info size={14} className="shrink-0 mt-0.5" />
+                    <span>{node.textoAntes}</span>
+                  </div>
+                )}
 
-                <ChevronDown
-                  size={18}
-                  className={`text-muted-foreground transition-transform duration-200 shrink-0 ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+                {node.kind === "agent" ? (
+                  (() => {
+                    const agent = findAgent(node.agentId);
+                    if (!agent) return null;
+                    const status = getAgentStatus(agent.id);
+                    return (
+                      <AgentCard
+                        agent={agent}
+                        color={trilha.cor}
+                        status={status}
+                        isFavorite={favorites.has(agent.id)}
+                        onToggleFavorite={toggleFavorite}
+                        onSkip={status === "unlocked" ? skipAgent : undefined}
+                      />
+                    );
+                  })()
+                ) : (
+                  <div className="space-y-2">
+                    {node.alternativas.map((alt) => {
+                      const agent = findAgent(alt.agentId);
+                      if (!agent) return null;
+                      const status = getAgentStatus(agent.id);
+                      return (
+                        <AgentCard
+                          key={alt.agentId}
+                          agent={agent}
+                          color={trilha.cor}
+                          status={status}
+                          isFavorite={favorites.has(agent.id)}
+                          onToggleFavorite={toggleFavorite}
+                          onSkip={status === "unlocked" ? skipAgent : undefined}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
 
-              {isOpen && (
-                <div className="px-3 md:px-4 pb-3 md:pb-4 space-y-2">
-                  {isLocked && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground">
-                      <Info size={14} className="shrink-0 mt-0.5" />
-                      <span>
-                        Complete as fases anteriores para desbloquear esta fase.
-                      </span>
-                    </div>
-                  )}
-                  {phase.freeAgents && !isLocked && (
-                    <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground">
-                      <Info size={14} className="shrink-0 mt-0.5" />
-                      <span>Use os agentes desta fase em qualquer ordem, conforme sua necessidade.</span>
-                    </div>
-                  )}
-
-                  {phase.agents.map((agent) => (
-                    <AgentCard
-                      key={agent.id}
-                      agent={agent}
-                      phaseColor={phase.color}
-                      status={getAgentStatus(agent.id)}
-                      isFavorite={favorites.has(agent.id)}
-                      onToggleFavorite={toggleFavorite}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                {node.kind === "agent" && node.textoDepois && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground mt-2">
+                    <Info size={14} className="shrink-0 mt-0.5" />
+                    <span>{node.textoDepois}</span>
+                  </div>
+                )}
+              </Fragment>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
