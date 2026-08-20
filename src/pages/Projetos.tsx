@@ -4,7 +4,7 @@ import { Plus, FolderOpen, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
-import { findAgent, getAllAgentIds } from "@/data/agents";
+import { TRILHAS, getTrilhaNodes, type TrilhaId } from "@/data/agents";
 import { toast } from "sonner";
 
 interface Project {
@@ -12,8 +12,9 @@ interface Project {
   name: string;
   description: string | null;
   created_at: string;
-  agentCount: number;
-  totalAgents: number;
+  trilha: TrilhaId | null;
+  doneNodes: number;
+  totalNodes: number;
 }
 
 const Projetos = () => {
@@ -25,8 +26,6 @@ const Projetos = () => {
   const [newName, setNewName] = useState("");
   const [creating, setCreating] = useState(false);
 
-  const totalAgents = getAllAgentIds().length;
-
   useEffect(() => {
     if (!user) return;
     loadProjects();
@@ -37,20 +36,34 @@ const Projetos = () => {
     setLoading(true);
     const { data } = await supabase
       .from("projects")
-      .select("id, name, description, created_at")
+      .select("id, name, description, created_at, trilha")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false });
 
     if (data) {
       const enriched = await Promise.all(
         data.map(async (p) => {
-          const { data: sessions } = await supabase
-            .from("agent_sessions")
-            .select("agent_id")
-            .eq("project_id", p.id)
-            .eq("status", "completed");
-          const uniqueAgents = new Set(sessions?.map((s) => s.agent_id) || []);
-          return { ...p, agentCount: uniqueAgents.size, totalAgents };
+          const trilhaId = p.trilha as TrilhaId | null;
+          const nodes = trilhaId ? getTrilhaNodes(trilhaId) : [];
+
+          const { data: progressRows } = await supabase
+            .from("user_progress")
+            .select("agent_id, completed, skipped")
+            .eq("project_id", p.id);
+
+          const doneSet = new Set(
+            (progressRows || [])
+              .filter((r) => r.completed || r.skipped)
+              .map((r) => r.agent_id)
+          );
+          const doneNodes = nodes.filter((n) => n.some((id) => doneSet.has(id))).length;
+
+          return {
+            ...p,
+            trilha: trilhaId,
+            doneNodes,
+            totalNodes: nodes.length,
+          };
         })
       );
       setProjects(enriched);
@@ -122,7 +135,8 @@ const Projetos = () => {
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {projects.map((p) => {
-            const pct = p.totalAgents > 0 ? Math.round((p.agentCount / p.totalAgents) * 100) : 0;
+            const trilhaInfo = p.trilha ? TRILHAS[p.trilha] : null;
+            const pct = p.totalNodes > 0 ? Math.round((p.doneNodes / p.totalNodes) * 100) : 0;
             return (
               <button
                 key={p.id}
@@ -130,22 +144,36 @@ const Projetos = () => {
                 className="text-left bg-card rounded-2xl p-5 border border-border hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <h2 className="font-bold text-foreground">{p.name}</h2>
+                  <div>
+                    <h2 className="font-bold text-foreground">{p.name}</h2>
+                    {trilhaInfo && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {trilhaInfo.emoji} {trilhaInfo.nome}
+                      </p>
+                    )}
+                  </div>
                   <ChevronRight size={16} className="text-muted-foreground mt-1" />
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Criado em {new Date(p.created_at).toLocaleDateString("pt-BR")} · {p.agentCount} agentes consultados
+                  Criado em {new Date(p.created_at).toLocaleDateString("pt-BR")}
+                  {trilhaInfo && ` · ${p.doneNodes} de ${p.totalNodes} etapas`}
                 </p>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{
-                      width: `${pct}%`,
-                      background: "linear-gradient(90deg, #6E9876, #C6A86C)",
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">{pct}% da trilha</p>
+                {trilhaInfo ? (
+                  <>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${pct}%`,
+                          background: "linear-gradient(90deg, #6E9876, #C6A86C)",
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{pct}% da trilha</p>
+                  </>
+                ) : (
+                  <p className="text-xs text-amber-600">Trilha ainda não definida</p>
+                )}
               </button>
             );
           })}
