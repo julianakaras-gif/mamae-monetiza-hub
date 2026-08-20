@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 import { useProject } from "@/hooks/useProject";
 import { useRealtimeProgress } from "@/contexts/AgentProgressContext";
 import { TRILHAS, findAgent, type Agent, type TrilhaId, type TrilhaDef } from "@/data/agents";
