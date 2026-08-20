@@ -357,3 +357,27 @@ export function getTrilhaSteps(trilhaId: TrilhaId): TrilhaStep[] {
 export function getAllAgentIds(): string[] {
   return Object.keys(AGENTS);
 }
+
+/**
+ * Agrupa os passos de uma trilha em "nós" de progresso: passos seguidos com
+ * o mesmo robô (ex: Manu 4x) viram um nó só, e um passo com `alternativas`
+ * (ex: Lira/Noa/Eron) vira um nó com os agentIds das 3 opções juntos.
+ * Mesma lógica usada em useAgentProgress.tsx, mas exposta aqui pra quem
+ * precisa calcular o total de etapas de uma trilha sem estar "dentro" dela
+ * (ex: a listagem de Meus Projetos, que mostra várias trilhas ao mesmo tempo).
+ */
+export function getTrilhaNodes(trilhaId: TrilhaId): string[][] {
+  const trilha = TRILHAS[trilhaId];
+  if (!trilha) return [];
+
+  const nodes: string[][] = [];
+  for (const passo of trilha.passos) {
+    const ids = passo.alternativas ? passo.alternativas.map((a) => a.agentId) : [passo.agentId];
+    const last = nodes[nodes.length - 1];
+    if (last && !passo.alternativas && last.length === 1 && last[0] === ids[0]) {
+      continue;
+    }
+    nodes.push(ids);
+  }
+  return nodes;
+}
