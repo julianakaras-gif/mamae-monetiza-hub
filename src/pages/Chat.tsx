@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Star, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
 import { useProject } from "@/hooks/useProject";
-import { findAgent, PHASES, SERENA } from "@/data/agents";
+import { findAgent, TRILHAS, SERENA, type TrilhaId } from "@/data/agents";
 import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -17,13 +17,29 @@ interface ChatMessage {
   content: string;
 }
 
+const SOFIA_AGENT = {
+  id: "sofia",
+  name: "Sofia",
+  role: "Guia de Entrada",
+  desc: "",
+  welcome:
+    "Oi! Eu sou a Sofia 🌿\n\nAntes de você começar, vou te fazer 6 perguntas rápidas pra descobrir qual trilha combina com o seu momento agora.\n\nPode responder com a letra da opção. Vamos?\n\n**Me conta: você já tem algum assunto, habilidade ou experiência que as pessoas costumam te procurar pra saber?**\n\na) Sim, tenho um assunto claro\nb) Mais ou menos, tenho alguma bagagem\nc) Não, não tenho nada assim ainda",
+};
+
+const SERENA_AGENT = {
+  id: "serena",
+  name: "Serena",
+  role: SERENA.role,
+  desc: "",
+  welcome: SERENA.welcome,
+};
+
 const Chat = () => {
   const { agentId } = useParams<{ agentId: string }>();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { favorites, toggleFavorite, refetch } = useAgentProgress();
-  const { activeProjectId, projects, loading: projectsLoading, loadProjects } = useProject();
+  const { activeProject, activeProjectId, projects, loading: projectsLoading, loadProjects } = useProject();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -37,63 +53,22 @@ const Chat = () => {
 
   const isSerena = agentId === "serena";
   const isSofia = agentId === "sofia";
-  const agentInfo = isSofia
-    ? {
-        agent: {
-          id: "sofia",
-          name: "Sofia",
-          role: "Guia de Entrada",
-          desc: "",
-          context: [] as string[],
-          welcome:
-            "Oi! Eu sou a Sofia 🌿\n\nAntes de você começar, vou te fazer 6 perguntas rápidas pra descobrir qual trilha combina com o seu momento agora.\n\nPode responder com a letra da opção. Vamos?\n\n**Me conta: você já tem algum assunto, habilidade ou experiência que as pessoas costumam te procurar pra saber?**\n\na) Sim, tenho um assunto claro\nb) Mais ou menos, tenho alguma bagagem\nc) Não, não tenho nada assim ainda",
-        },
-        phase: {
-          id: 0,
-          name: "Entrada",
-          emoji: "🌿",
-          color: "#3A5C46",
-          sub: "",
-          agents: [],
-        },
-      }
-    : isSerena
-    ? {
-        agent: {
-          id: "serena",
-          name: "Serena",
-          role: "Desbloqueadora de Potencial",
-          desc: "",
-          context: [] as string[],
-          welcome: SERENA.welcome,
-        },
-        phase: {
-          id: 0,
-          name: "Apoio",
-          emoji: "🧘‍♀️",
-          color: SERENA.color,
-          sub: "",
-          agents: [],
-        },
-      }
-    : agentId
-    ? findAgent(agentId)
-    : null;
 
-  const agent = agentInfo?.agent;
-  const phase = agentInfo?.phase;
+  const agent = isSofia ? SOFIA_AGENT : isSerena ? SERENA_AGENT : agentId ? findAgent(agentId) : null;
+
+  const trilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
+  const trilha = trilhaId ? TRILHAS[trilhaId] : undefined;
+
+  const themeColor = isSofia ? "#3A5C46" : isSerena ? SERENA.color : trilha?.cor ?? "#3A5C46";
+  const headerEmoji = isSofia ? "🌿" : isSerena ? "💛" : trilha?.emoji ?? "";
+  const headerLabel = isSofia ? "Diagnóstico" : isSerena ? "Apoio" : trilha?.nome ?? "";
+
   const photoUrl = agentId ? getAgentPhotoUrl(agentId) : null;
 
   const isFav = agentId ? favorites.has(agentId) : false;
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
   const hasUserMessage = messages.some((m) => m.role === "user");
   const canComplete = !isSerena && !isSofia && hasUserMessage && !!lastAssistant && !isStreaming;
-
-  const getNextAgentId = (completedAgentId: string) => {
-    const orderedAgents = PHASES.flatMap((currentPhase) => currentPhase.agents);
-    const currentIndex = orderedAgents.findIndex((currentAgent) => currentAgent.id === completedAgentId);
-    return currentIndex >= 0 ? orderedAgents[currentIndex + 1]?.id ?? null : null;
-  };
 
   // Guard: non-Serena chats require an active project
   useEffect(() => {
@@ -216,7 +191,6 @@ const Chat = () => {
     init();
   }, [user, agentId, ready, sessionProjectId]);
 
-
   const sendMessage = useCallback(async () => {
     if (!input.trim() || !sessionId || isStreaming || !agent) return;
 
@@ -224,35 +198,6 @@ const Chat = () => {
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsStreaming(true);
-
-    let contextOutputs: any[] = [];
-    if (agent.context.length > 0 && user) {
-      let outputsQuery = supabase
-        .from("agent_outputs")
-        .select("agent_id, summary")
-        .eq("user_id", user.id)
-        .in("agent_id", agent.context);
-
-      // Scope context outputs to the active project so each project keeps its own history
-      if (sessionProjectId) {
-        outputsQuery = outputsQuery.eq("project_id", sessionProjectId);
-      } else {
-        outputsQuery = outputsQuery.is("project_id", null);
-      }
-
-      const { data: outputs } = await outputsQuery;
-
-      if (outputs) {
-        contextOutputs = outputs.map((o) => {
-          const info = findAgent(o.agent_id);
-          return {
-            agent_name: info?.agent.name || o.agent_id,
-            agent_role: info?.agent.role || "",
-            summary: o.summary,
-          };
-        });
-      }
-    }
 
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
@@ -274,7 +219,6 @@ const Chat = () => {
           session_id: sessionId,
           project_id: sessionProjectId,
           message: userMessage,
-          context_outputs: contextOutputs,
         }),
       });
 
@@ -344,10 +288,10 @@ const Chat = () => {
         navigate("/trilha", { replace: true });
       }
     }
-  }, [input, sessionId, isStreaming, agentId, agent, user, sessionProjectId, isSofia, loadProjects, navigate]);
+  }, [input, sessionId, isStreaming, agentId, agent, sessionProjectId, isSofia, loadProjects, navigate]);
 
   const handleComplete = async () => {
-    if (!sessionId || !user || !agent || !phase) return;
+    if (!sessionId || !user || !agent) return;
     setIsCompleting(true);
 
     try {
@@ -376,15 +320,9 @@ const Chat = () => {
 
       if (!resp.ok) throw new Error("Erro ao concluir etapa");
 
-      const nextAgentId = agentId ? getNextAgentId(agentId) : null;
-      toast.success(nextAgentId ? "Etapa concluída! Indo para o próximo agente. 🎉" : "Etapa concluída! 🎉");
+      toast.success("Etapa concluída! 🎉");
       await refetch();
-      if (nextAgentId) {
-        const projectQuery = sessionProjectId ? `?project=${sessionProjectId}` : "";
-        navigate(`/chat/${nextAgentId}${projectQuery}`);
-      } else {
-        navigate(`/trilha?phase=${phase.id}`);
-      }
+      navigate("/trilha");
     } catch (err: any) {
       toast.error(err.message || "Erro ao concluir etapa");
     } finally {
@@ -399,7 +337,7 @@ const Chat = () => {
     }
   };
 
-  if (!agentInfo || !agent || !phase) {
+  if (!agent) {
     return (
       <div className="p-8 text-center">
         <p className="text-muted-foreground">Agente não encontrado.</p>
@@ -421,7 +359,7 @@ const Chat = () => {
         {/* Header */}
         <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 border-b bg-card shrink-0">
           <button
-            onClick={() => navigate(`/trilha?phase=${phase.id}`)}
+            onClick={() => navigate("/trilha")}
             className="p-1.5 rounded-lg hover:bg-muted transition-colors"
             aria-label="Voltar para a trilha"
           >
@@ -437,7 +375,7 @@ const Chat = () => {
           ) : (
             <div
               className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs md:text-sm font-bold shrink-0"
-              style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+              style={{ backgroundColor: `${themeColor}15`, color: themeColor }}
               aria-hidden="true"
             >
               {agent.name.charAt(0)}
@@ -446,15 +384,15 @@ const Chat = () => {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-sm text-foreground m-0">
-                {agent.name}
-              </h1>
-              <Badge
-                className="text-xs px-2 py-0 border-0 hidden sm:inline-flex"
-                style={{ backgroundColor: `${phase.color}20`, color: phase.color }}
-              >
-                {phase.emoji} {phase.name}
-              </Badge>
+              <h1 className="font-display text-sm text-foreground m-0">{agent.name}</h1>
+              {headerLabel && (
+                <Badge
+                  className="text-xs px-2 py-0 border-0 hidden sm:inline-flex"
+                  style={{ backgroundColor: `${themeColor}20`, color: themeColor }}
+                >
+                  {headerEmoji} {headerLabel}
+                </Badge>
+              )}
             </div>
             <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
           </div>
@@ -479,11 +417,7 @@ const Chat = () => {
             >
               <Star
                 size={18}
-                className={
-                  isFav
-                    ? "fill-gold text-gold"
-                    : "text-muted-foreground/40 hover:text-gold"
-                }
+                className={isFav ? "fill-gold text-gold" : "text-muted-foreground/40 hover:text-gold"}
               />
             </button>
           )}
@@ -496,8 +430,8 @@ const Chat = () => {
               key={i}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
             >
-              {msg.role === "assistant" && (
-                photoUrl ? (
+              {msg.role === "assistant" &&
+                (photoUrl ? (
                   <img
                     src={photoUrl}
                     alt={`Foto da agente ${agent.name}`}
@@ -506,23 +440,20 @@ const Chat = () => {
                 ) : (
                   <div
                     className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
-                    style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+                    style={{ backgroundColor: `${themeColor}15`, color: themeColor }}
                     aria-hidden="true"
                   >
                     {agent.name.charAt(0)}
                   </div>
-                )
-              )}
+                ))}
               <div
                 className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-3.5 md:px-4 py-2.5 md:py-3 text-sm leading-relaxed ${
-                  msg.role === "user"
-                    ? "rounded-br-md text-white"
-                    : "rounded-bl-md bg-card border-l-[3px]"
+                  msg.role === "user" ? "rounded-br-md text-white" : "rounded-bl-md bg-card border-l-[3px]"
                 }`}
                 style={
                   msg.role === "user"
-                    ? { backgroundColor: phase.color }
-                    : { borderLeftColor: phase.color }
+                    ? { backgroundColor: themeColor }
+                    : { borderLeftColor: themeColor }
                 }
               >
                 <ChatMessageContent content={msg.content} role={msg.role} />
@@ -541,7 +472,7 @@ const Chat = () => {
               ) : (
                 <div
                   className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-xs font-bold shrink-0 mr-2 mt-1"
-                  style={{ backgroundColor: `${phase.color}15`, color: phase.color }}
+                  style={{ backgroundColor: `${themeColor}15`, color: themeColor }}
                   aria-hidden="true"
                 >
                   {agent.name.charAt(0)}
@@ -549,7 +480,7 @@ const Chat = () => {
               )}
               <div
                 className="bg-card border-l-[3px] rounded-2xl rounded-bl-md px-4 py-3"
-                style={{ borderLeftColor: phase.color }}
+                style={{ borderLeftColor: themeColor }}
               >
                 <div className="flex gap-1">
                   <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -597,7 +528,7 @@ const Chat = () => {
               onClick={sendMessage}
               disabled={!input.trim() || isStreaming}
               className="p-2.5 rounded-xl text-white transition-colors disabled:opacity-30"
-              style={{ backgroundColor: phase.color }}
+              style={{ backgroundColor: themeColor }}
               aria-label="Enviar mensagem"
             >
               <Send size={18} />
