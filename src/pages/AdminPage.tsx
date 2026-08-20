@@ -396,25 +396,18 @@ const AdminPage = () => {
                 <h3 className="font-display mb-3" style={{ fontSize: 16, color: "#1C3C2C" }}>
                   Progresso por agente ({selectedAluna.progress.filter((p) => p.completed).length}/{TOTAL_AGENTS})
                 </h3>
-                {PHASES.map((phase) => (
-                  <div key={phase.id} className="mb-3">
-                    <p className="font-medium mb-1" style={{ fontSize: 13, color: "#6E9876" }}>
-                      {phase.emoji} {phase.name}
-                    </p>
-                    <div className="grid grid-cols-2 gap-1">
-                      {phase.agents.map((ag) => {
-                        const done = selectedAluna.progress.some((p) => p.agent_id === ag.id && p.completed);
-                        const started = selectedAluna.progress.some((p) => p.agent_id === ag.id && !p.completed);
-                        return (
-                          <div key={ag.id} className="flex items-center gap-1.5 py-0.5" style={{ fontSize: 13 }}>
-                            <span>{done ? "✓" : started ? "⏳" : "○"}</span>
-                            <span style={{ color: done ? "#3A5C46" : "#B6D0BE" }}>{ag.name}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                <div className="grid grid-cols-2 gap-1">
+                  {ALL_AGENTS.map((ag) => {
+                    const done = selectedAluna.progress.some((p) => p.agent_id === ag.id && p.completed);
+                    const started = selectedAluna.progress.some((p) => p.agent_id === ag.id && !p.completed);
+                    return (
+                      <div key={ag.id} className="flex items-center gap-1.5 py-0.5" style={{ fontSize: 13 }}>
+                        <span>{done ? "✓" : started ? "⏳" : "○"}</span>
+                        <span style={{ color: done ? "#3A5C46" : "#B6D0BE" }}>{ag.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
