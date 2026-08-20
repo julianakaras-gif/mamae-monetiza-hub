@@ -46,6 +46,7 @@ const AgentCard = memo(({ agent, color, status, isFavorite, onToggleFavorite, on
 
   return (
     <div
+      id={`agente-${agent.id}`}
       onClick={() => !isLocked && navigate(`/chat/${agent.id}`)}
       className={`relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-card transition-all duration-200 ${
         isLocked
@@ -118,6 +119,7 @@ const AgentCard = memo(({ agent, color, status, isFavorite, onToggleFavorite, on
         {isUnlocked && (
           <ChevronRight
             size={16}
+            id={`btn-conversar-${agent.id}`}
             className="text-muted-foreground"
           />
         )}
