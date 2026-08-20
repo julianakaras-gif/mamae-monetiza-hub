@@ -2,12 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAdmin } from "@/hooks/useAdmin";
 import { supabase } from "@/integrations/supabase/client";
-import { PHASES } from "@/data/agents";
+import { AGENTS } from "@/data/agents";
 import { ArrowLeft, Search, ChevronUp, ChevronDown, Users, FolderOpen, CheckCircle, Activity, X, UserPlus, Pencil } from "lucide-react";
 import CreateAlunaModal from "@/components/CreateAlunaModal";
 import EditAlunaModal from "@/components/EditAlunaModal";
 
-const ALL_AGENTS = PHASES.flatMap((p) => p.agents);
+const ALL_AGENTS = Object.values(AGENTS);
 const TOTAL_AGENTS = ALL_AGENTS.length;
 
 type SortKey = "name" | "created_at" | "progress";

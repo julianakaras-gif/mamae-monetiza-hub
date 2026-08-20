@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
 import { useAdmin } from "@/hooks/useAdmin";
-import { PHASES } from "@/data/agents";
+import { AGENTS } from "@/data/agents";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0);
+const TOTAL_AGENTS = Object.keys(AGENTS).length;
 
 const Configuracoes = () => {
   const { user, profile, signOut } = useAuth();

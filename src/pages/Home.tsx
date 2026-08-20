@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProject } from "@/hooks/useProject";
 import { useAgentProgress } from "@/hooks/useAgentProgress";
-import { PHASES, SERENA } from "@/data/agents";
+import { AGENTS, SERENA } from "@/data/agents";
 import { getAgentPhotoUrl } from "@/data/agentPhotos";
 import { toast } from "sonner";
 import {
@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const TOTAL_AGENTS = PHASES.reduce((sum, p) => sum + p.agents.length, 0) + 1;
+const TOTAL_AGENTS = Object.keys(AGENTS).length + 1;
 
 const Home = () => {
   const { user, profile } = useAuth();
@@ -67,7 +67,7 @@ const Home = () => {
 
   const firstName = (profile?.name || "").split(" ")[0] || "aluna";
   const nextAgent = getNextAgent();
-  const recent = recentAgent ? PHASES.flatMap((p) => p.agents).find((a) => a.id === recentAgent.agent_id) || (recentAgent.agent_id === SERENA.id ? SERENA : null) : null;
+  const recent = recentAgent ? Object.values(AGENTS).find((a) => a.id === recentAgent.agent_id) || (recentAgent.agent_id === SERENA.id ? SERENA : null) : null;
 
   if (projectsLoading) {
     return (
@@ -205,22 +205,22 @@ const Home = () => {
           </div>
           <div className="flex items-center gap-4">
             <img
-              src={getAgentPhotoUrl(nextAgent.agent.id) || ""}
-              alt={nextAgent.agent.name}
+              src={getAgentPhotoUrl(nextAgent.id) || ""}
+              alt={nextAgent.name}
               className="w-16 h-16 rounded-full object-cover shrink-0"
               style={{ backgroundColor: "#B6D0BE" }}
               onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
             />
             <div className="min-w-0 flex-1">
               <h3 className="font-display" style={{ fontSize: 20, color: "#1C3C2C" }}>
-                {nextAgent.agent.name}
+                {nextAgent.name}
               </h3>
               <p style={{ fontSize: 13, color: "#3D6B4D" }} className="line-clamp-2">
-                {nextAgent.agent.role}
+                {nextAgent.role}
               </p>
             </div>
             <button
-              onClick={() => navigate(`/chat/${nextAgent.agent.id}`)}
+              onClick={() => navigate(`/chat/${nextAgent.id}`)}
               className="shrink-0 flex items-center gap-1.5 font-medium transition-opacity hover:opacity-90"
               style={{ backgroundColor: "#1C3C2C", color: "#fff", borderRadius: 40, fontSize: 14, padding: "10px 18px" }}
             >
