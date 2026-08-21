@@ -186,7 +186,11 @@ const Trilha = () => {
                 key={id}
                 onClick={() => {
                   if (!isActive) {
-                    toast("Essa trilha fica disponível se você criar um novo projeto.");
+                    if (isAdmin) {
+                      setPreviewTrilhaId(id);
+                    } else {
+                      toast("Essa trilha fica disponível se você criar um novo projeto.");
+                    }
                   }
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-opacity ${
@@ -205,6 +209,20 @@ const Trilha = () => {
             );
           })}
         </div>
+
+        {isAdmin && previewTrilhaId && previewTrilhaId !== projectTrilhaId && (
+          <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-between">
+            <span>
+              Modo prévia (admin): mostrando a trilha <strong>{TRILHAS[previewTrilhaId].nome}</strong>, não é a trilha real deste projeto.
+            </span>
+            <button
+              onClick={() => setPreviewTrilhaId(null)}
+              className="ml-3 underline font-medium whitespace-nowrap hover:no-underline"
+            >
+              Voltar pra trilha do projeto
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center justify-between mb-6">
           <Badge
