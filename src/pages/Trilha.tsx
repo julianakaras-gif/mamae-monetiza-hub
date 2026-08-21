@@ -7,6 +7,7 @@ import { useAgentProgress } from "@/hooks/useAgentProgress";
 import { useProject } from "@/hooks/useProject";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import AgentCard from "@/components/AgentCard";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +55,11 @@ const TODAS_TRILHAS: TrilhaId[] = ["af", "ugc", "pp", "dk"];
 const Trilha = () => {
   const navigate = useNavigate();
   const [tourStarted, setTourStarted] = useState(false);
+  const [previewTrilhaId, setPreviewTrilhaId] = useState<TrilhaId | null>(null);
+  const { activeProject, activeProjectId, projects, loading: projectsLoading } = useProject();
+  const { startTour } = useOnboarding();
+  const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const {
     getAgentStatus,
     getTrilhaProgress,
@@ -61,12 +67,10 @@ const Trilha = () => {
     toggleFavorite,
     skipAgent,
     loading,
-  } = useAgentProgress();
-  const { activeProject, activeProjectId, projects, loading: projectsLoading } = useProject();
-  const { startTour } = useOnboarding();
-  const { user } = useAuth();
+  } = useAgentProgress(isAdmin && previewTrilhaId ? previewTrilhaId : undefined);
 
-  const trilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
+  const projectTrilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
+  const trilhaId = isAdmin && previewTrilhaId ? previewTrilhaId : projectTrilhaId;
   const trilha = trilhaId ? TRILHAS[trilhaId] : undefined;
   const nodes = useMemo(() => buildRenderNodes(trilha), [trilha]);
 
@@ -182,7 +186,11 @@ const Trilha = () => {
                 key={id}
                 onClick={() => {
                   if (!isActive) {
-                    toast("Essa trilha fica disponível se você criar um novo projeto.");
+                    if (isAdmin) {
+                      setPreviewTrilhaId(id);
+                    } else {
+                      toast("Essa trilha fica disponível se você criar um novo projeto.");
+                    }
                   }
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-opacity ${
@@ -201,6 +209,20 @@ const Trilha = () => {
             );
           })}
         </div>
+
+        {isAdmin && previewTrilhaId && previewTrilhaId !== projectTrilhaId && (
+          <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-between">
+            <span>
+              Modo prévia (admin): mostrando a trilha <strong>{TRILHAS[previewTrilhaId].nome}</strong>, não é a trilha real deste projeto.
+            </span>
+            <button
+              onClick={() => setPreviewTrilhaId(null)}
+              className="ml-3 underline font-medium whitespace-nowrap hover:no-underline"
+            >
+              Voltar pra trilha do projeto
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center justify-between mb-6">
           <Badge
