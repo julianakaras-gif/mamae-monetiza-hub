@@ -33,7 +33,7 @@ function buildTrilhaNodes(trilha: TrilhaDef | undefined): TrilhaNode[] {
   return nodes;
 }
 
-export function useAgentProgress() {
+export function useAgentProgress(overrideTrilhaId?: TrilhaId) {
   const { user } = useAuth();
   const { isAdmin } = useAdmin();
   const { activeProject, activeProjectId } = useProject();
@@ -44,7 +44,7 @@ export function useAgentProgress() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
-  const trilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
+  const trilhaId = overrideTrilhaId ?? ((activeProject as any)?.trilha as TrilhaId | undefined);
   const trilha = trilhaId ? TRILHAS[trilhaId] : undefined;
   const nodes = useMemo(() => buildTrilhaNodes(trilha), [trilha]);
 
