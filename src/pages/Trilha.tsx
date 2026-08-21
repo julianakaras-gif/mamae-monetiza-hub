@@ -56,6 +56,10 @@ const Trilha = () => {
   const navigate = useNavigate();
   const [tourStarted, setTourStarted] = useState(false);
   const [previewTrilhaId, setPreviewTrilhaId] = useState<TrilhaId | null>(null);
+  const { activeProject, activeProjectId, projects, loading: projectsLoading } = useProject();
+  const { startTour } = useOnboarding();
+  const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const {
     getAgentStatus,
     getTrilhaProgress,
@@ -64,10 +68,6 @@ const Trilha = () => {
     skipAgent,
     loading,
   } = useAgentProgress(isAdmin && previewTrilhaId ? previewTrilhaId : undefined);
-  const { activeProject, activeProjectId, projects, loading: projectsLoading } = useProject();
-  const { startTour } = useOnboarding();
-  const { user } = useAuth();
-  const { isAdmin } = useAdmin();
 
   const projectTrilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
   const trilhaId = isAdmin && previewTrilhaId ? previewTrilhaId : projectTrilhaId;
