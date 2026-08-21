@@ -55,6 +55,7 @@ const TODAS_TRILHAS: TrilhaId[] = ["af", "ugc", "pp", "dk"];
 const Trilha = () => {
   const navigate = useNavigate();
   const [tourStarted, setTourStarted] = useState(false);
+  const [previewTrilhaId, setPreviewTrilhaId] = useState<TrilhaId | null>(null);
   const {
     getAgentStatus,
     getTrilhaProgress,
@@ -62,12 +63,14 @@ const Trilha = () => {
     toggleFavorite,
     skipAgent,
     loading,
-  } = useAgentProgress();
+  } = useAgentProgress(isAdmin && previewTrilhaId ? previewTrilhaId : undefined);
   const { activeProject, activeProjectId, projects, loading: projectsLoading } = useProject();
   const { startTour } = useOnboarding();
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
 
-  const trilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
+  const projectTrilhaId = (activeProject as any)?.trilha as TrilhaId | undefined;
+  const trilhaId = isAdmin && previewTrilhaId ? previewTrilhaId : projectTrilhaId;
   const trilha = trilhaId ? TRILHAS[trilhaId] : undefined;
   const nodes = useMemo(() => buildRenderNodes(trilha), [trilha]);
 
