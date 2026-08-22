@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Playfair Display", "serif"],
-        sans: ["Instrument Sans", "sans-serif"],
+        display: ["Cormorant Garamond", "serif"],
+        sans: ["Montserrat", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,21 +61,21 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        "sage-dark": "#1A4540",
-        "sage-mid": "#276E5E",
-        "sage-light": "#469580",
-        "sage-pale": "#A8D4CB",
-        "sage-xlight": "#E0F2EE",
+        "sage-dark": "#3D3A36",
+        "sage-mid": "#6B7C8A",
+        "sage-light": "#8A9A8A",
+        "sage-pale": "#F1EBE3",
+        "sage-xlight": "#F9F6F1",
         gold: {
-          DEFAULT: "#C6A86C",
-          light: "#DEC888",
+          DEFAULT: "#C4A484",
+          light: "#C4A484",
         },
         ivory: {
-          DEFAULT: "#F5F1E9",
-          dark: "#EDE5D2",
+          DEFAULT: "#F9F6F1",
+          dark: "#F1EBE3",
         },
-        "warm-brown": "#7A5535",
-        "border-color": "#C8DDD9",
+        "warm-brown": "#3D3A36",
+        "border-color": "#F1EBE3",
       },
       borderRadius: {
         lg: "var(--radius)",
