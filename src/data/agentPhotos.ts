@@ -1,7 +1,6 @@
 import ALANA from '@/assets/robos/ALANA.png';
 import ALICE from '@/assets/robos/ALICE.png';
 import BILL from '@/assets/robos/BILL.png';
-import ALMA from '@/assets/robos/ALMA.png';
 import AYA from '@/assets/robos/AYA.png';
 import CLARA from '@/assets/robos/CLARA.png';
 import CORA from '@/assets/robos/CORA.png';
@@ -28,7 +27,7 @@ import VERA from '@/assets/robos/VERA.png';
 const AGENT_PHOTOS: Record<string, string> = {
   clara: CLARA, aya: AYA, lucca: LUCCA, alice: ALICE,
   kaia: KAIA, talia: TALIA, lira: LIRA1, noa: NOA,
-  eron: ERON, vera: VERA, cora: CORA, alma: ALMA,
+  eron: ERON, vera: VERA, cora: CORA,
   malu: MALU, kaena: KAENA, lumi: LUMI, luli: LULI,
   nara: NARA, petra: PETRA, alana: ALANA, nina: NINA,
   elisa: ELISA, luna: LUNA, maia: MAIA, liora: LIORA,
